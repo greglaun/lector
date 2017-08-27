@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">WebViewApplication</string>
+    <string name="action_play">Play</string>
+    <string name="action_pause">Pause</string>
 </resources>
