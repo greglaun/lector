@@ -27,13 +27,17 @@ class MainActivity : AppCompatActivity() {
     @Volatile var isPlaying : Boolean = false
     lateinit var playMenuItem : MenuItem
     lateinit var pauseMenuItem : MenuItem
+    lateinit var currentProvider : TextProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val myWebView = findViewById(R.id.webview) as WebView
         myWebView.setWebViewClient(WikiWebViewClient())
-        myWebView.loadUrl("https://www.wikipedia.org")
+        val wikiURL = "https://en.wikipedia.org/wiki/Wikipedia:Today%27s_featured_article"
+        myWebView.loadUrl(wikiURL)
+        currentProvider = TextProvider { wikiURL }
+        textSpeaker = TextSpeaker(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -51,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_play -> {
                 isPlaying = true
-                textSpeaker.startSpeaking()
+                textSpeaker.startSpeaking(currentProvider)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     this.invalidateOptionsMenu()
                 }
@@ -98,6 +102,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareForSpeaking(url: Uri) {
-        textSpeaker.provider = TextProvider { url.toString() }
+        currentProvider = JSoupTextProvider(url.toString())
     }
 }
