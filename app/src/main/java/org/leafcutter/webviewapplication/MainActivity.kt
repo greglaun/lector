@@ -10,7 +10,6 @@ import android.view.MenuItem
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 
 
 
@@ -36,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         myWebView.setWebViewClient(WikiWebViewClient())
         val wikiURL = "https://en.wikipedia.org/wiki/Wikipedia:Today%27s_featured_article"
         myWebView.loadUrl(wikiURL)
-        currentProvider = TextProvider { wikiURL }
+        currentProvider = JSoupTextProvider( wikiURL )
         textSpeaker = TextSpeaker(this)
     }
 
@@ -97,7 +96,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onURLChanged(url : Uri) {
-        Toast.makeText(this@MainActivity, url.toString(), Toast.LENGTH_LONG).show()
         prepareForSpeaking(url)
     }
 
