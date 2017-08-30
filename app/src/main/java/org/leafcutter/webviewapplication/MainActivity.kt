@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val myWebView = findViewById(R.id.webview) as WebView
         myWebView.setWebViewClient(WikiWebViewClient())
-        val wikiURL = "https://en.wikipedia.org/wiki/Wikipedia:Today%27s_featured_article"
+        val wikiURL = getString(R.string.starting_url)
         myWebView.loadUrl(wikiURL)
         currentProvider = JSoupTextProvider( wikiURL )
         textSpeaker = TextSpeaker(this)

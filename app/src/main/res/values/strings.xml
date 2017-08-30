@@ -2,4 +2,6 @@
     <string name="app_name">WebViewApplication</string>
     <string name="action_play">Play</string>
     <string name="action_pause">Pause</string>
+    <!--<string name="starting_url">https://en.wikipedia.org/wiki/Wikipedia:Today%27s_featured_article</string>-->
+    <string name="starting_url">https://en.wikipedia.org/wiki/Theodore_roosevelt</string>
 </resources>

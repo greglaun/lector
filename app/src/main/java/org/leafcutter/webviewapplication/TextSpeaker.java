@@ -69,6 +69,9 @@ public class TextSpeaker implements TextToSpeech.OnUtteranceCompletedListener {
     @Override
     public void onUtteranceCompleted(String utteranceId) {
         mirrorQueue.poll();
+        if (mirrorQueue.isEmpty()) {
+            stopSpeaking();
+        }
     }
 
     private class MainSpeechLoop implements Runnable {
@@ -79,7 +82,9 @@ public class TextSpeaker implements TextToSpeech.OnUtteranceCompletedListener {
                     buffer.addAll(provider.provideText(MAX_TEXTS_IN_BUFFER));
                 }
                 String textToSpeak = nextSpeechUnit();
-                queueForSpeaking(textToSpeak);
+                if (textToSpeak != null) {
+                    queueForSpeaking(textToSpeak);
+                }
             }
         }
     }
