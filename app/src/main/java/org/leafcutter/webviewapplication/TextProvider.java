@@ -6,4 +6,8 @@ public interface TextProvider {
     String provideOneText();
     List<String> provideText(int n);
     List<String> provideAllTexts();
+
+    String getTitle();
+
+    String getHtml();
 }

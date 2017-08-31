@@ -1,8 +1,10 @@
 package org.leafcutter.webviewapplication
 
+import android.content.DialogInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
@@ -12,12 +14,10 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 
 
-
-
-
-
 class MainActivity : AppCompatActivity() {
 
+    val OFFLINE_MODE = true
+    val WIKI_BASE = "https://en.wikipedia.org/wiki/"
     lateinit var currentURL : Uri
     val TAG : String = MainActivity::class.java.simpleName
     @Volatile lateinit var textSpeaker : TextSpeaker
@@ -26,17 +26,18 @@ class MainActivity : AppCompatActivity() {
     @Volatile var isPlaying : Boolean = false
     lateinit var playMenuItem : MenuItem
     lateinit var pauseMenuItem : MenuItem
-    lateinit var currentProvider : TextProvider
+    lateinit var textProvider: TextProvider
+    lateinit var myWebView : WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val myWebView = findViewById(R.id.webview) as WebView
+        myWebView = findViewById(R.id.webview) as WebView
         myWebView.setWebViewClient(WikiWebViewClient())
         val wikiURL = getString(R.string.starting_url)
         myWebView.loadUrl(wikiURL)
-        currentProvider = JSoupTextProvider( wikiURL )
         textSpeaker = TextSpeaker(this)
+        prepareForSpeaking(Uri.parse(wikiURL))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -54,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_play -> {
                 isPlaying = true
-                textSpeaker.startSpeaking(currentProvider)
+                textSpeaker.startSpeaking(textProvider)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     this.invalidateOptionsMenu()
                 }
@@ -68,8 +69,47 @@ class MainActivity : AppCompatActivity() {
                 }
                 return true
             }
+            R.id.action_save -> {
+                saveArticle(textProvider)
+                return true
+            }
+            R.id.action_reading_list -> {
+                displayReadingList()
+                return true
+            }
+            R.id.action_delete -> {
+                deleteArticle()
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun deleteArticle() {
+        ReadingListProvider.deleteArticle(textProvider.title, this)
+    }
+
+    private fun displayReadingList() {
+        val readingList = ReadingListProvider.retrieveList(this);
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.dialog_reading_list_title))
+        builder.setItems(readingList, DialogInterface.OnClickListener { dialog, which ->
+            // TODO: Run on worker thread?
+            if (OFFLINE_MODE) {
+                val html = ReadingListProvider.retrieveArticle(readingList[which], this)
+                textProvider = JSoupTextProvider(html)
+                myWebView.loadData(html, "text/html", "utf-8")
+            } else {
+                val url = WIKI_BASE + readingList[which]
+                textProvider = JSoupTextProvider(Uri.parse(url))
+                myWebView.loadUrl(url)
+            }
+        })
+        builder.show()
+    }
+
+    private fun saveArticle(provider: TextProvider) {
+        ReadingListProvider.saveArticle(provider.title, provider.html, this)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
@@ -100,6 +140,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareForSpeaking(url: Uri) {
-        currentProvider = JSoupTextProvider(url.toString())
+        textProvider = JSoupTextProvider(url)
     }
 }
