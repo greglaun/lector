@@ -10,6 +10,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class TextSpeaker implements TextToSpeech.OnUtteranceCompletedListener {
+
+    interface Callback { void call(); }
+
     private static int MAX_TEXTS_IN_BUFFER = 10;
 
     private TextProvider provider;
@@ -19,14 +22,20 @@ public class TextSpeaker implements TextToSpeech.OnUtteranceCompletedListener {
     Queue<String> buffer = new ArrayDeque<>();
     Queue<String> mirrorQueue = new ArrayDeque<>(); // A Queue to mirror the queue state of the tts engine
     Executor speechExecutor = Executors.newSingleThreadExecutor();
+    private Callback endOfArticleCallback;
 
-    public TextSpeaker(Context context) {
+    public TextSpeaker (Context context) {
+        this(context, null);
+    }
+
+    public TextSpeaker(Context context, Callback endOfArticleCallback) {
         tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 speechReady.countDown();
             }
         });
+        this.endOfArticleCallback = endOfArticleCallback;
     }
 
     private void queueForSpeaking(String text) {
@@ -82,10 +91,22 @@ public class TextSpeaker implements TextToSpeech.OnUtteranceCompletedListener {
                     buffer.addAll(provider.provideText(MAX_TEXTS_IN_BUFFER));
                 }
                 String textToSpeak = nextSpeechUnit();
-                if (textToSpeak != null) {
-                    queueForSpeaking(textToSpeak);
+                if (textToSpeak.equals(TextProvider.END_OF_STREAM)) {
+                    if (endOfArticleCallback != null) {
+                        endOfArticleCallback.call();
+                    }
+                    return;
                 }
+                queueForSpeaking(textToSpeak);
             }
         }
+    }
+
+    public String getCurrentUtterance() {
+        return mirrorQueue.peek();
+    }
+
+    public void setEndOfArticleCallback(Callback endOfArticleCallback) {
+        this.endOfArticleCallback = endOfArticleCallback;
     }
 }

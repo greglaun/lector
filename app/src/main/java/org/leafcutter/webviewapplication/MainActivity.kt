@@ -1,6 +1,7 @@
 package org.leafcutter.webviewapplication
 
 import android.content.DialogInterface
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -37,7 +38,34 @@ class MainActivity : AppCompatActivity() {
         val wikiURL = getString(R.string.starting_url)
         myWebView.loadUrl(wikiURL)
         textSpeaker = TextSpeaker(this)
+        textSpeaker.setEndOfArticleCallback(ArticleCleanupCallback())
         prepareForSpeaking(Uri.parse(wikiURL))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        saveCurrentPlace(textProvider)
+        stopSpeaking()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadCurrentPlace()
+    }
+
+    private fun loadCurrentPlace() {
+        val html = ReadingListProvider.retrieveCurrentHTML(this)
+        val currentPlace = ReadingListProvider.retrieveCurrentPlace(this)
+        this.textProvider = JSoupTextProvider(html)
+        this.textProvider.fastForwardTo(currentPlace)
+    }
+
+    private fun saveCurrentPlace(textProvider: TextProvider) {
+        ReadingListProvider.saveCurrent(textProvider.html, textSpeaker.currentUtterance, this)
+        if (!ReadingListProvider.retrieveArticle(textProvider.title, this).equals("")) {
+            ReadingListProvider.savePlace(textProvider.title, textSpeaker.getCurrentUtterance(), this)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -54,19 +82,11 @@ class MainActivity : AppCompatActivity() {
 
         when (item.itemId) {
             R.id.action_play -> {
-                isPlaying = true
-                textSpeaker.startSpeaking(textProvider)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    this.invalidateOptionsMenu()
-                }
+                startSpeaking()
                 return true
             }
             R.id.action_pause -> {
-                isPlaying = false
-                textSpeaker.stopSpeaking()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    this.invalidateOptionsMenu()
-                }
+                stopSpeaking()
                 return true
             }
             R.id.action_save -> {
@@ -85,6 +105,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun stopSpeaking() {
+        isPlaying = false
+        textSpeaker.stopSpeaking()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            this.invalidateOptionsMenu()
+        }
+    }
+
+    private fun startSpeaking() {
+        isPlaying = true
+        textSpeaker.startSpeaking(textProvider)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            this.invalidateOptionsMenu()
+        }
+    }
+
     private fun deleteArticle() {
         ReadingListProvider.deleteArticle(textProvider.title, this)
     }
@@ -97,8 +133,10 @@ class MainActivity : AppCompatActivity() {
             // TODO: Run on worker thread?
             if (OFFLINE_MODE) {
                 val html = ReadingListProvider.retrieveArticle(readingList[which], this)
+                val currentPlace = ReadingListProvider.retrievePlace(readingList[which], this)
+                myWebView.loadDataWithBaseURL(WIKI_BASE, html, "text/html", "utf-8", null)
                 textProvider = JSoupTextProvider(html)
-                myWebView.loadData(html, "text/html", "utf-8")
+                textProvider.fastForwardTo(currentPlace)
             } else {
                 val url = WIKI_BASE + readingList[which]
                 textProvider = JSoupTextProvider(Uri.parse(url))
@@ -127,6 +165,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     inner class WikiWebViewClient : WebViewClient() {
+        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+            super.onPageStarted(view, url, favicon)
+            if (url.equals(WIKI_BASE)) {
+                return // Ignore WebKit telling us that we loaded data using loadData.
+            }
+            Log.d(TAG, "Page started: " + url)
+            // TODO: Sort out policy for Uri class vs String class urls
+            val uri = Uri.parse(url)
+            currentURL = uri
+            onURLChanged(uri)
+        }
+
         override fun shouldOverrideUrlLoading(view: WebView, request : WebResourceRequest): Boolean {
             Log.d(TAG, "Should override url loading.")
             currentURL = request.url
@@ -141,5 +191,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun prepareForSpeaking(url: Uri) {
         textProvider = JSoupTextProvider(url)
+    }
+
+    internal inner class ArticleCleanupCallback : TextSpeaker.Callback {
+
+        override fun call() {
+            ReadingListProvider.deletePlace(textProvider.title, this@MainActivity)
+        }
     }
 }

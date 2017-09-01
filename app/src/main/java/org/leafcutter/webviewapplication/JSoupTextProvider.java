@@ -66,7 +66,7 @@ public class JSoupTextProvider implements TextProvider {
     @Override
     public String provideOneText() {
         if (paragraphs.size() <= 0) {
-            return null;
+            return END_OF_STREAM;
         }
         Element result = paragraphs.get(0);
         paragraphs.remove(result);
@@ -77,13 +77,40 @@ public class JSoupTextProvider implements TextProvider {
     public List<String> provideText(int m) {
         int n = Math.min(m, paragraphs.size() - 1);
         ArrayList<String> result = new ArrayList<>();
+        String tmp;
         synchronized (paragraphs) {
             for (int i = 0; i < n; i++) {
-                result.add(paragraphs.get(0).text());
-                paragraphs.remove(0);
+                tmp = popText(paragraphs);
+                result.add(tmp);
+
             }
         }
+        result.add(END_OF_STREAM);
         return result;
+    }
+
+    private String popText(Elements elementList) {
+        String tmp;
+        tmp = elementList.get(0).text();
+        elementList.remove(0);
+        return tmp;
+    }
+
+    @Override
+    public boolean fastForwardTo(String place) {
+        if (paragraphs.size() == 0) {
+            return false;
+        }
+        Elements parCopy = new Elements(paragraphs);
+        String test = popText(parCopy);
+        while (!test.equals(place)) {
+            test = popText(parCopy);
+        }
+        if (parCopy.size() > 0) {
+            paragraphs = parCopy;
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -100,4 +127,5 @@ public class JSoupTextProvider implements TextProvider {
     public String getHtml() {
         return html;
     }
+
 }
