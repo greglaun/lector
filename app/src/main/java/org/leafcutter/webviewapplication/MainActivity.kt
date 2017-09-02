@@ -1,45 +1,45 @@
 package org.leafcutter.webviewapplication
 
 import android.content.DialogInterface
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 
 
 class MainActivity : AppCompatActivity() {
 
     val OFFLINE_MODE = true
-    val WIKI_BASE = "https://en.wikipedia.org/wiki/"
-    lateinit var currentURL : Uri
-    val TAG : String = MainActivity::class.java.simpleName
-    @Volatile lateinit var textSpeaker : TextSpeaker
+    val TAG: String = MainActivity::class.java.simpleName
+    @Volatile lateinit var textSpeaker: TextSpeaker
+    private lateinit var webFragment: WikiWebViewFragment
 
     // Play controls
-    @Volatile var isPlaying : Boolean = false
-    lateinit var playMenuItem : MenuItem
-    lateinit var pauseMenuItem : MenuItem
+    @Volatile var isPlaying: Boolean = false
+    lateinit var playMenuItem: MenuItem
+    lateinit var pauseMenuItem: MenuItem
     lateinit var textProvider: TextProvider
-    lateinit var myWebView : WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        myWebView = findViewById(R.id.webview) as WebView
-        myWebView.setWebViewClient(WikiWebViewClient())
-        val wikiURL = getString(R.string.starting_url)
-        myWebView.loadUrl(wikiURL)
+        switchToWebView()
         textSpeaker = TextSpeaker(this)
         textSpeaker.setEndOfArticleCallback(ArticleCleanupCallback())
-        prepareForSpeaking(Uri.parse(wikiURL))
+        prepareForSpeaking(Uri.parse(getString(R.string.starting_url)))
+    }
+
+    private fun switchToWebView() {
+        webFragment = WikiWebViewFragment()
+        val fm = supportFragmentManager
+        val ft = fm.beginTransaction()
+        ft.replace(R.id.viewFragment, webFragment as Fragment)
+        ft.commit()
+        webFragment.urlChangedCallback = NewURLCallback()
     }
 
     override fun onPause() {
@@ -134,13 +134,13 @@ class MainActivity : AppCompatActivity() {
             if (OFFLINE_MODE) {
                 val html = ReadingListProvider.retrieveArticle(readingList[which], this)
                 val currentPlace = ReadingListProvider.retrievePlace(readingList[which], this)
-                myWebView.loadDataWithBaseURL(WIKI_BASE, html, "text/html", "utf-8", null)
+                webFragment.loadNewArticle(html)
                 textProvider = JSoupTextProvider(html)
                 textProvider.fastForwardTo(currentPlace)
             } else {
-                val url = WIKI_BASE + readingList[which]
+                val url = TextProvider.WIKI_BASE + readingList[which]
                 textProvider = JSoupTextProvider(Uri.parse(url))
-                myWebView.loadUrl(url)
+                webFragment.loadURL(url)
             }
         })
         builder.show()
@@ -164,28 +164,8 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    inner class WikiWebViewClient : WebViewClient() {
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            super.onPageStarted(view, url, favicon)
-            if (url.equals(WIKI_BASE)) {
-                return // Ignore WebKit telling us that we loaded data using loadData.
-            }
-            Log.d(TAG, "Page started: " + url)
-            // TODO: Sort out policy for Uri class vs String class urls
-            val uri = Uri.parse(url)
-            currentURL = uri
-            onURLChanged(uri)
-        }
 
-        override fun shouldOverrideUrlLoading(view: WebView, request : WebResourceRequest): Boolean {
-            Log.d(TAG, "Should override url loading.")
-            currentURL = request.url
-            onURLChanged(request.url)
-            return false
-        }
-    }
-
-    private fun onURLChanged(url : Uri) {
+    private fun onURLChanged(url: Uri) {
         prepareForSpeaking(url)
     }
 
@@ -197,6 +177,12 @@ class MainActivity : AppCompatActivity() {
 
         override fun call() {
             ReadingListProvider.deletePlace(textProvider.title, this@MainActivity)
+        }
+    }
+
+    internal inner class NewURLCallback : WikiWebViewFragment.URLChangedCallback {
+        override fun call(uri: Uri) {
+            onURLChanged(uri)
         }
     }
 }
