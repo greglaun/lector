@@ -15,7 +15,7 @@ DECISION:
 
 ** Strategy for chopping articles [Priotiy High] (todo: sehailey)
 
-We have considered
+We have considered (roughly Feb 2017 - June 2017): 
 
 - Chopping articles into paragraphs and feeding in one paragraph at a
   time, and
@@ -31,7 +31,7 @@ DECISION:
 
 ** Recommendation strategy [Priority Low]
 
-We have considered
+We have considered (roughly Feb 2017 - June 2017): 
 
 1. Using Wikipedia's built-in recommended article feature (as in their
    mobile app). [Question: Do we have access to this?]
