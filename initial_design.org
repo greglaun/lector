@@ -1,0 +1,44 @@
+The basic design is there is a database of local copies of Wikipedia
+articles (anything saved in the Reading List), including a cache of
+the HTML content.
+
+There is a library that chops articles into paragraphs, a library for
+interfacing with the TTS system, and a database layer.
+
+In the future, there will be a recommendation system.
+
+* Current Decisions
+
+** Choice of Database? Realm vs SQLite [Priority High] (todo: sehailey)
+
+DECISION:
+
+** Strategy for chopping articles [Priotiy High] (todo: sehailey)
+
+We have considered
+
+- Chopping articles into paragraphs and feeding in one paragraph at a
+  time, and
+- Pre-creating MP3s for easy fastforward-rewind, and resume
+
+Obviously, pre-creating MP3s uses a great deal more space, requires
+heavy use of compute resources.
+
+DECISION:
+
+
+** Auth / Login / User account Decisions [Priority Low]
+
+** Recommendation strategy [Priority Low]
+
+We have considered
+
+1. Using Wikipedia's built-in recommended article feature (as in their
+   mobile app). [Question: Do we have access to this?]
+2. Use article similarity (e.g. Cosine similarity), and recommend
+   similar articles
+3. Combine similarity with additional structure, (e.g. topic models)
+4. Using the link structure (e.g. BFS + topic models + similarity) to
+   recommend articles.
+
+DECISION:
