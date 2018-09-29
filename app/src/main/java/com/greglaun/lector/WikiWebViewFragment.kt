@@ -1,4 +1,4 @@
-package org.leafcutter.webviewapplication
+package com.greglaun.lector
 
 import android.app.Fragment
 import android.graphics.Bitmap

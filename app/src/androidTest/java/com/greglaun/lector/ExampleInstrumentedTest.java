@@ -1,4 +1,4 @@
-package org.leafcutter.webviewapplication;
+package com.greglaun.lector;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("org.leafcutter.webviewapplication", appContext.getPackageName());
+        assertEquals("com.greglaun.lector", appContext.getPackageName());
     }
 }
