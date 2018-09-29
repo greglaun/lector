@@ -1,9 +1,9 @@
 package com.greglaun.lector
 
-import android.app.Fragment
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,8 +23,7 @@ class WikiWebViewFragment : Fragment() {
     private lateinit var currentURL : Uri
     lateinit var urlChangedCallback : URLChangedCallback
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup,
-                              savedInstanceState: Bundle): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_webview, container, false)
         myWebView = view.findViewById(R.id.webview) as WebView
         myWebView.setWebViewClient(WikiWebViewClient())
