@@ -23,6 +23,12 @@ android {
     }
 }
 
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+def arrow_version = "0.7.3"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 //    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -34,7 +40,17 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'org.jsoup:jsoup:1.10.3'
+
+    // Arrow Dependencies
+    implementation "io.arrow-kt:arrow-core:$arrow_version"
+    implementation "io.arrow-kt:arrow-syntax:$arrow_version"
+    implementation "io.arrow-kt:arrow-typeclasses:$arrow_version"
+    implementation "io.arrow-kt:arrow-data:$arrow_version"
+    implementation "io.arrow-kt:arrow-instances-core:$arrow_version"
+    implementation "io.arrow-kt:arrow-instances-data:$arrow_version"
+    kapt    "io.arrow-kt:arrow-annotations-processor:$arrow_version"
 }
 repositories {
     mavenCentral()
 }
+

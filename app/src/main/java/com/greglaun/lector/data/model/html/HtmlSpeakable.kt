@@ -1,5 +1,7 @@
 package com.greglaun.lector.data.model.html
 
-interface HtmlSpeakable implements LinearSpeakable {
-    htmlDocument : HtmlDocument
+import com.greglaun.lector.data.model.speakable.LinearSpeakable
+
+interface HtmlSpeakable : LinearSpeakable {
+    val htmlDocument : HtmlDocument
 }
