@@ -4,6 +4,7 @@ import com.greglaun.lector.data.model.html.WikiDocument
 import java.net.URI
 
 interface WikiFetcher {
+    fun fetchTextOnly(uri : URI)
     fun fetchArticle(uri : URI)
     fun fetchArticle(id : Int) : WikiDocument
     fun fetchRelated(id : Int) : List<WikiDocument>

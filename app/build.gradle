@@ -12,8 +12,14 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     sourceSets {
-        test.java.srcDirs += 'src/test/kotlin'
+        test.java.srcDirs += 'src/test/unit/kotlin'
+        // todo(gradle): Make sepearate task for integration tests
+        test.java.srcDirs += 'src/test/integration/kotlin'
     }
     buildTypes {
         release {
@@ -49,6 +55,10 @@ dependencies {
     implementation "io.arrow-kt:arrow-instances-core:$arrow_version"
     implementation "io.arrow-kt:arrow-instances-data:$arrow_version"
     kapt    "io.arrow-kt:arrow-annotations-processor:$arrow_version"
+
+    // RxJava
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.9'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 }
 repositories {
     mavenCentral()
