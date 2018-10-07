@@ -60,8 +60,8 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.1.9'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
-    // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    // OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 }
 repositories {
     mavenCentral()
