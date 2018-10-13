@@ -33,6 +33,10 @@ articleMetadata : ArticleMetadata
 where ArticleMetadata will be a class that contains information about
 things like topics and related articles.
 
+** Choice of concurrency framework
+
+DECISION: Since this is a greenfield project, we'll take some risk and use the category-theory-inspired arrow-kt library, which builds some functionality on top of Kotlin's coroutines. This alleviates us from depending on RxJava.
+
 ** Strategy for chopping articles [Priotiy High] (todo: sehailey)
 
 We have considered (roughly Feb 2017 - June 2017): 
