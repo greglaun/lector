@@ -24,9 +24,9 @@ objects. Room should be sufficient for this. We need to store an object
 consisting of 
 
 {
-articleId : Long
-articleName : String
-articleUrl : String
+articleId : Long,
+articleName : String,
+articleUrl : String,
 articleMetadata : ArticleMetadata
 }
 
