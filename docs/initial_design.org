@@ -10,7 +10,7 @@ In the future, there will be a recommendation system.
 * Current Decisions
 
 ** Choice of Database? Compositional caches [Priority High]
-nn
+
 DECISION: 
 For web-based content, such as article, we will have a series of caches that compose, and which as a
 last resort hit the production Wikipedia servers.
