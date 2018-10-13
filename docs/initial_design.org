@@ -10,17 +10,17 @@ In the future, there will be a recommendation system.
 * Current Decisions
 
 ** Choice of Database? Compositional caches [Priority High]
-
+nn
 DECISION: 
-For web-based content, such as article, we will have a series of caches that compose well, and which as a
-last resuelt hit the production Wikipedia servers.
+For web-based content, such as article, we will have a series of caches that compose, and which as a
+last resort hit the production Wikipedia servers.
 
 As a first implementation, we can use OkHttp's bult-in cache, which
 cashes the response to disk. We may need to build another layer on top
 of this, but we should postpone that decision.
 
 For the reading list, we just need a simple storage that can save data
-objects. Room should be sufficient for this. We need to on object
+objects. Room should be sufficient for this. We need to store an object
 consisting of 
 
 {
