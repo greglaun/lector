@@ -33,7 +33,7 @@ things like topics and related articles.
 
 Let A, B, C be caches. Then we can compose caches A -> B -> C, meaning
 that first A is queried, and if A does not have the result, then B is
-queried and the result is place in A. If B does not have the result,
+queried and the result is placed in A. If B does not have the result,
 then C is queried, and the result is placed in B. 
 
 For now, we assume that all caching layers store the HTTP response.
