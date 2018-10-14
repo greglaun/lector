@@ -56,7 +56,7 @@ directory within the cache.
  The articles themselves may be stored in
 article.html within their subdirectory (that is, we may decide to
 store the html file itself rather than the HTTP response. In this
-case, we'd have to recreate the response.)
+case, we'd have to recreate the response).
 
 In each article directory, there will be a metadata file that includes
 information about the article, such as topic model information, and
