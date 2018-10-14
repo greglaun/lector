@@ -37,6 +37,10 @@ things like topics and related articles.
 
 DECISION: Since this is a greenfield project, we'll take some risk and use the category-theory-inspired arrow-kt library, which builds some functionality on top of Kotlin's coroutines. This alleviates us from depending on RxJava.
 
+** Choice of Library for handling Wikipedia API
+
+DECISION: Retrofit seems to work well here. Wikipedia exposes a [[https://en.wikipedia.org/api/rest_v1/][REST API]], and the [[https://github.com/wikimedia/apps-android-wikipedia][official Wikipedia Android app]] (Apache license) does much of the work of modeling the API in Retrofit.
+
 ** Strategy for chopping articles [Priotiy High] (todo: sehailey)
 
 We have considered (roughly Feb 2017 - June 2017): 
@@ -49,7 +53,6 @@ Obviously, pre-creating MP3s uses a great deal more space, requires
 heavy use of compute resources.
 
 DECISION:
-
 
 ** Auth / Login / User account Decisions [Priority Low]
 
