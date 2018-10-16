@@ -1,0 +1,51 @@
+The composable cache API allows the implementation of a chain of API
+calls.
+
+* Background and Rationale
+
+Unlike a standard caching system, the goal is not to simply provide
+faster access to the same data. Instead, one of the caches implements
+an offline storage system for web data that can be personalized. It is
+the ability to personalize this data that requires us to build a
+separate cache from the standard DiskLruCache.
+
+Why not store the personalized data in a separate data path, like a
+database? That may be our ultimate solution. However, the goal of this 
+approach is to move quickly and provide a layer so that the UI layer and most of the
+business logic don't need to know about personalization. Adding a
+separate database significantly complicates the design. That
+complication may be worthwhile down the line, especially if
+maintaining a customized cache becomes unwieldy and it becomes cheaper
+to maintain additional app complexity.
+
+* Caching layers
+
+We will number the caching layers in the order they are hit as the UI
+layer requests hits them. As of now, the likely caching layers are:
+1. NaiveDiskCache (to be described in detail later).
+2. DiskLruCache hit by OkHttp using an OkHttp Interceptor.
+3. Wikipedia servers
+
+At some point in the future, we may support using an offline Wikipedia
+database.
+
+* Caching API
+
+We basically just need a cache that exposes a standard API and also
+adds a compose method.
+
+We follow Matthew Dolan
+https://medium.com/@appmattus/caching-made-simple-on-android-d6e024e3726b
+in his simple implementation:
+
+interface Cache<Key : Any, Value : Any> {
+    fun get(key: Key): Deferred<Value?>
+    fun set(key: Key, value: Value): Deferred<Unit>
+    fun compose(Cache) : Cache
+}
+
+where Deferred uses Kotlin's coroutines.
+
+We could try to go fancier, such as by using Arrow's support for
+semigroups or monoids, but there doesn't seem to be any benefit for
+doing that.
