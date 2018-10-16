@@ -10,9 +10,8 @@ the ability to personalize this data that requires us to build a
 separate cache from the standard DiskLruCache.
 
 Why not store the personalized data in a separate data path, like a
-database? That may be our
-ultimate solution. However, the goal of this approach is to move
-quickly and provide a layer so that the UI layer and most of the
+database? That may be our ultimate solution. However, the goal of this 
+approach is to move quickly and provide a layer so that the UI layer and most of the
 business logic don't need to know about personalization. Adding a
 separate database significantly complicates the design. That
 complication may be worthwhile down the line, especially if
