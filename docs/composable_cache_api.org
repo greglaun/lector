@@ -23,7 +23,7 @@ to maintain additional app complexity.
 
 We will number the caching layers in the order they are hit as the UI
 layer requests hits them. As of now, the likely caching layers are:
-1. NaiveDiskCache (to be described in detail later).
+1. NaiveDiskCache (see below).
 2. DiskLruCache hit by OkHttp using an OkHttp Interceptor.
 3. Wikipedia servers
 
@@ -50,3 +50,38 @@ where Deferred uses Kotlin's coroutines.
 We could try to go fancier, such as by using Arrow's support for
 semigroups or monoids, but there doesn't seem to be any benefit for
 doing that.
+
+* NaiveDiskCache
+
+The first layer is what I will call the "Naive Disk Cache". This cache
+is homegrown and simply writes responses to disk. The article is
+stored in a subdirectory named either for the article or its unique
+id.
+
+Images and other assets needed to render the page are stored
+within this directory, with the file names determined by the md5
+hash of their URL.
+
+The exception to this is static assets that are used for all of
+Wikipedia. These will be stored by their md5 hash in a static/
+directory within the cache.
+
+ The articles themselves may be stored in
+article.html within their subdirectory (that is, we may decide to
+store the html file itself rather than the HTTP response. In this
+case, we'd have to recreate the response).
+
+In each article directory, there will be a metadata file that includes
+information about the article, such as topic model information, and
+related article information that is different from what is sent by Wikipedia.
+
+This cache exists mainly so that we can have an easily-accessed offline
+copy of all articles that are saved in the reading list. It can also
+store state about where one is in the article and how to speak
+difficult passages.
+
+In addition, this cache does not depend on OkHttp, and helps to
+decouple the app from that dependency.
+
+It is named "Naive Disk Cache" mainly to remind us that implementing
+our own cache may be a bad idea and we may need to replace it.

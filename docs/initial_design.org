@@ -29,61 +29,6 @@ articleMetadata : ArticleMetadata
 where ArticleMetadata will be a class that contains information about
 things like topics and related articles.
 
-*** Composable caching layers
-
-Let A, B, C be caches. Then we can compose caches A -> B -> C, meaning
-that first A is queried, and if A does not have the result, then B is
-queried and the result is placed in A. If B does not have the result,
-then C is queried, and the result is placed in B. 
-
-For now, we assume that all caching layers store the HTTP response.
-
-- Naive Disk Cache.
-
-The first layer is what I will call the "Naive Disk Cache". This cache
-is homegrown and simply writes responses to disk. The article is
-stored in a subdirectory named either for the article or its unique
-id.
-
-Images and other assets needed to render the page are stored
-within this directory, with the filenames determined by the md5
-hash of their URL.
-
-The exception to this is static assets that are used for all of
-Wikipedia. These will be stored by their md5 hash in a static/
-directory within the cache.
-
- The articles themselves may be stored in
-article.html within their subdirectory (that is, we may decide to
-store the html file itself rather than the HTTP response. In this
-case, we'd have to recreate the response).
-
-In each article directory, there will be a metadata file that includes
-information about the article, such as topic model information, and
-related article information that is different from what is sent by Wikipedia.
-
-This cache exists mainly so that we can have an easily-accessed offline
-copy of all articles that are saved in the reading list. It can also
-store state about where one is in the article and how to speak
-difficult passages.
-
-In addition, this cache does not depend on OkHttp, and helps to
-decouple the app from that dependency.
-
-It is named "Naive Disk Cache" mainly to remind us that implementing
-our own cache may be a bad idea and we may need to replace it.
-
-- OkHttp Cache
-
-This is a standard Http cache as implemented by OkHttp.
-
-- Wikipedia Production Server
-
-These is the standard [https://wikipedia.org/].
-
-In the future, we may also decide to support an offline copy of the
-Wikipedia database for users with limited bandwidth or connectivity.
-
 ** Choice of concurrency framework
 
 DECISION: Since this is a greenfield project, we'll take some risk and use the category-theory-inspired arrow-kt library, which builds some functionality on top of Kotlin's coroutines. This alleviates us from depending on RxJava.
