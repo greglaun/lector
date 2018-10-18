@@ -16,7 +16,7 @@ import java.util.*
  * Test of the Speakable interface
  *
  */
-class JsoupWikiFetcherTest {
+class CacheApiTest {
     val testUrlString = "https://en.wikipedia.org/robots.txt"
 
     // todo(security): https
