@@ -11,10 +11,10 @@ import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.util.*
 
-val NEWLINE = 'n'.toInt()
+val NEWLINE = '\n'.toInt()
 
 // Initial iteration of code borrows heavily from OkHttp.
-fun serializeResponse(response : Response, sink : Sink) : ByteArray {
+fun serializeResponse(response : Response, sink : Sink) {
     val sink = Okio.buffer(sink)
 
     val url = response.request().url().toString()
@@ -46,7 +46,7 @@ fun serializeResponse(response : Response, sink : Sink) : ByteArray {
 
     sink.writeUtf8(StatusLine(protocol, code, message).toString())
             .writeByte(NEWLINE)
-    sink.writeDecimalLong((responseHeaders.size() + 2).toLong())
+    sink.writeDecimalLong((responseHeaders.size()).toLong())
             .writeByte(NEWLINE)
     var i = 0
     val size = responseHeaders.size()
@@ -67,17 +67,16 @@ fun serializeResponse(response : Response, sink : Sink) : ByteArray {
         sink.writeUtf8(handshake.tlsVersion().javaName()).writeByte(NEWLINE)
     }
 
-    sink.write(response.body()!!.source(), response.body()!!.contentLength())
+    val writtenContentLength = sink.writeAll(response.body()!!.source())
     sink.close()
-    return ByteArray(1)
 }
 
 
-fun deserializeResponse(`in`: Source) : Response {
+fun deserializeResponse(input: Source) : Response {
     val response : Response
     // todo(beginner): Replace try-catch with try-with-resources
     try {
-        val source = Okio.buffer(`in`)
+        val source = Okio.buffer(input)
         val url = source.readUtf8LineStrict()
         val requestMethod = source.readUtf8LineStrict()
         val varyHeadersBuilder = Headers.Builder()
@@ -114,27 +113,28 @@ fun deserializeResponse(`in`: Source) : Response {
             handshake = Handshake.get(tlsVersion, cipherSuite, peerCertificates, localCertificates)
         }
         val contentType = responseHeaders.get("Content-Type")
-        val contentLength = responseHeaders.get("Content-Length")!!.toInt()
+        var contentLength = responseHeaders.get("Content-Length")?.toInt()
+        if (null == contentLength) {
+            contentLength = -1
+        }
         val cacheRequest = Request.Builder()
                 .url(url)
                 .method(requestMethod, null)
                 .headers(varyHeaders)
                 .build()
         // Assume we can fit everything into memory. This should be okay for Wikipedia content
-        val bodyBytes : ByteArray = source.readByteArray(contentLength.toLong())
         return Response.Builder()
                 .request(cacheRequest)
                 .protocol(protocol)
                 .code(code)
                 .message(message)
                 .headers(responseHeaders)
-                .body(ResponseBody.create(MediaType.parse(contentType), bodyBytes))
+                .body(ResponseBody.create(MediaType.parse(contentType), source.readByteArray()))
                 .handshake(handshake)
                 .build()
     } finally {
-        `in`.close()
+        input.close()
     }
-
 }
 
 
