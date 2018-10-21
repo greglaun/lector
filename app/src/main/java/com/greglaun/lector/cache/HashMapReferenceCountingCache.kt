@@ -3,6 +3,7 @@ package com.greglaun.lector.cache
 import com.greglaun.lector.data.cache.ComposableCache
 import okhttp3.Response
 
+// An in-memory ReferenceCountingWrapper to use for testing
 class HashMapReferenceCountingWrapper(override val wrappedCache: ComposableCache<String, Response>) : ReferenceCountingCacheWrapper {
     val referenceMap : HashMap<String, Long> = HashMap()
 
