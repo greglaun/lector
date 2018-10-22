@@ -12,7 +12,6 @@ class UtilKtTest {
     val testUrlString = "https://en.wikipedia.org/robots.txt"
 
     @Test
-    @Throws(Exception::class)
     fun serializeDeserialize() {
         val client = OkHttpClient()
         val request = Request.Builder()
