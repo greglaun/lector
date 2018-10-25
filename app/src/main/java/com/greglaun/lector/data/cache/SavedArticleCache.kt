@@ -1,17 +1,24 @@
 package com.greglaun.lector.data.cache
 
+import com.greglaun.lector.data.container.ProbabilisticSet
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request
 import okhttp3.Response
 
-class SavedArticleCache(val delegateCache : ReferenceCountingCacheWrapper)  : ComposableCache<Request, Response>{
+class SavedArticleCache(val delegateCache : ReferenceCountingCacheWrapper,
+                        val whitelist : ProbabilisticSet<String>)
+    : ComposableCache<Request, Response>{
 
     override fun get(key: Request): Deferred<Response?> {
         return delegateCache.wrappedCache.get(key)
     }
 
     override fun set(key: Request, value: Response): Deferred<Unit> {
+        if (!whitelist.probablyContains(key.url().toString())) {
+            // Not whitelisted, do nothing
+            return CompletableDeferred(Unit)
+        }
         // Warning, we are assuming here that everything works okay if we update the cached response
         // for everything that references it. This should be a semi-reasonable assumption for
         // Wikipedia data, since we are dealing mostly with text and images.
@@ -29,5 +36,8 @@ class SavedArticleCache(val delegateCache : ReferenceCountingCacheWrapper)  : Co
         }
         delegateCache.setReferenceCount(key.url().toString(),referenceCount - 1)
         return CompletableDeferred(false)
+    }
+
+    fun setIfWhitelisted(key : Request, value : Response) {
     }
 }
