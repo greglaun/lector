@@ -37,7 +37,4 @@ class SavedArticleCache(val delegateCache : ReferenceCountingCacheWrapper,
         delegateCache.setReferenceCount(key.url().toString(),referenceCount - 1)
         return CompletableDeferred(false)
     }
-
-    fun setIfWhitelisted(key : Request, value : Response) {
-    }
 }
