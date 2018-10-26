@@ -1,4 +1,4 @@
-package com.greglaun.lector.data.container
+package com.greglaun.lector.data.whitelist
 
 interface ProbabilisticSet<T> {
     // Returns true if the set probably contains the element. A return value of false indicates

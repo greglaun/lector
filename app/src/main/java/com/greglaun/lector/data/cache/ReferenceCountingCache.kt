@@ -1,6 +1,6 @@
 package com.greglaun.lector.data.cache
 
-import com.greglaun.lector.data.container.ProbabilisticSet
+import com.greglaun.lector.data.whitelist.ProbabilisticSet
 import okhttp3.Request
 import okhttp3.Response
 

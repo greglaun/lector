@@ -1,6 +1,6 @@
 package com.greglaun.lector.data.cache
 
-import com.greglaun.lector.data.container.ProbabilisticSet
+import com.greglaun.lector.data.whitelist.ProbabilisticSet
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request

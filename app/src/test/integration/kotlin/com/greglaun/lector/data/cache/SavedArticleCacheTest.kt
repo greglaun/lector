@@ -1,6 +1,6 @@
 package com.greglaun.lector.data.cache
 
-import com.greglaun.lector.data.container.HashSetProbabillisticSet
+import com.greglaun.lector.data.whitelist.HashSetProbabillisticSet
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response

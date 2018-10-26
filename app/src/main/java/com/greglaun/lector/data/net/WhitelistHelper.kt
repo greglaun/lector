@@ -1,6 +1,6 @@
 package com.greglaun.lector.data.net
 
-import com.greglaun.lector.data.container.ProbabilisticSet
+import com.greglaun.lector.data.whitelist.ProbabilisticSet
 import org.jsoup.nodes.Document
 
 object WhitelistHelper {

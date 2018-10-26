@@ -1,4 +1,4 @@
-package com.greglaun.lector.data.container
+package com.greglaun.lector.data.whitelist
 
 // A deterministic probabilistic set for testing
 class HashSetProbabillisticSet<T> : ProbabilisticSet<T> {
