@@ -6,7 +6,7 @@ package com.greglaun.lector.data.net
 // *
 // */
 //class CacheApiTest {
-//    val testUrlString = "https://en.wikipedia.org/robots.txt"
+//    val dogUrlString = "https://en.wikipedia.org/robots.txt"
 //
 //    // todo(security): https
 //    // todo(efficiency): efficient string operations
@@ -47,7 +47,7 @@ package com.greglaun.lector.data.net
 //    @Test
 //    @Throws(Exception::class)
 //    fun fetch_text_only() {
-//        val uri = URI(testUrlString)
+//        val uri = URI(dogUrlString)
 //
 //        val client = OkHttpClient()
 //        val wikiFetcher = JsoupWikiFetcher(client)

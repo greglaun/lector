@@ -11,17 +11,18 @@ import java.io.File
 class SavedArticleCacheTest {
 
     companion object {
-            val testUrlString = "https://www.wikipedia.org/wiki/Dog"
+        val dogUrlString = "https://www.wikipedia.org/wiki/Dog"
+        val catUrlString = "https://www.wikipedia.org/wiki/Cat"
 
-            val savedArticleCache = HashMapSavedArticleCache()
-            val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
-                    File("testDir"))
+        val savedArticleCache = HashMapSavedArticleCache()
+        val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
+                File("testDir"))
     }
 
     @Test
     fun downloadAndCheckSaved() {
         val request = Request.Builder()
-                .url(testUrlString)
+                .url(dogUrlString)
                 .build()
         var networkResponse : Response? = null
         var cachedResponse : Response? = null
@@ -43,35 +44,44 @@ class SavedArticleCacheTest {
 
     @Test
     fun onlySetWhitelist() {
-        val request = Request.Builder()
-                .url(testUrlString)
+        val dogRequest = Request.Builder()
+                .url(dogUrlString)
                 .build()
-        var networkResponse : Response? = null
-        var cachedResponse : Response? = null
+        val catRequest = Request.Builder()
+                .url(catUrlString)
+                .build()
+        var networkDogResponse : Response? = null
+        var cachedDogResponse : Response? = null
+        var networkCatResponse : Response? = null
+        var cachedCatResponse : Response? = null
 
         runBlocking {
             // Response from network
-            networkResponse = responseSource.getWithContext(request, "Dog").await()
+            networkDogResponse = responseSource.getWithContext(dogRequest, "Dog").await()
+            networkCatResponse = responseSource.getWithContext(catRequest, "Dog").await()
+
             // Response is in cache now
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            cachedCatResponse = savedArticleCache.getWithContext(catRequest, "Cat").await()
+            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
         }
-        assertTrue(networkResponse == cachedResponse)
+        assertTrue(networkDogResponse == cachedDogResponse)
+        assertTrue(networkCatResponse == cachedCatResponse)
 
         // Run garbage collection on a non-Dog context
         savedArticleCache.garbageCollectContext("Cat")
         runBlocking {
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
         }
         // Response should still be in cache
-        assertTrue(networkResponse == cachedResponse)
+        assertTrue(networkDogResponse == cachedDogResponse)
 
         // Garbage collect Dog
         savedArticleCache.garbageCollectContext("Dog")
 
         // Cache saved article cache should be empty after Garbage Collection
         runBlocking {
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
         }
-        assertNull(cachedResponse)
+        assertNull(cachedDogResponse)
     }
 }
