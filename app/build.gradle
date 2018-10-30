@@ -1,0 +1,76 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+    defaultConfig {
+        applicationId "com.greglaun.lector"
+        minSdkVersion 25
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    sourceSets {
+        test.java.srcDirs += 'src/test/unit/kotlin'
+        // todo(gradle): Make sepearate task for integration tests
+        test.java.srcDirs += 'src/test/integration/kotlin'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+def arrow_version = "0.7.3"
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+//    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+//        exclude group: 'com.android.support', module: 'support-annotations'
+//    })
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'org.jsoup:jsoup:1.10.3'
+
+    // Arrow
+    implementation "io.arrow-kt:arrow-core:$arrow_version"
+    implementation "io.arrow-kt:arrow-syntax:$arrow_version"
+    implementation "io.arrow-kt:arrow-typeclasses:$arrow_version"
+    implementation "io.arrow-kt:arrow-data:$arrow_version"
+    implementation "io.arrow-kt:arrow-instances-core:$arrow_version"
+    implementation "io.arrow-kt:arrow-instances-data:$arrow_version"
+    kapt    "io.arrow-kt:arrow-annotations-processor:$arrow_version"
+
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2'
+
+    // OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+
+    // Bloom filters
+    implementation('com.baqend:bloom-filter:1.0.7') {
+        exclude group: 'redis.clients', module: 'jedis'
+        exclude group: 'org.apache.commons', module: 'commons-pool2'
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+
+}
+repositories {
+    mavenCentral()
+}
+
