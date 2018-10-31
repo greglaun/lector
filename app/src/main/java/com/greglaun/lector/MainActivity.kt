@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         saveCurrentPlace(textProvider)
         stopSpeaking()
-
     }
 
     override fun onResume() {
