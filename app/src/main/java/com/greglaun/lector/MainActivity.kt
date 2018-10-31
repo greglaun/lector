@@ -1,14 +1,14 @@
 package com.greglaun.lector
 
-import android.content.DialogInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.WebView
+import com.greglaun.lector.ui.WikiWebViewClient
 
 
 class MainActivity : AppCompatActivity() {
@@ -16,7 +16,8 @@ class MainActivity : AppCompatActivity() {
     val OFFLINE_MODE = true
     val TAG: String = MainActivity::class.java.simpleName
     @Volatile lateinit var textSpeaker: TextSpeaker
-    private lateinit var webFragment: WikiWebViewFragment
+    private lateinit var webView : WebView
+    private val wikiWebViewClient = WikiWebViewClient
 
     // Play controls
     @Volatile var isPlaying: Boolean = false
@@ -27,19 +28,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        switchToWebView()
+        prepareWebView()
         textSpeaker = TextSpeaker(this)
         textSpeaker.setEndOfArticleCallback(ArticleCleanupCallback())
         prepareForSpeaking(Uri.parse(getString(R.string.starting_url)))
     }
 
-    private fun switchToWebView() {
-        webFragment = WikiWebViewFragment()
-        val fm = supportFragmentManager
-        val ft = fm.beginTransaction()
-        ft.replace(R.id.viewFragment, webFragment as Fragment)
-        ft.commit()
-        webFragment.urlChangedCallback = NewURLCallback()
+    fun prepareWebView() {
+        webView = findViewById(R.id.webview) as WebView
+        webView.setWebViewClient(wikiWebViewClient)
+        val wikiURL = getString(R.string.starting_url)
+        webView.loadUrl(wikiURL)
+        // todo(kotlin): Can Kotlin handle first class functions?
+        wikiWebViewClient.urlChangedCallback = NewURLCallback()
     }
 
     override fun onPause() {
@@ -129,20 +130,22 @@ class MainActivity : AppCompatActivity() {
         val readingList = ReadingListProvider.retrieveList(this);
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.dialog_reading_list_title))
-        builder.setItems(readingList, DialogInterface.OnClickListener { dialog, which ->
+        builder.setItems(readingList) { dialog, which ->
             // TODO: Run on worker thread?
             if (OFFLINE_MODE) {
                 val html = ReadingListProvider.retrieveArticle(readingList[which], this)
-                val currentPlace = ReadingListProvider.retrievePlace(readingList[which], this)
-                webFragment.loadNewArticle(html)
+                val currentPlace = ReadingListProvider.retrievePlace(readingList[which],
+                        this)
+                webView.loadDataWithBaseURL(TextProvider.WIKI_BASE,
+                        html, "text/html", "utf-8", null)
                 textProvider = JSoupTextProvider(html)
                 textProvider.fastForwardTo(currentPlace)
             } else {
                 val url = TextProvider.WIKI_BASE + readingList[which]
                 textProvider = JSoupTextProvider(Uri.parse(url))
-                webFragment.loadURL(url)
+                webView.loadUrl(url)
             }
-        })
+        }
         builder.show()
     }
 
@@ -164,6 +167,15 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    // todo(refactor): Move to presenter
+    fun loadURL(url : String) {
+        webView.loadUrl(url)
+    }
+
+    // todo(refactor): Move to presenter
+    fun loadNewArticle(html :String) {
+        webView.loadDataWithBaseURL(TextProvider.WIKI_BASE, html, "text/html", "utf-8", null)
+    }
 
     private fun onURLChanged(url: Uri) {
         prepareForSpeaking(url)
@@ -180,7 +192,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    internal inner class NewURLCallback : WikiWebViewFragment.URLChangedCallback {
+    internal inner class NewURLCallback : WikiWebViewClient.URLChangedCallback {
         override fun call(uri: Uri) {
             onURLChanged(uri)
         }

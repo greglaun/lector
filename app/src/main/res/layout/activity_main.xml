@@ -4,10 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="org.greglaun.webviewapplication.com.greglaun.webviewapplication.MainActivity">
-
-    <FrameLayout
-        android:id="@+id/viewFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    tools:context="com.greglaun.lector.MainActivity">
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp" />
 </LinearLayout>
