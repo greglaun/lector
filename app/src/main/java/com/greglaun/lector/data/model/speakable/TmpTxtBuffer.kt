@@ -1,6 +1,7 @@
 package com.greglaun.lector.data.model.speakable
 
 import com.greglaun.lector.TextProvider
+import kotlin.math.min
 
 // A temporary class to be deleted after refactoring properly
 class TmpTxtBuffer {
@@ -12,13 +13,15 @@ class TmpTxtBuffer {
         return internalBuffer.size
     }
 
-    fun getCurrentAndAdvance(): String {
-        val current = getCurrent()
+    fun advance() {
         cursor += 1
-        return current
     }
 
-    private fun getCurrent(): String {
+    fun rewind() {
+        cursor = min(0, cursor - 1)
+    }
+
+    fun getCurrent(): String {
         return internalBuffer[cursor]
     }
 
@@ -27,7 +30,15 @@ class TmpTxtBuffer {
     }
 
     fun addFromProvider(provider: TextProvider) {
-        internalBuffer.addAll(provider.provideAllTexts())
+        if (provider != null) {
+            // todo(debug): Why is the first text often (always) null
+            internalBuffer.addAll(provider.provideAllTexts())
+        }
+    }
+
+    fun clear() {
+        cursor = 0
+        internalBuffer.clear()
     }
 
 }

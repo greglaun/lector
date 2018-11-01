@@ -181,6 +181,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareForSpeaking(url: Uri) {
+        textSpeaker.flush()
         textProvider = JSoupTextProvider(url)
     }
 

@@ -2,6 +2,7 @@ package com.greglaun.lector;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 
 import com.greglaun.lector.data.model.speakable.TmpTxtBuffer;
 
@@ -9,9 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import kotlin.NotImplementedError;
-
-public class TextSpeaker {
+public class TextSpeaker extends UtteranceProgressListener {
 
     interface Callback { void call(); }
 
@@ -29,11 +28,12 @@ public class TextSpeaker {
 
     public TextSpeaker(Context context, Callback endOfArticleCallback) {
         tts = new TextToSpeech(context, status -> speechReady.countDown());
+        tts.setOnUtteranceProgressListener(this);
         this.endOfArticleCallback = endOfArticleCallback;
     }
 
     private void queueForSpeaking(String text) {
-        tts.speak(text, TextToSpeech.QUEUE_ADD, null);
+        tts.speak(text, TextToSpeech.QUEUE_ADD, null, "UniqueID");
     }
 
     public void startSpeaking(final TextProvider provider) {
@@ -59,31 +59,52 @@ public class TextSpeaker {
         this.provider = provider;
     }
 
-    public String nextSpeechUnit() {
-        return buffer.getCurrentAndAdvance();
-    }
-
     private class MainSpeechLoop implements Runnable {
         @Override
         public void run() {
-            while (speaking) {
-                String textToSpeak = nextSpeechUnit();
-                if (textToSpeak.equals(TextProvider.END_OF_STREAM)) {
-                    if (endOfArticleCallback != null) {
-                        endOfArticleCallback.call();
-                    }
-                    return;
-                }
-                queueForSpeaking(textToSpeak);
-            }
+            playOneIfSpeaking();
         }
     }
 
+    public void playOneIfSpeaking() {
+        if (speaking) {
+            String textToSpeak = buffer.getCurrent();
+            if (textToSpeak.equals(TextProvider.END_OF_STREAM)) {
+                if (endOfArticleCallback != null) {
+                    endOfArticleCallback.call();
+                }
+                return;
+            }
+            queueForSpeaking(textToSpeak);
+        }
+    }
+
+    public void flush() {
+        buffer.clear();
+    }
+
     public String getCurrentUtterance() {
-        throw new NotImplementedError();
+        return buffer.getCurrent();
     }
 
     public void setEndOfArticleCallback(Callback endOfArticleCallback) {
         this.endOfArticleCallback = endOfArticleCallback;
     }
+
+    @Override
+    public void onStart(String utteranceId) {
+
+    }
+
+    @Override
+    public void onDone(String utteranceId) {
+        buffer.advance();
+        playOneIfSpeaking();
+    }
+
+    @Override
+    public void onError(String utteranceId) {
+
+    }
+
 }
