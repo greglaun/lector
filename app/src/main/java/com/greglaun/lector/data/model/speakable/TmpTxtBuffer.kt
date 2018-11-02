@@ -22,7 +22,10 @@ class TmpTxtBuffer {
     }
 
     fun getCurrent(): String {
-        return internalBuffer[cursor]
+        if (cursor < internalBuffer.size) {
+            return internalBuffer[cursor]
+        }
+        return ""; // todo(refactor): Use proper error handling
     }
 
     fun isEmpty(): Boolean {
