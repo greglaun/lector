@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface TextProvider {
     String END_OF_STREAM = "com.greglaun.eof";
-    public static final String WIKI_BASE = "https://en.wikipedia.org/wiki/";
+    String WIKI_BASE = "https://en.wikipedia.org/wiki/";
 
 
     String provideOneText();

@@ -43,11 +43,17 @@ class MainActivity : AppCompatActivity() {
         wikiWebViewClient.urlChangedCallback = NewURLCallback()
     }
 
+    override fun onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        }
+        onPause()
+    }
+
     override fun onPause() {
         super.onPause()
         saveCurrentPlace(textProvider)
         stopSpeaking()
-
     }
 
     override fun onResume() {
@@ -178,10 +184,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onURLChanged(url: Uri) {
-        prepareForSpeaking(url)
+        if (isWikiUrl(url)) {
+            prepareForSpeaking(url)
+        }
+    }
+
+    private val WIKI_LANGUAGE = "en"
+
+    private fun isWikiUrl(url: Uri): Boolean {
+        return (url.toString().startsWith("https://" + WIKI_LANGUAGE + ".wikipedia.org/wiki")
+                || url.toString().startsWith(
+                "https://" + WIKI_LANGUAGE + ".m.wikipedia.org/wiki")
+                && !url.toString().contains("File:")
+        )
     }
 
     private fun prepareForSpeaking(url: Uri) {
+        textSpeaker.flush()
         textProvider = JSoupTextProvider(url)
     }
 
