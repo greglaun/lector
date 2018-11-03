@@ -9,6 +9,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.TextProvider
 
+
+
 object WikiWebViewClient : WebViewClient() {
     var currentURL : Uri = Uri.parse("https://www.wikipedia.org/wiki/Main_Page")
     lateinit var urlChangedCallback : URLChangedCallback
@@ -35,4 +37,9 @@ object WikiWebViewClient : WebViewClient() {
         urlChangedCallback.call(request.url)
         return false
     }
+
+//    override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? {
+//        return super.shouldInterceptRequest(view, url)
+//    }
+
 }

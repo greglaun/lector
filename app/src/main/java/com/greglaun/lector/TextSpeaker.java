@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 
 public class TextSpeaker extends UtteranceProgressListener {
 
-    interface Callback { void call(); }
+    public interface Callback { void call(); }
 
     private TextProvider provider;
     private volatile boolean speaking;
