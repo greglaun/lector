@@ -1,12 +1,10 @@
 package com.greglaun.lector;
 
-import android.content.Context;
-import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 
+import com.greglaun.lector.data.model.speakable.TTSContract;
 import com.greglaun.lector.data.model.speakable.TmpTxtBuffer;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -16,24 +14,17 @@ public class TextSpeaker extends UtteranceProgressListener {
 
     private TextProvider provider;
     private volatile boolean speaking;
-    private final CountDownLatch speechReady = new CountDownLatch(1);
-    private final TextToSpeech tts;
+    private final TTSContract.AudioView tts;
     TmpTxtBuffer buffer = new TmpTxtBuffer();
     Executor speechExecutor = Executors.newSingleThreadExecutor();
     private Callback endOfArticleCallback;
 
-    public TextSpeaker (Context context) {
-        this(context, null);
-    }
-
-    public TextSpeaker(Context context, Callback endOfArticleCallback) {
-        tts = new TextToSpeech(context, status -> speechReady.countDown());
-        tts.setOnUtteranceProgressListener(this);
-        this.endOfArticleCallback = endOfArticleCallback;
+    public TextSpeaker (TTSContract.AudioView tts) {
+        this.tts = tts;
     }
 
     private void queueForSpeaking(String text) {
-        tts.speak(text, TextToSpeech.QUEUE_ADD, null, "UniqueID");
+        tts.speak(text);
     }
 
     public void startSpeaking(final TextProvider provider) {
@@ -45,7 +36,6 @@ public class TextSpeaker extends UtteranceProgressListener {
 
     public void stopSpeaking() {
         if (speaking) {
-            tts.playSilentUtterance(0, TextToSpeech.QUEUE_FLUSH, null);
             speaking = false;
             tts.stop();
         }
