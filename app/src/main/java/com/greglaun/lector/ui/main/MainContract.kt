@@ -2,11 +2,10 @@ package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
-import java.net.URI
 
 interface MainContract {
     interface View : LectorView {
-        fun loadUrl(Url : URI)
+        fun loadUrl(urlString : String)
         fun startPlaying()
         fun stopPlaying()
         fun enablePlayButton()
@@ -17,8 +16,10 @@ interface MainContract {
     interface Presenter : LectorPresenter<View> {
         fun onPlayButtonPressed()
         fun onPauseBottonPressed()
+        fun saveArticle(url : String)
+        fun deleteArticle(url : String)
         fun onUrlChanged(url : String)
-        fun onPageStarted(url : String)
         fun onRequest(url : String)
+        fun onDisplayReadingList()
     }
 }

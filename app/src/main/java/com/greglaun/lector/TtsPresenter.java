@@ -2,14 +2,16 @@ package com.greglaun.lector;
 
 import android.speech.tts.UtteranceProgressListener;
 
-import com.greglaun.lector.data.model.speakable.TTSContract;
+import com.greglaun.lector.ui.speak.TTSContract;
 import com.greglaun.lector.data.model.speakable.TmpTxtBuffer;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class TextSpeaker extends UtteranceProgressListener {
-
+public class TtsPresenter extends UtteranceProgressListener
+        implements TTSContract.Presenter {
     public interface Callback { void call(); }
 
     private TextProvider provider;
@@ -19,8 +21,13 @@ public class TextSpeaker extends UtteranceProgressListener {
     Executor speechExecutor = Executors.newSingleThreadExecutor();
     private Callback endOfArticleCallback;
 
-    public TextSpeaker (TTSContract.AudioView tts) {
+    public TtsPresenter(TTSContract.AudioView tts) {
         this.tts = tts;
+    }
+
+    @Override
+    public void onUrlChanged(@NotNull String urlString) {
+        // todo: implement
     }
 
     private void queueForSpeaking(String text) {
@@ -34,11 +41,14 @@ public class TextSpeaker extends UtteranceProgressListener {
         speechExecutor.execute(new MainSpeechLoop());
     }
 
+    @Override
+    public void startSpeaking() {
+        // todo: Implement method
+    }
+
+    @Override
     public void stopSpeaking() {
-        if (speaking) {
-            speaking = false;
-            tts.stop();
-        }
+        // todo: Implement method
     }
 
     public TextProvider getProvider() {
@@ -96,5 +106,14 @@ public class TextSpeaker extends UtteranceProgressListener {
     public void onError(String utteranceId) {
 
     }
+
+//    private fun isWikiUrl(url: String): Boolean {
+//        return (url.startsWith("https://" + WIKI_LANGUAGE + ".wikipedia.org/wiki")
+//                || url.startsWith(
+//                "https://" + WIKI_LANGUAGE + ".m.wikipedia.org/wiki")
+//                && !url.contains("File:")
+//        )
+//    }
+
 
 }
