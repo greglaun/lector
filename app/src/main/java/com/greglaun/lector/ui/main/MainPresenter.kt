@@ -42,4 +42,15 @@ class MainPresenter(val view : MainContract.View, ttsView : TTSContract.AudioVie
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun saveArticle(url: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deleteArticle(url: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onDisplayReadingList() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

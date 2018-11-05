@@ -1,25 +1,27 @@
 package com.greglaun.lector.ui.main
 
-import android.net.Uri
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebView
-import com.greglaun.lector.*
+import com.greglaun.lector.R
+import com.greglaun.lector.TextProvider
+import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.ui.WikiWebViewClient
+import com.greglaun.lector.ui.speak.TTSContract
 
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity(), MainContract.View {
     val OFFLINE_MODE = true
     val TAG: String = MainActivity::class.java.simpleName
     private lateinit var webView : WebView
     private val wikiWebViewClient = WikiWebViewClient
 
+    lateinit var ttsAudioView : AndroidAudioView
     lateinit var mainPresenter : MainContract.Presenter
+    lateinit var ttsPresenter : TTSContract.Presenter
     @Volatile var isPlaying: Boolean = false
     lateinit var playMenuItem: MenuItem
     lateinit var pauseMenuItem: MenuItem
@@ -30,10 +32,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(wikiWebViewClient)
-        mainPresenter = MainPresenter(webView, tts)
-    }
-
-    fun prepareWebView() {
+        ttsAudioView.androidTts = TextToSpeech(this, ttsAudioView)
+        mainPresenter = MainPresenter(this, ttsAudioView)
     }
 
     override fun onBackPressed() {
@@ -89,5 +89,41 @@ class MainActivity : AppCompatActivity() {
             pauseMenuItem.setVisible(false) // hide the pause button
         }
         return true
+    }
+
+    override fun loadUrl(urlString: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun startPlaying() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun stopPlaying() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun enablePlayButton() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun enablePauseButton() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onError(resId: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onError(message: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showMessage(message: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showMessage(resId: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
