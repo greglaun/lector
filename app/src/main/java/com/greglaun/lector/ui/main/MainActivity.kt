@@ -3,37 +3,57 @@ package com.greglaun.lector.ui.main
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebView
 import com.greglaun.lector.R
-import com.greglaun.lector.TextProvider
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.ui.WikiWebViewClient
-import com.greglaun.lector.ui.speak.TTSContract
+import com.greglaun.lector.ui.speak.NoOpTtsView
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
-    val OFFLINE_MODE = true
     val TAG: String = MainActivity::class.java.simpleName
     private lateinit var webView : WebView
     private val wikiWebViewClient = WikiWebViewClient
 
-    lateinit var ttsAudioView : AndroidAudioView
     lateinit var mainPresenter : MainContract.Presenter
-    lateinit var ttsPresenter : TTSContract.Presenter
-    @Volatile var isPlaying: Boolean = false
     lateinit var playMenuItem: MenuItem
     lateinit var pauseMenuItem: MenuItem
-    lateinit var textProvider: TextProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(wikiWebViewClient)
-        ttsAudioView.androidTts = TextToSpeech(this, ttsAudioView)
-        mainPresenter = MainPresenter(this, ttsAudioView)
+        mainPresenter = MainPresenter(this, NoOpTtsView())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkTts()
+    }
+
+    fun checkTts() {
+        // todo(android): Clean this up, it is horribly messy.
+        var androidTts : TextToSpeech? = null
+         androidTts = TextToSpeech(this, TextToSpeech.OnInitListener {
+            if (androidTts == null) onBadTts()
+             when(it) {
+                 TextToSpeech.SUCCESS -> onSuccessfulTts(androidTts!!)
+                 TextToSpeech.ERROR -> onBadTts()
+             }
+        })
+    }
+
+    private fun onSuccessfulTts(androidTts: TextToSpeech) {
+        // todo(concurrency): This should be called on the UI thread. Should we lock?
+        mainPresenter = MainPresenter(this, AndroidAudioView(androidTts))
+    }
+
+    private fun onBadTts() {
+        Log.d(TAG, "Null Tts")
     }
 
     override fun onBackPressed() {
@@ -42,7 +62,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
         onPause()
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
@@ -81,6 +100,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         super.onPrepareOptionsMenu(menu)
+        val isPlaying = false
         if (isPlaying) {
             playMenuItem.setVisible(false) // hide play button
             pauseMenuItem.setVisible(true) // show the pause button
