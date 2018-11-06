@@ -1,22 +1,26 @@
 package com.greglaun.lector.ui.main
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
-import com.greglaun.lector.ui.WikiWebViewClient
+import com.greglaun.lector.android.OkHttpToWebView
 import com.greglaun.lector.ui.speak.NoOpTtsView
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
     val TAG: String = MainActivity::class.java.simpleName
     private lateinit var webView : WebView
-    private val wikiWebViewClient = WikiWebViewClient
 
     lateinit var mainPresenter : MainContract.Presenter
     lateinit var playMenuItem: MenuItem
@@ -26,8 +30,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview) as WebView
-        webView.setWebViewClient(wikiWebViewClient)
+        webView.setWebViewClient(WikiWebViewClient())
         mainPresenter = MainPresenter(this, NoOpTtsView())
+        checkTts()
+        webView.loadUrl("https://www.wikipedia.org/wiki/Main_Page")
     }
 
     override fun onResume() {
@@ -145,5 +151,21 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun showMessage(resId: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+   inner class WikiWebViewClient : WebViewClient() {
+        var currentURL : Uri = Uri.parse("https://www.wikipedia.org/wiki/Main_Page")
+
+        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+            super.onPageStarted(view, url, favicon)
+            if (url != null) {
+                mainPresenter.onUrlChanged(url)
+            }
+        }
+
+    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+        return OkHttpToWebView(mainPresenter.onRequest(request.url.toString()))
+    }
+
     }
 }

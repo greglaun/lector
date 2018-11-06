@@ -2,6 +2,7 @@ package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.TtsPresenter
 import com.greglaun.lector.ui.speak.TTSContract
+import okhttp3.Response
 
 // todo(global state): Move to better place.
 val STARTING_URL_STRING = "https://www.wikipedia.org/wiki/Main_Page"
@@ -38,7 +39,7 @@ class MainPresenter(val view : MainContract.View, ttsView : TTSContract.AudioVie
         ttsPresenter.onUrlChanged(url)
     }
 
-    override fun onRequest(url: String) {
+    override fun onRequest(url: String): Response {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

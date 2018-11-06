@@ -2,6 +2,7 @@ package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
+import okhttp3.Response
 
 interface MainContract {
     interface View : LectorView {
@@ -19,7 +20,7 @@ interface MainContract {
         fun saveArticle(url : String)
         fun deleteArticle(url : String)
         fun onUrlChanged(url : String)
-        fun onRequest(url : String)
+        fun onRequest(url : String) : Response
         fun onDisplayReadingList()
     }
 }
