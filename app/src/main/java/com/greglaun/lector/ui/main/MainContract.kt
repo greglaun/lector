@@ -8,8 +8,6 @@ import okhttp3.Response
 interface MainContract {
     interface View : LectorView {
         fun loadUrl(urlString : String)
-        fun startPlaying()
-        fun stopPlaying()
         fun enablePlayButton()
         fun enablePauseButton()
         // todo(feature): highlightText(String)
