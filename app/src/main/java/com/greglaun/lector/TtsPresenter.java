@@ -1,39 +1,37 @@
 package com.greglaun.lector;
 
-import android.content.Context;
-import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 
+import com.greglaun.lector.ui.speak.TTSContract;
 import com.greglaun.lector.data.model.speakable.TmpTxtBuffer;
 
-import java.util.concurrent.CountDownLatch;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class TextSpeaker extends UtteranceProgressListener {
-
-    interface Callback { void call(); }
+public class TtsPresenter extends UtteranceProgressListener
+        implements TTSContract.Presenter {
+    public interface Callback { void call(); }
 
     private TextProvider provider;
     private volatile boolean speaking;
-    private final CountDownLatch speechReady = new CountDownLatch(1);
-    private final TextToSpeech tts;
+    private final TTSContract.AudioView tts;
     TmpTxtBuffer buffer = new TmpTxtBuffer();
     Executor speechExecutor = Executors.newSingleThreadExecutor();
     private Callback endOfArticleCallback;
 
-    public TextSpeaker (Context context) {
-        this(context, null);
+    public TtsPresenter(TTSContract.AudioView tts) {
+        this.tts = tts;
     }
 
-    public TextSpeaker(Context context, Callback endOfArticleCallback) {
-        tts = new TextToSpeech(context, status -> speechReady.countDown());
-        tts.setOnUtteranceProgressListener(this);
-        this.endOfArticleCallback = endOfArticleCallback;
+    @Override
+    public void onUrlChanged(@NotNull String urlString) {
+        // todo: implement
     }
 
     private void queueForSpeaking(String text) {
-        tts.speak(text, TextToSpeech.QUEUE_ADD, null, "UniqueID");
+        tts.speak(text);
     }
 
     public void startSpeaking(final TextProvider provider) {
@@ -43,12 +41,14 @@ public class TextSpeaker extends UtteranceProgressListener {
         speechExecutor.execute(new MainSpeechLoop());
     }
 
+    @Override
+    public void startSpeaking() {
+        // todo: Implement method
+    }
+
+    @Override
     public void stopSpeaking() {
-        if (speaking) {
-            tts.playSilentUtterance(0, TextToSpeech.QUEUE_FLUSH, null);
-            speaking = false;
-            tts.stop();
-        }
+        // todo: Implement method
     }
 
     public TextProvider getProvider() {
@@ -106,5 +106,14 @@ public class TextSpeaker extends UtteranceProgressListener {
     public void onError(String utteranceId) {
 
     }
+
+//    private fun isWikiUrl(url: String): Boolean {
+//        return (url.startsWith("https://" + WIKI_LANGUAGE + ".wikipedia.org/wiki")
+//                || url.startsWith(
+//                "https://" + WIKI_LANGUAGE + ".m.wikipedia.org/wiki")
+//                && !url.contains("File:")
+//        )
+//    }
+
 
 }
