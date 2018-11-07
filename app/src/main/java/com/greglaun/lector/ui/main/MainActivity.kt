@@ -107,29 +107,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        super.onPrepareOptionsMenu(menu)
-        val isPlaying = false
-        if (isPlaying) {
-            playMenuItem.setVisible(false) // hide play button
-            pauseMenuItem.setVisible(true) // show the pause button
-        } else if (!isPlaying) {
-            playMenuItem.setVisible(true) // show play button
-            pauseMenuItem.setVisible(false) // hide the pause button
-        }
-        return true
-    }
-
     override fun loadUrl(urlString: String) {
 //        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun enablePlayButton() {
-
+        playMenuItem.setVisible(true) // show play button
+        pauseMenuItem.setVisible(false) // hide the pause button
     }
 
     override fun enablePauseButton() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        playMenuItem.setVisible(false) // hide play button
+        pauseMenuItem.setVisible(true) // show the pause button
     }
 
     override fun onError(resId: Int) {
