@@ -10,8 +10,8 @@ import java.io.File
 // as a composable cache.
 object ResponseSourceFactory {
 
-    fun createResponseSource(savedArticleCache: SavedArticleCache<Request, Response, String>,
-                             lruCacheDir: File): ContextAwareCache<Request, Response, String> {
+    fun createResponseSource(savedArticleCache : SavedArticleCache<Request, Response, String>,
+                             lruCacheDir : File) : ContextAwareCache<Request, Response, String> {
         return savedArticleCache.compose(
                 NetworkCache(
                         OkHttpConnectionFactory.createClient(lruCacheDir)))

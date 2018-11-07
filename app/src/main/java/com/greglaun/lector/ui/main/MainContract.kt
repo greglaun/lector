@@ -2,6 +2,7 @@ package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
+import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Response
 
 interface MainContract {
@@ -20,7 +21,7 @@ interface MainContract {
         fun saveArticle(url : String)
         fun deleteArticle(url : String)
         fun onUrlChanged(url : String)
-        fun onRequest(url : String) : Response
+        fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
     }
 }

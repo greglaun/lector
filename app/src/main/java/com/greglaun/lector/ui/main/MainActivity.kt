@@ -16,6 +16,7 @@ import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.OkHttpToWebView
 import com.greglaun.lector.ui.speak.NoOpTtsView
+import kotlinx.coroutines.experimental.runBlocking
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -25,15 +26,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     lateinit var mainPresenter : MainContract.Presenter
     lateinit var playMenuItem: MenuItem
     lateinit var pauseMenuItem: MenuItem
+    lateinit var cacheDir : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(WikiWebViewClient())
-        mainPresenter = MainPresenter(this, NoOpTtsView())
+        mainPresenter = MainPresenter(this, NoOpTtsView(), getCacheDir())
         checkTts()
-        webView.loadUrl("https://www.wikipedia.org/wiki/Main_Page")
+        webView.settings.javaScriptEnabled = true
+        webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
     }
 
     override fun onResume() {
@@ -55,7 +58,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun onSuccessfulTts(androidTts: TextToSpeech) {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
-        mainPresenter = MainPresenter(this, AndroidAudioView(androidTts))
+        mainPresenter = MainPresenter(this, AndroidAudioView(androidTts), getCacheDir())
     }
 
     private fun onBadTts() {
@@ -118,7 +121,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun loadUrl(urlString: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun startPlaying() {
@@ -154,7 +157,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
    inner class WikiWebViewClient : WebViewClient() {
-        var currentURL : Uri = Uri.parse("https://www.wikipedia.org/wiki/Main_Page")
+        var currentURL : Uri = Uri.parse("https://en.m.wikipedia.org/wiki/Main_Page")
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
@@ -163,9 +166,25 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
         }
 
+       override fun onPageFinished(view: WebView?, url: String?) {
+           super.onPageFinished(view, url)
+           var result = webView.evaluateJavascript(
+                   "(function() { return (document.getElementsByTagName('html')[0].innerHTML); })();"
+           ) { html ->
+               Log.d("HTML", html)
+               // code here
+           }
+           println("Happy")
+       }
+
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-        return OkHttpToWebView(mainPresenter.onRequest(request.url.toString()))
+        if (request.url.authority.substringAfter('.') == "wikipedia.org") {
+            return runBlocking {
+                OkHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
+            }
+        }
+        return super.shouldInterceptRequest(view, request)
     }
 
-    }
+   }
 }
