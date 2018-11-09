@@ -9,11 +9,13 @@ import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
+import java.util.concurrent.Semaphore
 
 class TtsPresenter(private val tts: TTSContract.AudioView,
                    private val mainPresenter : MainContract.Presenter) : TTSContract.Presenter {
     private val TAG = TtsPresenter::class.java.simpleName
 
+    val readyLock  = Semaphore(1)
     var articleStarted = false
     var provider: TextProvider? = null
     private var buffer = TmpTxtBuffer()
@@ -38,21 +40,21 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
 
     override fun startSpeaking() {
-        // todo(concurrency): Clean up concurrency, especially accesses to buffer.
+        // todo(concurrency): Is a semaphore really the right solution here?
         mainLoop = GlobalScope.launch {
             if (buffer?.isEmpty() && articleStarted) {
                 mainPresenter.onArticleOver()
                 return@launch
             }
-            var ready = true
+            readyLock.release()
             while (true) {
-                if (ready && !buffer.isEmpty()) {
-                    ready = false
+                if (!buffer.isEmpty()) {
+                    readyLock.acquire()
                     val text = buffer.getCurrent()
                     tts.speak(text) {
                         if (it == utteranceId(text)) {
                             buffer.advance()
-                            ready = true
+                            readyLock.release()
                         }
                     }
                 }
