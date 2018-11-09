@@ -16,7 +16,7 @@ class MainPresenter(val view : MainContract.View,
                     ttsView : TTSContract.AudioView,
                     cacheDir : File)
     : MainContract.Presenter {
-    val ttsPresenter = TtsPresenter(ttsView)
+    val ttsPresenter = TtsPresenter(ttsView, this)
     val WIKI_LANGUAGE = "en"
     val savedArticleCache = HashMapSavedArticleCache()
     val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
@@ -35,11 +35,16 @@ class MainPresenter(val view : MainContract.View,
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onPlayButtonPressed() {
-        ttsPresenter.startSpeaking()
+    override fun onArticleOver() {
+        view.enablePlayButton()
     }
 
-    override fun onPauseBottonPressed() {
+    override fun onPlayButtonPressed() {
+        ttsPresenter.startSpeaking()
+        view.enablePauseButton()
+    }
+
+    override fun stopSpeakingAndEnablePlayButton() {
         ttsPresenter.stopSpeaking()
         view.enablePlayButton()
     }

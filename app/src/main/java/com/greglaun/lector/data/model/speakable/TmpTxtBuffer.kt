@@ -25,11 +25,11 @@ class TmpTxtBuffer {
         if (cursor < internalBuffer.size) {
             return internalBuffer[cursor]
         }
-        return ""; // todo(refactor): Use proper error handling
+        return "" // todo(refactor): Use proper error handling
     }
 
-    fun isEmpty(): Boolean {
-        return internalBuffer.size == 0
+    fun isExhausted(): Boolean {
+        return cursor >= internalBuffer.size
     }
 
     fun addFromProvider(provider: TextProvider) {
