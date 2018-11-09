@@ -46,15 +46,6 @@ class JSoupTextProvider(@field:Volatile private var doc: Document?) : TextProvid
         return doc
     }
 
-    override fun provideOneText(): String {
-        if (paragraphs!!.size <= 0) {
-            return TextProvider.END_OF_STREAM
-        }
-        val result = paragraphs!![0]
-        paragraphs!!.remove(result)
-        return result.text()
-    }
-
     override fun provideText(m: Int): List<String> {
         val n = Math.min(m, paragraphs!!.size - 1)
         val result = ArrayList<String>()
@@ -63,7 +54,6 @@ class JSoupTextProvider(@field:Volatile private var doc: Document?) : TextProvid
             tmp = popText(paragraphs!!)
             result.add(tmp)
         }
-        result.add(TextProvider.END_OF_STREAM)
         return result
     }
 

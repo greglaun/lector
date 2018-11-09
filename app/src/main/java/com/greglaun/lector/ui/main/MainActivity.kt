@@ -114,13 +114,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun enablePlayButton() {
-        playMenuItem?.setVisible(true) // show play button
-        pauseMenuItem?.setVisible(false) // hide the pause button
+        runOnUiThread {
+            playMenuItem?.setVisible(true) // show play button
+            pauseMenuItem?.setVisible(false) // hide the pause button
+        }
     }
 
     override fun enablePauseButton() {
-        playMenuItem?.setVisible(false) // hide play button
-        pauseMenuItem?.setVisible(true) // show the pause button
+        runOnUiThread {
+            playMenuItem?.setVisible(false) // hide play button
+            pauseMenuItem?.setVisible(true) // show the pause button
+        }
     }
 
     override fun onError(resId: Int) {

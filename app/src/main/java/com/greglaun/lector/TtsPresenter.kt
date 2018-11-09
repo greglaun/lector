@@ -42,21 +42,23 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     override fun startSpeaking() {
         // todo(concurrency): Is a semaphore really the right solution here?
         mainLoop = GlobalScope.launch {
-            if (buffer?.isEmpty() && articleStarted) {
+           if (buffer?.isExhausted() && articleStarted) {
                 mainPresenter.onArticleOver()
                 return@launch
             }
             readyLock.release()
             while (true) {
-                if (!buffer.isEmpty()) {
-                    readyLock.acquire()
-                    val text = buffer.getCurrent()
-                    tts.speak(text) {
-                        if (it == utteranceId(text)) {
-                            buffer.advance()
-                            readyLock.release()
-                        }
+                if (buffer.isExhausted()) {
+                    mainPresenter.onArticleOver()
+                }
+                readyLock.acquire()
+                val text = buffer.getCurrent()
+                tts.speak(text) {
+                    if (it == utteranceId(text)) {
+                        buffer.advance()
+                        readyLock.release()
                     }
+
                 }
             }
         }
