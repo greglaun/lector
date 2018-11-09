@@ -14,7 +14,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
-import com.greglaun.lector.android.OkHttpToWebView
+import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.ui.speak.NoOpTtsView
 import kotlinx.coroutines.experimental.runBlocking
 
@@ -24,8 +24,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var webView : WebView
 
     lateinit var mainPresenter : MainContract.Presenter
-    lateinit var playMenuItem: MenuItem
-    lateinit var pauseMenuItem: MenuItem
+    var playMenuItem : MenuItem? = null
+    var pauseMenuItem : MenuItem? = null
     lateinit var cacheDir : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +58,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun onSuccessfulTts(androidTts: TextToSpeech) {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
-        mainPresenter = MainPresenter(this, AndroidAudioView(androidTts), getCacheDir())
+        val androidVideoView = AndroidAudioView(androidTts)
+        androidTts.setOnUtteranceProgressListener(androidVideoView)
+        mainPresenter = MainPresenter(this, androidVideoView, getCacheDir())
     }
 
     private fun onBadTts() {
@@ -88,7 +90,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_pause -> {
-                mainPresenter.onPauseBottonPressed()
+                mainPresenter.stopSpeakingAndEnablePlayButton()
                 return true
             }
             R.id.action_save -> {
@@ -112,13 +114,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun enablePlayButton() {
-        playMenuItem.setVisible(true) // show play button
-        pauseMenuItem.setVisible(false) // hide the pause button
+        playMenuItem?.setVisible(true) // show play button
+        pauseMenuItem?.setVisible(false) // hide the pause button
     }
 
     override fun enablePauseButton() {
-        playMenuItem.setVisible(false) // hide play button
-        pauseMenuItem.setVisible(true) // show the pause button
+        playMenuItem?.setVisible(false) // hide play button
+        pauseMenuItem?.setVisible(true) // show the pause button
     }
 
     override fun onError(resId: Int) {
@@ -155,13 +157,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                Log.d("HTML", html)
                // code here
            }
-           println("Happy")
        }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
         if (request.url.authority.substringAfter('.') == "wikipedia.org") {
             return runBlocking {
-                OkHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
+                okHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
             }
         }
         return super.shouldInterceptRequest(view, request)

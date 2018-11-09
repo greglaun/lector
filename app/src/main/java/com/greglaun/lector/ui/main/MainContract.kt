@@ -15,11 +15,12 @@ interface MainContract {
 
     interface Presenter : LectorPresenter<View> {
         fun onPlayButtonPressed()
-        fun onPauseBottonPressed()
+        fun stopSpeakingAndEnablePlayButton()
         fun saveArticle(url : String)
         fun deleteArticle(url : String)
         fun onUrlChanged(url : String)
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
+        fun onArticleOver()
     }
 }
