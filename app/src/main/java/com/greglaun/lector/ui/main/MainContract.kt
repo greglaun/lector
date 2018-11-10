@@ -10,6 +10,7 @@ interface MainContract {
         fun loadUrl(urlString : String)
         fun enablePlayButton()
         fun enablePauseButton()
+        fun displayReadingList(readingList: List<String>)
         // todo(feature): highlightText(String)
     }
 

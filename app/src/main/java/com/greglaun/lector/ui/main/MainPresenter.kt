@@ -1,8 +1,8 @@
 package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.TtsPresenter
-import com.greglaun.lector.data.cache.HashMapSavedArticleCache
-import com.greglaun.lector.data.cache.ResponseSourceFactory
+import com.greglaun.lector.data.cache.*
+import com.greglaun.lector.data.whitelist.HashSetWhitelist
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request
@@ -10,18 +10,17 @@ import okhttp3.Response
 import java.io.File
 
 // todo(global state): Move to better place.
-val STARTING_URL_STRING = "https://www.wikipedia.org/wiki/Main_Page"
-
 class MainPresenter(val view : MainContract.View,
                     ttsView : TTSContract.AudioView,
                     cacheDir : File)
     : MainContract.Presenter {
     val ttsPresenter = TtsPresenter(ttsView, this)
     val WIKI_LANGUAGE = "en"
-    val savedArticleCache = HashMapSavedArticleCache()
+    val whitelist : HashSetWhitelist<String> =  HashSetWhitelist()
+    val savedArticleCache = WhitelistSavedArticleCache(HashMapSavedArticleCache(), whitelist)
     val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
             cacheDir)
-    val currentRequestContext = "BAD_CONTEXT"
+    var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
 
     override fun onAttach(lectorView: MainContract.View) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -50,6 +49,8 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onUrlChanged(url: String) {
+        // todo(optimization): If urlToContext becomes complicated, move it somewhere else.
+        currentRequestContext = urlToContext(url)
         view.loadUrl(url)
         ttsPresenter.onUrlChanged(url)
     }
@@ -61,14 +62,24 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun saveArticle(url: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        whitelist.add(urlToContext(url))
     }
 
     override fun deleteArticle(url: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        whitelist.delete(urlToContext(url))
     }
 
     override fun onDisplayReadingList() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        view.displayReadingList(getReadingList())
+    }
+
+    // todo(data): Replace with live data or some other mechanism
+    fun getReadingList(): List<String> {
+        val readingList : MutableList<String> = ArrayList()
+        for (article in whitelist.hashSet) {
+            readingList.add(contextToTitle(article))
+        }
+        val readOnlyList : List<String> = readingList
+        return readOnlyList
     }
 }

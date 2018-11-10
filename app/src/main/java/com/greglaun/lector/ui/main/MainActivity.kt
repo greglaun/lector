@@ -1,7 +1,7 @@
 package com.greglaun.lector.ui.main
 
-import android.graphics.Bitmap
-import android.net.Uri
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
@@ -15,9 +15,9 @@ import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
+import com.greglaun.lector.data.cache.titleToContext
 import com.greglaun.lector.ui.speak.NoOpTtsView
 import kotlinx.coroutines.experimental.runBlocking
-
 
 class MainActivity : AppCompatActivity(), MainContract.View {
     val TAG: String = MainActivity::class.java.simpleName
@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun loadUrl(urlString: String) {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        webView.loadUrl(urlString)
     }
 
     override fun enablePlayButton() {
@@ -143,15 +143,36 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-   inner class WikiWebViewClient : WebViewClient() {
-        var currentURL : Uri = Uri.parse("https://en.m.wikipedia.org/wiki/Main_Page")
-
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            super.onPageStarted(view, url, favicon)
-            if (url != null) {
-                mainPresenter.onUrlChanged(url)
-            }
+    override fun displayReadingList(readingList : List<String>) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.dialog_reading_list_title))
+        builder.setItems(readingList.toTypedArray()) { dialog, which ->
+            mainPresenter.onUrlChanged("https://en.m.wikipedia.org/wiki/"
+                    + titleToContext(readingList[which]))
         }
+        builder.show()
+    }
+
+    inner class WikiWebViewClient : WebViewClient() {
+//        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+//            super.onPageStarted(view, url, favicon)
+//            if (url != null) {
+//                mainPresenter.onUrlChanged(url)
+//            }
+//        }
+
+       override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+           if (request.url.authority.endsWith("wikipedia.org")) {
+               mainPresenter.onUrlChanged(request.url.toString())
+               return true
+           }
+           if (request.url.authority.endsWith("wikimedia.org")) {
+               return false
+           }
+           val intent = Intent(Intent.ACTION_VIEW, request.url)
+           startActivity(intent)
+           return false
+       }
 
        override fun onPageFinished(view: WebView?, url: String?) {
            super.onPageFinished(view, url)
@@ -164,7 +185,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
        }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-        if (request.url.authority.substringAfter('.') == "wikipedia.org") {
+        if (request.url.authority.endsWith("wikipedia.org")) {
             return runBlocking {
                 okHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
             }

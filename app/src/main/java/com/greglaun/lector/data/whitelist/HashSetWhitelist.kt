@@ -1,9 +1,9 @@
 package com.greglaun.lector.data.whitelist
 
 // A deterministic probabilistic set for testing
-class HashSetProbabillisticSet<T> : ProbabilisticSet<T> {
+class HashSetWhitelist<T> : Whitelist<T> {
     val hashSet = HashSet<T>()
-    override fun probablyContains(element: T): Boolean {
+    override fun contains(element: T): Boolean {
         return hashSet.contains(element)
     }
 
