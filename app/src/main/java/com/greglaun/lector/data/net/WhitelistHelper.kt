@@ -5,7 +5,7 @@ import org.jsoup.nodes.Document
 
 object WhitelistHelper {
 // For an html document, add all links to the white list.
-fun adAllToWhiteList(document : Document, whitelist : ProbabilisticSet<String>) {
+fun addAllToWhiteList(document : Document, whitelist : ProbabilisticSet<String>) {
     val anchorTags = document.select("a")
     val linkSet = HashSet<String>()
     for (a in anchorTags) {

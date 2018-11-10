@@ -2,7 +2,6 @@ package com.greglaun.lector.data.cache
 
 interface SavedArticleCache<Key : Any, Value : Any, KeyContext : Any>
     : ContextAwareCache<Key, Value, KeyContext> {
-    
 
     // Garbage collect the items from the given context provided they are not referred to by another
     // context. This prevents us from deleting items that are still needed in other contexts.

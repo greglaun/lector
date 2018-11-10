@@ -3,7 +3,9 @@ package com.greglaun.lector.ui.main
 import com.greglaun.lector.TtsPresenter
 import com.greglaun.lector.data.cache.HashMapSavedArticleCache
 import com.greglaun.lector.data.cache.ResponseSourceFactory
+import com.greglaun.lector.data.cache.WhitelistSavedArticleCache
 import com.greglaun.lector.data.cache.urlToContext
+import com.greglaun.lector.data.whitelist.HashSetProbabillisticSet
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request
@@ -19,7 +21,8 @@ class MainPresenter(val view : MainContract.View,
     : MainContract.Presenter {
     val ttsPresenter = TtsPresenter(ttsView, this)
     val WIKI_LANGUAGE = "en"
-    val savedArticleCache = HashMapSavedArticleCache()
+    val whitelist : HashSetProbabillisticSet<String> =  HashSetProbabillisticSet()
+    val savedArticleCache = WhitelistSavedArticleCache(HashMapSavedArticleCache(), whitelist)
     val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
             cacheDir)
     var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page

@@ -11,7 +11,7 @@ class WhitelistHelperKtTest {
     fun testHashSetWhitelist() {
         val dogArticle = Jsoup.connect("http://www.wikipedia.org/wiki/Dog").get()
         val whitelist = HashSetProbabillisticSet<String>()
-        WhitelistHelper.adAllToWhiteList(dogArticle, whitelist)
+        WhitelistHelper.addAllToWhiteList(dogArticle, whitelist)
         assertTrue(whitelist.probablyContains("https://en.wikipedia.org/wiki/Dog_breeding"))
     }
 
@@ -19,7 +19,7 @@ class WhitelistHelperKtTest {
     fun testGlobalWhitelist() {
         val dogArticle = Jsoup.connect("http://www.wikipedia.org/wiki/Dog").get()
         val whitelist = GlobalWhitelist
-        WhitelistHelper.adAllToWhiteList(dogArticle, whitelist)
+        WhitelistHelper.addAllToWhiteList(dogArticle, whitelist)
         assertTrue(whitelist.probablyContains("https://en.wikipedia.org/wiki/Dog_breeding"))
     }
 }
