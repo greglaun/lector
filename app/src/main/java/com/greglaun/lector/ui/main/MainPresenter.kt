@@ -21,7 +21,7 @@ class MainPresenter(val view : MainContract.View,
     val savedArticleCache = HashMapSavedArticleCache()
     val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
             cacheDir)
-    val currentRequestContext = "BAD_CONTEXT"
+    val currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
 
     override fun onAttach(lectorView: MainContract.View) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

@@ -1,7 +1,6 @@
 package com.greglaun.lector.ui.main
 
-import android.graphics.Bitmap
-import android.net.Uri
+import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
@@ -17,6 +16,8 @@ import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.ui.speak.NoOpTtsView
 import kotlinx.coroutines.experimental.runBlocking
+
+
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun loadUrl(urlString: String) {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        webView.loadUrl(urlString)
     }
 
     override fun enablePlayButton() {
@@ -144,14 +145,22 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
    inner class WikiWebViewClient : WebViewClient() {
-        var currentURL : Uri = Uri.parse("https://en.m.wikipedia.org/wiki/Main_Page")
+//        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+//            super.onPageStarted(view, url, favicon)
+//            if (url != null) {
+//                mainPresenter.onUrlChanged(url)
+//            }
+//        }
 
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            super.onPageStarted(view, url, favicon)
-            if (url != null) {
-                mainPresenter.onUrlChanged(url)
-            }
-        }
+       override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+           if (request.url.authority.endsWith("wikipedia.org")) {
+               mainPresenter.onUrlChanged(request.url.toString())
+               return true
+           }
+           val intent = Intent(Intent.ACTION_VIEW, request.url)
+           startActivity(intent)
+           return false
+       }
 
        override fun onPageFinished(view: WebView?, url: String?) {
            super.onPageFinished(view, url)
@@ -164,7 +173,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
        }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-        if (request.url.authority.substringAfter('.') == "wikipedia.org") {
+        if (request.url.authority.endsWith("wikipedia.org")) {
             return runBlocking {
                 okHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
             }
