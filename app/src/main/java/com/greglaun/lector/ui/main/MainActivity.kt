@@ -157,6 +157,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                mainPresenter.onUrlChanged(request.url.toString())
                return true
            }
+           if (request.url.authority.endsWith("wikimedia.org")) {
+               return false
+           }
            val intent = Intent(Intent.ACTION_VIEW, request.url)
            startActivity(intent)
            return false

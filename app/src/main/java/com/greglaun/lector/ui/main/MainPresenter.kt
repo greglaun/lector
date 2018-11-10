@@ -3,6 +3,7 @@ package com.greglaun.lector.ui.main
 import com.greglaun.lector.TtsPresenter
 import com.greglaun.lector.data.cache.HashMapSavedArticleCache
 import com.greglaun.lector.data.cache.ResponseSourceFactory
+import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request
@@ -21,7 +22,7 @@ class MainPresenter(val view : MainContract.View,
     val savedArticleCache = HashMapSavedArticleCache()
     val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
             cacheDir)
-    val currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
+    var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
 
     override fun onAttach(lectorView: MainContract.View) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -50,6 +51,8 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onUrlChanged(url: String) {
+        // todo(optimization): If urlToContext becomes complicated, move it somewhere else.
+        currentRequestContext = urlToContext(url)
         view.loadUrl(url)
         ttsPresenter.onUrlChanged(url)
     }
