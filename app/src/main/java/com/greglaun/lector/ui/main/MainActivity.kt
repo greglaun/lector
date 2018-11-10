@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.main
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -14,6 +15,7 @@ import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
+import com.greglaun.lector.data.cache.titleToContext
 import com.greglaun.lector.ui.speak.NoOpTtsView
 import kotlinx.coroutines.experimental.runBlocking
 
@@ -141,7 +143,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-   inner class WikiWebViewClient : WebViewClient() {
+    override fun displayReadingList(readingList : List<String>) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.dialog_reading_list_title))
+        builder.setItems(readingList.toTypedArray()) { dialog, which ->
+            mainPresenter.onUrlChanged("https://en.m.wikipedia.org/wiki/"
+                    + titleToContext(readingList[which]))
+        }
+        builder.show()
+    }
+
+    inner class WikiWebViewClient : WebViewClient() {
 //        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
 //            super.onPageStarted(view, url, favicon)
 //            if (url != null) {
