@@ -5,7 +5,7 @@ import com.greglaun.lector.data.cache.HashMapSavedArticleCache
 import com.greglaun.lector.data.cache.ResponseSourceFactory
 import com.greglaun.lector.data.cache.WhitelistSavedArticleCache
 import com.greglaun.lector.data.cache.urlToContext
-import com.greglaun.lector.data.whitelist.HashSetProbabillisticSet
+import com.greglaun.lector.data.whitelist.HashSetWhitelist
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request
@@ -21,7 +21,7 @@ class MainPresenter(val view : MainContract.View,
     : MainContract.Presenter {
     val ttsPresenter = TtsPresenter(ttsView, this)
     val WIKI_LANGUAGE = "en"
-    val whitelist : HashSetProbabillisticSet<String> =  HashSetProbabillisticSet()
+    val whitelist : HashSetWhitelist<String> =  HashSetWhitelist()
     val savedArticleCache = WhitelistSavedArticleCache(HashMapSavedArticleCache(), whitelist)
     val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
             cacheDir)
@@ -67,11 +67,11 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun saveArticle(url: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        whitelist.add(urlToContext(url))
     }
 
     override fun deleteArticle(url: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        whitelist.delete(urlToContext(url))
     }
 
     override fun onDisplayReadingList() {

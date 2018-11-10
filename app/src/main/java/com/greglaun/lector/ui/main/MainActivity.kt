@@ -17,9 +17,6 @@ import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.ui.speak.NoOpTtsView
 import kotlinx.coroutines.experimental.runBlocking
 
-
-
-
 class MainActivity : AppCompatActivity(), MainContract.View {
     val TAG: String = MainActivity::class.java.simpleName
     private lateinit var webView : WebView
