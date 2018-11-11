@@ -62,13 +62,10 @@ dependencies {
     // OkHttp
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    // Bloom filters
-    implementation('com.baqend:bloom-filter:1.0.7') {
-        exclude group: 'redis.clients', module: 'jedis'
-        exclude group: 'org.apache.commons', module: 'commons-pool2'
-        exclude group: 'com.google.code.gson', module: 'gson'
-    }
+    // Room
 
+    implementation 'android.arch.persistence.room:runtime:1.0.0'
+    kapt "android.arch.persistence.room:compiler:1.0.0"
 }
 repositories {
     mavenCentral()
