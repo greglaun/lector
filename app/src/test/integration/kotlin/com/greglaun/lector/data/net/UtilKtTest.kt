@@ -11,6 +11,13 @@ import java.io.ByteArrayOutputStream
 class UtilKtTest {
     val testUrlString = "https://en.wikipedia.org/robots.txt"
 
+    fun doPrint(bytes: ByteArray) {
+        for (b in bytes) {
+            val st = String.format("%02X", b)
+            print(st)
+        }
+    }
+
     @Test
     fun serializeDeserialize() {
         val client = OkHttpClient()
@@ -23,6 +30,7 @@ class UtilKtTest {
         val sink = Okio.sink(byteArraySink)
         serializeResponse(networkResponse, sink)
         val byteArraySource = ByteArrayInputStream(byteArraySink.toByteArray())
+        doPrint(byteArraySink.toByteArray())
         val source = Okio.source(byteArraySource)
         val deserializedResponse = deserializeResponse(source)
         assertTrue(networkResponse.code() == deserializedResponse.code())

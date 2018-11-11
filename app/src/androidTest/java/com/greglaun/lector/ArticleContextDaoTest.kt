@@ -10,6 +10,7 @@ import com.greglaun.lector.android.data.ArticleContextDao
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.IsEqual.equalTo
 import org.junit.After
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,10 +37,13 @@ class SimpleEntityReadWriteTest {
 
     @Test
     @Throws(Exception::class)
-    fun writeUserAndReadInList() {
+    fun writeAndDeleteContext() {
         val bananaContext = ArticleContext("Banana")
         articleContextDao.insert(bananaContext)
         val retrieved = articleContextDao.get("Banana")
         assertThat(retrieved, equalTo(bananaContext))
+        articleContextDao.delete("Banana")
+        val retrievedNull = articleContextDao.get("Banana")
+        assertNull(retrievedNull)
     }
 }

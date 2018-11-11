@@ -18,7 +18,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     sourceSets {
-        test.java.srcDirs += 'src/androidTest/kotlin'
         test.java.srcDirs += 'src/test/unit/kotlin'
         // todo(gradle): Make separate task for integration tests
         test.java.srcDirs += 'src/test/integration/kotlin'
