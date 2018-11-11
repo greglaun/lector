@@ -10,5 +10,7 @@ import android.arch.persistence.room.PrimaryKey
         parentColumns = arrayOf("context"),
         childColumns = arrayOf("context"))))
 
-data class WeatherData(@PrimaryKey(autoGenerate = true) var id: Long?,
-                       @ColumnInfo(name = "serial_response") var serialResponse : String)
+data class CachedResponse(@PrimaryKey(autoGenerate = true) var id: Long?,
+                          @ColumnInfo(name = "url_hash") var urlHash: String, // Using md5
+                          @ColumnInfo(name = "serial_response") var serialResponse : String,
+                          var context: String)
