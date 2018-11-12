@@ -1,4 +1,4 @@
-package com.greglaun.lector.android.data
+package com.greglaun.lector.android.room
 
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert
@@ -11,11 +11,11 @@ interface ArticleContextDao {
     @Query("SELECT * from articlecontext")
     fun getAll(): List<ArticleContext>
 
-    @Query("SELECT * FROM articlecontext WHERE context = :context")
-    fun get(context: String): ArticleContext
+    @Query("SELECT * FROM articlecontext WHERE articleContext = :articleContext")
+    fun get(articleContext: String): ArticleContext
 
-    @Query("DELETE from ArticleContext WHERE context = :context" )
-    fun delete(context: String)
+    @Query("DELETE from ArticleContext WHERE articleContext = :articleContext" )
+    fun delete(articleContext: String)
 
     @Insert(onConflict = REPLACE)
     fun insert(articleContext: ArticleContext)

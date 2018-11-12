@@ -4,9 +4,9 @@ import android.arch.persistence.room.Room
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.greglaun.lector.android.data.ArticleCacheDatabase
-import com.greglaun.lector.android.data.ArticleContext
-import com.greglaun.lector.android.data.ArticleContextDao
+import com.greglaun.lector.android.room.ArticleCacheDatabase
+import com.greglaun.lector.android.room.ArticleContext
+import com.greglaun.lector.android.room.ArticleContextDao
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.IsEqual.equalTo
 import org.junit.After

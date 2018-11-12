@@ -1,4 +1,4 @@
-package com.greglaun.lector.android.data
+package com.greglaun.lector.android.room
 
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.Room

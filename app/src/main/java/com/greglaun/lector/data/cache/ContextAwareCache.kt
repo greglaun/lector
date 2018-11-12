@@ -8,7 +8,6 @@ interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
     fun getWithContext(key : Key, keyContext : KeyContext) : Deferred<Value?>
     fun setWithContext(key : Key, value : Value, keyContext : KeyContext) : Deferred<Unit>
 
-
     fun compose(b: ContextAwareCache<Key, Value, KeyContext>)
             : ContextAwareCache<Key, Value, KeyContext> {
         return object : ContextAwareCache<Key, Value, KeyContext> {
@@ -31,7 +30,7 @@ interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
         }
     }
 
-    // Throw away context when componing with a ComposableCache
+    // Throw away articleContext when componing with a ComposableCache
     fun compose(b: ComposableCache<Key, Value>):
             ContextAwareCache<Key, Value, KeyContext> {
         return object : ContextAwareCache<Key, Value, KeyContext> {

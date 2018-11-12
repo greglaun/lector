@@ -2,7 +2,7 @@ package com.greglaun.lector
 
 import android.net.Uri
 import android.util.Log
-import com.greglaun.lector.android.utteranceId
+import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.data.model.speakable.TmpTxtBuffer
 import com.greglaun.lector.ui.main.MainContract
 import com.greglaun.lector.ui.speak.TTSContract

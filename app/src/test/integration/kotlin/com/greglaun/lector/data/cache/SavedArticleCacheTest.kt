@@ -67,7 +67,7 @@ class SavedArticleCacheTest {
         assertTrue(networkDogResponse == cachedDogResponse)
         assertTrue(networkCatResponse == cachedCatResponse)
 
-        // Run garbage collection on a non-Dog context
+        // Run garbage collection on a non-Dog articleContext
         savedArticleCache.garbageCollectContext("Cat")
         runBlocking {
             cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()

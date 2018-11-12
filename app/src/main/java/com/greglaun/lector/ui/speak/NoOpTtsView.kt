@@ -1,6 +1,6 @@
 package com.greglaun.lector.ui.speak
 
-import com.greglaun.lector.android.utteranceId
+import com.greglaun.lector.data.cache.utteranceId
 
 class NoOpTtsView : TTSContract.AudioView {
     override fun speak(textToSpeak: String, callback : (String) -> Unit) {
