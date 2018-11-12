@@ -3,6 +3,8 @@ package com.greglaun.lector.data.cache
 import com.greglaun.lector.data.whitelist.Whitelist
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.async
 
 class WhitelistSavedArticleCache<Key : Any, Value : Any, KeyContext : Any>
 (val delegateCache : SavedArticleCache<Key, Value, KeyContext>,
@@ -19,10 +21,12 @@ class WhitelistSavedArticleCache<Key : Any, Value : Any, KeyContext : Any>
     }
 
     override fun setWithContext(key: Key, value: Value, keyContext: KeyContext): Deferred<Unit> {
-        if (whitelist.contains(keyContext)) {
-            return delegateCache.setWithContext(key, value, keyContext)
+        return GlobalScope.async {
+            if(whitelist.contains(keyContext).await()) {
+                delegateCache.setWithContext(key, value, keyContext)
+            }
+            Unit
         }
-        return CompletableDeferred(Unit)
     }
 
     override fun addContext(keyContext: KeyContext): Deferred<Unit> {
