@@ -13,11 +13,15 @@ class RoomWhitelist(val db: ArticleCacheDatabase): Whitelist<String> {
     }
 
     override fun add(element: String): Deferred<Unit> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return GlobalScope.async {
+            db.articleContextDao().insert(ArticleContext(element))
+        }
     }
 
     override fun delete(element: String): Deferred<Unit> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return GlobalScope.async{
+            db.articleContextDao().delete(element)
+        }
     }
 
 }
