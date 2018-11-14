@@ -21,7 +21,7 @@ class JSoupTextProvider(@field:Volatile private var doc: Document?) : TextProvid
         prepareDocument(this.doc)
     }
 
-    fun prepareDocument(document: Document?) {
+    private fun prepareDocument(document: Document?) {
         // Remove elements from the navboxes
         doc = removeUnwanted(document!!)
         title = retrieveTitle(doc!!)

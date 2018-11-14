@@ -1,14 +1,13 @@
 package com.greglaun.lector.android.room
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.ForeignKey
-import android.arch.persistence.room.PrimaryKey
+import android.arch.persistence.room.*
 
 @Entity(foreignKeys = arrayOf(ForeignKey(
         entity = ArticleContext::class,
         parentColumns = arrayOf("articleContext"),
-        childColumns = arrayOf("articleContext"))))
+        childColumns = arrayOf("articleContext"))),
+        indices = arrayOf(Index(value = "articleContext")))
+
 
 data class CachedResponse(@PrimaryKey(autoGenerate = true) var id: Long?,
                           @ColumnInfo(name = "url_hash") var urlHash: String, // Using md5

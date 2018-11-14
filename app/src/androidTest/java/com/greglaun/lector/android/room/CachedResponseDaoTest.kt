@@ -1,11 +1,10 @@
-package com.greglaun.lector
+package com.greglaun.lector.android.room
 
 import android.arch.persistence.room.Room
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.greglaun.lector.android.room.*
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
