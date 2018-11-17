@@ -1,7 +1,5 @@
 package com.greglaun.lector.android.room
 
-import android.database.sqlite.SQLiteConstraintException
-import android.util.Log
 import com.greglaun.lector.data.cache.SavedArticleCache
 import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.serialize
@@ -18,7 +16,7 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
     override fun getWithContext(key: Request, keyContext: String): Deferred<Response?> {
        return GlobalScope.async {
             val cachedResponse = db.cachedResponseDao().get(key.url().toString().md5())
-            cachedResponse.serialResponse.toResponse()
+           cachedResponse?.serialResponse?.toResponse()
         }
     }
 
@@ -26,13 +24,7 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
         return GlobalScope.async {
             val cachedResponse = CachedResponse(null, key.url().toString().md5(),
                     value.serialize(), keyContext)
-            try {
-                db.cachedResponseDao().insert(cachedResponse)
-            } catch (e : SQLiteConstraintException) {
-                Log.d("RoomSavedArticleCache", "ForeignKey constraint", e)
-            } catch (e: Exception) {
-                Log.d("RoomSavedArticleCache", "ForeignKey constraint", e)
-            }
+            db.cachedResponseDao().insert(cachedResponse)
             Unit
         }
     }

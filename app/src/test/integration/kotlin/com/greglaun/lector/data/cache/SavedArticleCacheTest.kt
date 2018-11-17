@@ -3,6 +3,7 @@ package com.greglaun.lector.data.cache
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response
+import org.junit.After
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,8 +16,16 @@ class SavedArticleCacheTest {
         val catUrlString = "https://www.wikipedia.org/wiki/Cat"
 
         val savedArticleCache = HashMapSavedArticleCache()
+        val testDir = File("testDir")
         val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
-                File("testDir"))
+                testDir)
+    }
+
+    @After
+    fun cleanup() {
+        if (testDir.exists()) {
+            testDir.deleteRecursively()
+        }
     }
 
     @Test
