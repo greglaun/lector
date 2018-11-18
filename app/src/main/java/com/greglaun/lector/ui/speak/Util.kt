@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
 fun removeUnwanted(doc: Document): Document {
@@ -17,5 +18,16 @@ fun removeUnwanted(doc: Document): Document {
 
 fun retrieveTitle(doc: Document): String {
     return doc.title().replace(" - Wikipedia", "")
+}
+
+fun jsoupStateFromUrl(urlString: String): ArticleState {
+    var doc = Jsoup.connect(urlString).get()
+    // Remove elements from the navboxes
+    doc = removeUnwanted(doc)
+    val title = retrieveTitle(doc)
+    val paragraphs = doc!!.select("p").map { it ->
+        it.text()!!
+    }
+    return ArticleState(title, paragraphs, paragraphs.listIterator())
 }
 

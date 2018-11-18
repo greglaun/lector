@@ -8,8 +8,11 @@ interface TTSContract {
     }
 
     interface Presenter {
-        fun startSpeaking(onArticleOver: () -> Unit)
+        fun startSpeaking()
         fun stopSpeaking()
         fun onUrlChanged(urlString : String)
+        fun onStart()
+        fun onStop()
+        fun registerArticleOverCallback(onArticleOver: () -> Unit)
     }
 }

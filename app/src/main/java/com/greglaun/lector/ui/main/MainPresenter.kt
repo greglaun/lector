@@ -13,15 +13,14 @@ class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource)
     : MainContract.Presenter {
-    private val WIKI_LANGUAGE = "en"
     private var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
 
     override fun onAttach(lectorView: MainContract.View) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        ttsPresenter.onStart()
     }
 
     override fun onDetach() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        ttsPresenter.onStop()
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -33,7 +32,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onPlayButtonPressed() {
-        ttsPresenter.startSpeaking(onArticleOver() as () -> Unit)
+        ttsPresenter.startSpeaking()
         view.enablePauseButton()
     }
 

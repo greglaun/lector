@@ -1,9 +1,21 @@
 package com.greglaun.lector.ui.speak
 
 class NoOpTtsPresenter : TTSContract.Presenter {
-    override fun startSpeaking(onArticleOver: () -> Unit) {
+    override fun registerArticleOverCallback(onArticleOver: () -> Unit) {
         // Do nothing
-        onArticleOver()
+    }
+
+    override fun startSpeaking() {
+        // Do nothing
+    }
+
+
+    override fun onStart() {
+        // Do nothing
+    }
+
+    override fun onStop() {
+        // Do nothing
     }
 
     override fun stopSpeaking() {

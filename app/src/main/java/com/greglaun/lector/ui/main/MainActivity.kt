@@ -20,7 +20,7 @@ import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
 import com.greglaun.lector.data.whitelist.HashSetWhitelist
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
-import com.greglaun.lector.ui.speak.TTSContract
+import com.greglaun.lector.ui.speak.TtsPresenter
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -70,9 +70,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun onSuccessfulTts(androidTts: TextToSpeech) {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
-        val androidVideoView = AndroidAudioView(androidTts)
-        androidTts.setOnUtteranceProgressListener(androidVideoView)
-        mainPresenter = MainPresenter(this, androidVideoView as TTSContract.Presenter,
+        val androidAudioView = AndroidAudioView(androidTts)
+        androidTts.setOnUtteranceProgressListener(androidAudioView)
+        mainPresenter = MainPresenter(this, TtsPresenter(androidAudioView),
                 mainPresenter.responseSource())
     }
 
@@ -167,14 +167,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     inner class WikiWebViewClient : WebViewClient() {
-//        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-//            super.onPageStarted(view, url, favicon)
-//            if (url != null) {
-//                mainPresenter.onUrlChanged(url)
-//            }
-//        }
-
-       override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
            if (request.url.authority.endsWith("wikipedia.org")) {
                mainPresenter.onUrlChanged(request.url.toString())
                return true
