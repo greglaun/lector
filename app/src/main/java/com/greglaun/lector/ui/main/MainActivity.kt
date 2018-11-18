@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         androidTts.setOnUtteranceProgressListener(androidAudioView)
         mainPresenter = MainPresenter(this, TtsPresenter(androidAudioView),
                 mainPresenter.responseSource())
+        mainPresenter.onAttach()
     }
 
     private fun onBadTts() {

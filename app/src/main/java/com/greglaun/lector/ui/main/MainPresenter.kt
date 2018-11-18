@@ -15,7 +15,7 @@ class MainPresenter(val view : MainContract.View,
     : MainContract.Presenter {
     private var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
 
-    override fun onAttach(lectorView: MainContract.View) {
+    override fun onAttach() {
         ttsPresenter.onStart()
     }
 
