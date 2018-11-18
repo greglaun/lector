@@ -1,26 +1,20 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.TtsPresenter
-import com.greglaun.lector.data.cache.*
-import com.greglaun.lector.data.whitelist.HashSetWhitelist
+import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.contextToTitle
+import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request
 import okhttp3.Response
-import java.io.File
 
 // todo(global state): Move to better place.
 class MainPresenter(val view : MainContract.View,
-                    ttsView : TTSContract.AudioView,
-                    cacheDir : File)
+                    val ttsPresenter: TTSContract.Presenter,
+                    val responseSource: ResponseSource)
     : MainContract.Presenter {
-    val ttsPresenter = TtsPresenter(ttsView, this)
-    val WIKI_LANGUAGE = "en"
-    val whitelist : HashSetWhitelist<String> =  HashSetWhitelist()
-    val savedArticleCache = WhitelistSavedArticleCache(HashMapSavedArticleCache(), whitelist)
-    val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
-            cacheDir)
-    var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
+    private val WIKI_LANGUAGE = "en"
+    private var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
 
     override fun onAttach(lectorView: MainContract.View) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -39,7 +33,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onPlayButtonPressed() {
-        ttsPresenter.startSpeaking()
+        ttsPresenter.startSpeaking(onArticleOver() as () -> Unit)
         view.enablePauseButton()
     }
 
@@ -52,6 +46,7 @@ class MainPresenter(val view : MainContract.View,
         // todo(optimization): If urlToContext becomes complicated, move it somewhere else.
         currentRequestContext = urlToContext(url)
         view.loadUrl(url)
+        stopSpeakingAndEnablePlayButton()
         ttsPresenter.onUrlChanged(url)
     }
 
@@ -62,11 +57,11 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun saveArticle(url: String) {
-        whitelist.add(urlToContext(url))
+        responseSource.add(urlToContext(url))
     }
 
     override fun deleteArticle(url: String) {
-        whitelist.delete(urlToContext(url))
+        responseSource.delete(urlToContext(url))
     }
 
     override fun onDisplayReadingList() {
@@ -76,10 +71,14 @@ class MainPresenter(val view : MainContract.View,
     // todo(data): Replace with live data or some other mechanism
     fun getReadingList(): List<String> {
         val readingList : MutableList<String> = ArrayList()
-        for (article in whitelist.hashSet) {
+        for (article in responseSource.iterator()) {
             readingList.add(contextToTitle(article))
         }
         val readOnlyList : List<String> = readingList
         return readOnlyList
+    }
+
+    override fun responseSource(): ResponseSource {
+        return responseSource
     }
 }

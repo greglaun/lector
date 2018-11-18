@@ -6,6 +6,7 @@ import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
 
+// todo(simplicity): Clean up this cache hierarchy
 class WhitelistSavedArticleCache<Key : Any, Value : Any, KeyContext : Any>
 (val delegateCache : SavedArticleCache<Key, Value, KeyContext>,
  val whitelist : Whitelist<KeyContext>)

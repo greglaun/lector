@@ -1,112 +1,72 @@
 package com.greglaun.lector.ui.main
 
-import junit.framework.Assert.assertTrue
+import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.ui.speak.TTSContract
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.*
+import java.io.File
 
 class MainPresenterTest {
+    lateinit var mainPresenter: MainContract.Presenter
+    lateinit var mockView: MainContract.View
+    lateinit var mockTts: TTSContract.Presenter
+    lateinit var responseSource: ResponseSource
+    val testDir = File("testDir")
 
     @Before
     fun setUp() {
+        mockView = mock(MainContract.View::class.java)
+        mockTts = mock(TTSContract.Presenter::class.java)
+        responseSource = mock(ResponseSource::class.java)
+        mainPresenter = MainPresenter(mockView, mockTts, responseSource)
     }
 
-    @Test
-    fun getTtsPresenter() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getWIKI_LANGUAGE() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getWhitelist() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getSavedArticleCache() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getResponseSource() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getCurrentRequestContext() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun setCurrentRequestContext() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun onAttach() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun onDetach() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getLectorView() {
-        assertTrue(false)
+    @After
+    fun cleanup() {
+        if (testDir.exists()) {
+            testDir.deleteRecursively()
+        }
     }
 
     @Test
     fun onArticleOver() {
-        assertTrue(false)
+        mainPresenter.onArticleOver()
+        verify(mockView, times(1)).enablePlayButton()
     }
 
     @Test
     fun onPlayButtonPressed() {
-        assertTrue(false)
+        mainPresenter.onPlayButtonPressed()
+        verify(mockTts, times(1)).startSpeaking(
+                onArticleOver() as () -> Unit)
+        verify(mockView, times(1)).enablePauseButton()
     }
 
     @Test
     fun stopSpeakingAndEnablePlayButton() {
-        assertTrue(false)
+        mainPresenter.stopSpeakingAndEnablePlayButton()
+        verify(mockTts, times(1)).stopSpeaking()
+        verify(mockView, times(1)).enablePlayButton()
     }
 
     @Test
     fun onUrlChanged() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun onRequest() {
-        assertTrue(false)
+        mainPresenter.onUrlChanged("test")
+        verify(mockView, times(1)).loadUrl("test")
+        verify(mockTts, times(1)).onUrlChanged("test")
     }
 
     @Test
     fun saveArticle() {
-        assertTrue(false)
+        mainPresenter.saveArticle("test")
+        verify(responseSource, times(1)).add("test")
     }
 
     @Test
     fun deleteArticle() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun onDisplayReadingList() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getReadingList() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun getView() {
-        assertTrue(false)
+        mainPresenter.saveArticle("test")
+        verify(responseSource, times(1)).delete("test")
     }
 }

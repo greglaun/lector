@@ -15,8 +15,12 @@ import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
+import com.greglaun.lector.data.cache.HashMapSavedArticleCache
+import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
-import com.greglaun.lector.ui.speak.NoOpTtsView
+import com.greglaun.lector.data.whitelist.HashSetWhitelist
+import com.greglaun.lector.ui.speak.NoOpTtsPresenter
+import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -33,10 +37,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(WikiWebViewClient())
-        mainPresenter = MainPresenter(this, NoOpTtsView(), getCacheDir())
+
+        mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
+                createResponseSource())
         checkTts()
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
+    }
+
+    private fun createResponseSource(): ResponseSource {
+        val whitelist: HashSetWhitelist<String> = HashSetWhitelist()
+        return ResponseSource.createResponseSource(HashMapSavedArticleCache(), whitelist,
+                getCacheDir())
     }
 
     override fun onResume() {
@@ -60,7 +72,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
         val androidVideoView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidVideoView)
-        mainPresenter = MainPresenter(this, androidVideoView, getCacheDir())
+        mainPresenter = MainPresenter(this, androidVideoView as TTSContract.Presenter,
+                mainPresenter.responseSource())
     }
 
     private fun onBadTts() {

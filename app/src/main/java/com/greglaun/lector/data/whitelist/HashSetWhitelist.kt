@@ -19,4 +19,8 @@ class HashSetWhitelist<T>: Whitelist<T> {
         hashSet.remove(element)
         return CompletableDeferred(Unit)
     }
+
+    override fun iterator(): MutableIterator<T> {
+        return hashSet.iterator()
+    }
 }

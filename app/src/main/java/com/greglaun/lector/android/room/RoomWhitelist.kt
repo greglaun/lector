@@ -24,4 +24,10 @@ class RoomWhitelist(val db: ArticleCacheDatabase): Whitelist<String> {
         }
     }
 
+    override fun iterator(): Iterator<String> {
+        return db.articleContextDao().getAll().map {
+            it -> it.articleContext }
+                .iterator()
+    }
+
 }
