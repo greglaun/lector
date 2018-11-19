@@ -10,11 +10,12 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
     private var actorLoop: SendChannel<TtsMsg>? = null
     val actorContext = newSingleThreadContext("ActorContext")
     val workerContext = newFixedThreadPoolContext(2, "WorkerContext")
-    var onArticleOver: (() -> Unit)? = {}
+    var onArticleOver: (() -> Unit) = {}
 
     fun ttsActor() = CoroutineScope(actorContext).actor<TtsMsg>(Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
         var articleState: ArticleState? = null
         var readyToSpeak = false
+        var isSpeaking = false
         for (msg in channel) { // iterate over incoming messages
             when (msg) {
                 is UpdateArticleState -> {
@@ -23,22 +24,33 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
                 }
                 is MarkReady -> readyToSpeak = true
                 is GetReadyState -> msg.response.complete(readyToSpeak)
+                is StartSpeaking -> {
+                    isSpeaking = true
+                }
                 is StopSpeaking -> {
                     tts.stopImmediately()
+                    isSpeaking = false
                 }
-                is Speak -> if (readyToSpeak && articleState!!.iterator != null) {
-                    if (!articleState.iterator.hasNext()) {
-                        onArticleOver
-                    }
-                    val text = articleState!!.iterator.next()
-                    if (articleState.iterator.hasPrevious()) {
-                        articleState.iterator.previous() // Return to where we were in case resume
-                    }
-                    synchronized(tts) {
-                        tts.speak(text) {
-                            if (it == utteranceId(text)) {
-                                if (articleState?.iterator?.hasNext()) {
-                                    articleState.iterator.next() // Advance again after completion
+                is SpeakOne -> {
+                    if (readyToSpeak && articleState!!.iterator != null) {
+                        if (!articleState.iterator.hasNext()) {
+                            onArticleOver()
+                        }
+                        val text = articleState!!.iterator.next()
+                        if (articleState.iterator.hasPrevious()) {
+                            articleState.iterator.previous() // Return to where we were in case resume
+                        }
+                        synchronized(tts) {
+                            tts.speak(text) {
+                                if (it == utteranceId(text)) {
+                                    if (articleState?.iterator?.hasNext()) {
+                                        articleState.iterator.next() // Advance again after completion
+                                    } else { // Article is over
+                                        isSpeaking = false
+                                        readyToSpeak = false
+                                    }
+                                    msg.speakingState.complete(isSpeaking)
+                                    onArticleOver()
                                 }
                             }
                         }
@@ -81,7 +93,13 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
                     delay(250)
                 }
             }
-            actorLoop?.send(Speak)
+            actorLoop?.send(StartSpeaking)
+            var stillSpeaking = true
+            while(stillSpeaking) {
+                val speakingState = CompletableDeferred<Boolean>()
+                actorLoop?.send(SpeakOne(speakingState))
+                stillSpeaking = speakingState.await()
+            }
         }
     }
 
@@ -95,7 +113,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
 // Message types for ttsActor
 sealed class TtsMsg
 object MarkReady : TtsMsg() // Mark as ready to speak
-class GetReadyState(val response: CompletableDeferred<Boolean>) : TtsMsg()
-object Speak : TtsMsg()
+class GetReadyState(val response: CompletableDeferred<Boolean>): TtsMsg()
+object StartSpeaking: TtsMsg()
+class SpeakOne(val speakingState: CompletableDeferred<Boolean>) : TtsMsg()
 object StopSpeaking : TtsMsg()
 class UpdateArticleState(val articleState: ArticleState): TtsMsg()
