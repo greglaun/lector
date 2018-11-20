@@ -15,8 +15,12 @@ import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
+import com.greglaun.lector.data.cache.HashMapSavedArticleCache
+import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
-import com.greglaun.lector.ui.speak.NoOpTtsView
+import com.greglaun.lector.data.whitelist.HashSetWhitelist
+import com.greglaun.lector.ui.speak.NoOpTtsPresenter
+import com.greglaun.lector.ui.speak.TtsPresenter
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -33,10 +37,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         setContentView(R.layout.activity_main)
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(WikiWebViewClient())
-        mainPresenter = MainPresenter(this, NoOpTtsView(), getCacheDir())
+
+        mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
+                createResponseSource())
         checkTts()
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
+    }
+
+    private fun createResponseSource(): ResponseSource {
+        val whitelist: HashSetWhitelist<String> = HashSetWhitelist()
+        return ResponseSource.createResponseSource(HashMapSavedArticleCache(), whitelist,
+                getCacheDir())
     }
 
     override fun onResume() {
@@ -58,9 +70,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun onSuccessfulTts(androidTts: TextToSpeech) {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
-        val androidVideoView = AndroidAudioView(androidTts)
-        androidTts.setOnUtteranceProgressListener(androidVideoView)
-        mainPresenter = MainPresenter(this, androidVideoView, getCacheDir())
+        val androidAudioView = AndroidAudioView(androidTts)
+        androidTts.setOnUtteranceProgressListener(androidAudioView)
+        mainPresenter = MainPresenter(this, TtsPresenter(androidAudioView),
+                mainPresenter.responseSource())
+        mainPresenter.onAttach()
     }
 
     private fun onBadTts() {
@@ -154,14 +168,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     inner class WikiWebViewClient : WebViewClient() {
-//        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-//            super.onPageStarted(view, url, favicon)
-//            if (url != null) {
-//                mainPresenter.onUrlChanged(url)
-//            }
-//        }
-
-       override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
            if (request.url.authority.endsWith("wikipedia.org")) {
                mainPresenter.onUrlChanged(request.url.toString())
                return true

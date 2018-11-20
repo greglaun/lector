@@ -1,8 +1,10 @@
 package com.greglaun.lector.data.cache
 
+import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response
+import org.junit.After
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,8 +17,16 @@ class SavedArticleCacheTest {
         val catUrlString = "https://www.wikipedia.org/wiki/Cat"
 
         val savedArticleCache = HashMapSavedArticleCache()
-        val responseSource = ResponseSourceFactory.createResponseSource(savedArticleCache,
-                File("testDir"))
+        val testDir = File("testDir")
+        val compositeCache = savedArticleCache.compose(
+                NetworkCache(OkHttpConnectionFactory.createClient(testDir)))
+        }
+
+    @After
+    fun cleanup() {
+        if (testDir.exists()) {
+            testDir.deleteRecursively()
+        }
     }
 
     @Test
@@ -35,7 +45,7 @@ class SavedArticleCacheTest {
 
         runBlocking {
             // Response from network
-            networkResponse = responseSource.getWithContext(request, "Dog").await()
+            networkResponse = compositeCache.getWithContext(request, "Dog").await()
             // Response is in cache now
             cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
         }
@@ -57,8 +67,8 @@ class SavedArticleCacheTest {
 
         runBlocking {
             // Response from network
-            networkDogResponse = responseSource.getWithContext(dogRequest, "Dog").await()
-            networkCatResponse = responseSource.getWithContext(catRequest, "Dog").await()
+            networkDogResponse = compositeCache.getWithContext(dogRequest, "Dog").await()
+            networkCatResponse = compositeCache.getWithContext(catRequest, "Dog").await()
 
             // Response is in cache now
             cachedCatResponse = savedArticleCache.getWithContext(catRequest, "Cat").await()
@@ -67,7 +77,7 @@ class SavedArticleCacheTest {
         assertTrue(networkDogResponse == cachedDogResponse)
         assertTrue(networkCatResponse == cachedCatResponse)
 
-        // Run garbage collection on a non-Dog context
+        // Run garbage collection on a non-Dog articleContext
         savedArticleCache.garbageCollectContext("Cat")
         runBlocking {
             cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()

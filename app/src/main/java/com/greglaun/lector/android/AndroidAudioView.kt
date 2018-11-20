@@ -2,6 +2,7 @@ package com.greglaun.lector.android
 
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.ui.speak.TTSContract
 
 class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,

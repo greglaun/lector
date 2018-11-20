@@ -31,7 +31,7 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
         return CompletableDeferred(Unit)
     }
 
-    override fun garbageCollectContext(keyContext : String) {
+    override fun garbageCollectContext(keyContext : String): Deferred<Unit> {
         val iterator = hashCache.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
@@ -40,6 +40,12 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
                     iterator.remove()
                 }
         }
+        return CompletableDeferred(Unit)
+    }
+
+    override fun addContext(keyContext: String): Deferred<Unit> {
+        // Do nothing
+        return CompletableDeferred(Unit)
     }
 }
 

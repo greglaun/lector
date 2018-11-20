@@ -13,6 +13,3 @@ fun okHttpToWebView(response : Response) : WebResourceResponse? {
     return null
 }
 
-fun utteranceId(text : String) : String{
-    return text.hashCode().toString()
-}
