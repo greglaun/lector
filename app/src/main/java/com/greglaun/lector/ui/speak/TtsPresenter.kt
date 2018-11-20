@@ -12,6 +12,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
     val workerContext = newFixedThreadPoolContext(2, "WorkerContext")
     var onArticleOver: (() -> Unit) = {}
 
+    // todo(testing): How do we test coroutines?
     fun ttsActor() = CoroutineScope(actorContext).actor<TtsMsg>(Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
         var articleState: ArticleState? = null
         var readyToSpeak = false
