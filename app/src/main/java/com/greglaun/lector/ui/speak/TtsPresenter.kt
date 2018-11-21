@@ -8,16 +8,15 @@ import kotlinx.coroutines.experimental.channels.actor
 class TtsPresenter(private val tts: TTSContract.AudioView)
     : TTSContract.Presenter {
     private var actorLoop: SendChannel<TtsMsg>? = null
-    val actorContext = newSingleThreadContext("ActorContext")
-    val workerContext = newFixedThreadPoolContext(2, "WorkerContext")
-    var onArticleOver: (() -> Unit) = {}
+    private val actorContext = newSingleThreadContext("ActorContext")
+    private val workerContext = newFixedThreadPoolContext(2, "WorkerContext")
+    private var onArticleOver: (() -> Unit) = {}
 
-    // todo(testing): How do we test coroutines?
     fun ttsActor() = CoroutineScope(actorContext).actor<TtsMsg>(Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
         var articleState: ArticleState? = null
         var readyToSpeak = false
         var isSpeaking = false
-        for (msg in channel) { // iterate over incoming messages
+        for (msg in channel) {
             when (msg) {
                 is UpdateArticleState -> {
                     readyToSpeak = false
