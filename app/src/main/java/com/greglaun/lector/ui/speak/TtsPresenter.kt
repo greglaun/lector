@@ -29,7 +29,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
                     isSpeaking = true
                 }
                 is StopSpeaking -> {
-                    tts.stopImmediately()
+                    stopSpeechViewImmediately()
                     isSpeaking = false
                 }
                 is SpeakOne -> {
@@ -41,18 +41,16 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
                         if (articleState.iterator.hasPrevious()) {
                             articleState.iterator.previous() // Return to where we were in case resume
                         }
-                        synchronized(tts) {
-                            tts.speak(text) {
-                                if (it == utteranceId(text)) {
-                                    if (articleState?.iterator?.hasNext()) {
-                                        articleState.iterator.next() // Advance again after completion
-                                    } else { // Article is over
-                                        isSpeaking = false
-                                        readyToSpeak = false
-                                    }
-                                    msg.speakingState.complete(isSpeaking)
-                                    onArticleOver()
+                        speechViewSpeek(text) {
+                            if (it == utteranceId(text)) {
+                                if (articleState?.iterator?.hasNext()) {
+                                    articleState.iterator.next() // Advance again after completion
+                                } else { // Article is over
+                                    isSpeaking = false
+                                    readyToSpeak = false
                                 }
+                                msg.speakingState.complete(isSpeaking)
+                                onArticleOver()
                             }
                         }
                     }
@@ -60,6 +58,18 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
             }
         }
     })
+
+    private fun speechViewSpeek(text: String, callback: (String) -> Unit) {
+        synchronized(tts) {
+            tts.speak(text) {
+                callback(it)
+            }
+        }
+    }
+
+    private fun stopSpeechViewImmediately() {
+        tts.stopImmediately()
+    }
 
     override fun onStart() {
         actorLoop = ttsActor()
