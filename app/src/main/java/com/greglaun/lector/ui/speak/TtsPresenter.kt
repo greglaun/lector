@@ -39,7 +39,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
 
     override fun onUrlChanged(urlString: String) {
         CoroutineScope(workerContext).launch {
-            actorLoop?.send(StopSpeaking)
+            actorLoop?.send(MarkNotReady)
             val articleState = jsoupStateFromUrl(urlString)
             actorLoop?.send(UpdateArticleState(articleState))
             actorLoop?.send(MarkReady)
@@ -50,9 +50,9 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
         CoroutineScope(workerContext).launch {
             var readyStatus = false
             while(!readyStatus) {
-                val readyDeferred = CompletableDeferred<Boolean>()
-                actorLoop?.send(GetReadyState(readyDeferred))
-                if (readyDeferred.await()) {
+                val readyDeferred = CompletableDeferred<SpeakerState>()
+                actorLoop?.send(GetSpeakerState(readyDeferred))
+                if (readyDeferred.await() == SpeakerState.READY) {
                     readyStatus = true
                 } else {
                     delay(250)
@@ -61,9 +61,9 @@ class TtsPresenter(private val tts: TTSContract.AudioView)
             actorLoop?.send(StartSpeaking)
             var stillSpeaking = true
             while(stillSpeaking) {
-                val speakingState = CompletableDeferred<Boolean>()
+                val speakingState = CompletableDeferred<SpeakerState>()
                 actorLoop?.send(SpeakOne(speakingState))
-                stillSpeaking = speakingState.await()
+                stillSpeaking = speakingState.await() == SpeakerState.SPEAKING
             }
         }
     }

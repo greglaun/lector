@@ -9,25 +9,30 @@ private val actorContext = newSingleThreadContext("ActorContext")
 fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<TtsMsg>(
         Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     var articleState: ArticleState? = null
-    var readyToSpeak = false
-    var isSpeaking = false
+    var state = SpeakerState.NOT_READY
     for (msg in channel) {
         when (msg) {
             is UpdateArticleState -> {
-                readyToSpeak = false
+                state = SpeakerState.NOT_READY
                 articleState = msg.articleState
             }
-            is MarkReady -> readyToSpeak = true
-            is GetReadyState -> msg.response.complete(readyToSpeak)
+            is MarkReady -> state = SpeakerState.READY
+            is MarkNotReady -> {
+                ttsClient.stopSpeechViewImmediately()
+                state = SpeakerState.NOT_READY
+            }
+            is GetSpeakerState -> msg.response.complete(state)
             is StartSpeaking -> {
-                isSpeaking = true
+                if (state == SpeakerState.READY) {
+                    state = SpeakerState.SPEAKING
+                }
             }
             is StopSpeaking -> {
                 ttsClient.stopSpeechViewImmediately()
-                isSpeaking = false
+                state = SpeakerState.READY
             }
             is SpeakOne -> {
-                if (readyToSpeak && articleState!!.iterator != null) {
+                if (state == SpeakerState.SPEAKING && articleState!!.iterator != null) {
                     if (!articleState.iterator.hasNext()) {
                         ttsClient.onArticleOver()
                     }
@@ -40,10 +45,9 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
                             if (articleState?.iterator?.hasNext()) {
                                 articleState.iterator.next() // Advance again after completion
                             } else { // Article is over
-                                isSpeaking = false
-                                readyToSpeak = false
+                                state = SpeakerState.NOT_READY
                             }
-                            msg.speakingState.complete(isSpeaking)
+                            msg.speakerState.complete(state)
                             ttsClient.onArticleOver()
                         }
                     }
@@ -53,12 +57,18 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
     }
 })
 
+enum class SpeakerState {
+    NOT_READY,
+    READY,
+    SPEAKING
+}
 
 // Message types for ttsActor
 sealed class TtsMsg
 object MarkReady : TtsMsg() // Mark as ready to speak
-class GetReadyState(val response: CompletableDeferred<Boolean>): TtsMsg()
+object MarkNotReady : TtsMsg() // Mark as ready to speak
+class GetSpeakerState(val response: CompletableDeferred<SpeakerState>): TtsMsg()
 object StartSpeaking: TtsMsg()
-class SpeakOne(val speakingState: CompletableDeferred<Boolean>) : TtsMsg()
+class SpeakOne(val speakerState: CompletableDeferred<SpeakerState>) : TtsMsg()
 object StopSpeaking : TtsMsg()
 class UpdateArticleState(val articleState: ArticleState): TtsMsg()
