@@ -70,7 +70,7 @@ class TtsActorKtTest {
         runBlocking {
             stateMachine.changeStateUpdateArticle(urlString).await()
             stateMachine.changeStateReady().await()
-            stateMachine.changeStateStartSpeaking()
+            stateMachine.changeStateStartSpeaking().await()
             val state1 = stateMachine.actionSpeakOne().await() // 1
             assertTrue(SpeakerState.SPEAKING == state1)
             val state2 = stateMachine.actionSpeakOne().await() // 2
@@ -84,7 +84,7 @@ class TtsActorKtTest {
         runBlocking {
             stateMachine.changeStateUpdateArticle(urlString).await()
             stateMachine.changeStateReady().await()
-            stateMachine.changeStateStartSpeaking()
+            stateMachine.changeStateStartSpeaking().await()
             stateMachine.actionStopSpeaking()
             val state1 = stateMachine.actionSpeakOne().await() // 1
             assertTrue(SpeakerState.READY == state1)
