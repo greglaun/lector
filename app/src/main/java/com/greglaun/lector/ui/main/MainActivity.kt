@@ -19,6 +19,7 @@ import com.greglaun.lector.data.cache.HashMapSavedArticleCache
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
 import com.greglaun.lector.data.whitelist.HashSetWhitelist
+import com.greglaun.lector.ui.speak.JSoupArticleStateSource
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsActorStateMachine
 import com.greglaun.lector.ui.speak.TtsPresenter
@@ -74,7 +75,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
         mainPresenter = MainPresenter(this,
-                TtsPresenter(androidAudioView, TtsActorStateMachine()),
+                TtsPresenter(androidAudioView, TtsActorStateMachine(JSoupArticleStateSource())),
                 mainPresenter.responseSource())
         mainPresenter.onAttach()
     }

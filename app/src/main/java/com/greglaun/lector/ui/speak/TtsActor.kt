@@ -44,13 +44,18 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
                         if (it == utteranceId(text)) {
                             if (articleState?.iterator?.hasNext()) {
                                 articleState.iterator.next() // Advance again after completion
+                            }
+                            if (articleState?.iterator?.hasNext()) {
+                                msg.speakerState.complete(state) // There is still more to speak
                             } else { // Article is over
                                 state = SpeakerState.NOT_READY
+                                msg.speakerState.complete(state)
+                                ttsClient.onArticleOver()
                             }
-                            msg.speakerState.complete(state)
-                            ttsClient.onArticleOver()
                         }
                     }
+                } else {
+                    msg.speakerState.complete(state)
                 }
             }
         }

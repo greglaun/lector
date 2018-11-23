@@ -3,8 +3,7 @@ package com.greglaun.lector.ui.speak
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 
-// todo(concurrency): Properly test this class
-class TtsActorStateMachine : TtsStateMachine {
+class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStateMachine {
     private var actorLoop: SendChannel<TtsMsg>? = null
     private val workerContext = newFixedThreadPoolContext(2, "WorkerContext")
 
@@ -25,7 +24,7 @@ class TtsActorStateMachine : TtsStateMachine {
 
     override fun changeStateUpdateArticle(urlString: String): Deferred<Unit> {
         return CoroutineScope(workerContext).async {
-            val articleState = jsoupStateFromUrl(urlString)
+            val articleState = articleStateSource.getArticle(urlString)
             actorLoop?.send(UpdateArticleState(articleState))
             Unit
         }
@@ -45,6 +44,7 @@ class TtsActorStateMachine : TtsStateMachine {
         }
     }
 
+    // todo(testing): Properly test this loop
     override fun actionSpeakInLoop(): Deferred<Unit> {
         return CoroutineScope(workerContext).async {
             var readyStatus = false
@@ -94,4 +94,6 @@ class TtsActorStateMachine : TtsStateMachine {
             changeStateReady().await()
         }
     }
+
+
 }
