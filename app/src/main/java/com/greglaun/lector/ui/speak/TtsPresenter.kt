@@ -1,10 +1,9 @@
 package com.greglaun.lector.ui.speak
 
-class TtsPresenter(private val tts: TTSContract.AudioView)
+class TtsPresenter(private val tts: TTSContract.AudioView,
+                   val stateMachine: TtsStateMachine)
     : TTSContract.Presenter, TtsActorClient {
     private var onArticleOver: (() -> Unit) = {}
-
-    val stateMachine: TtsStateMachine? = TtsActorStateMachine()
 
     override fun speechViewSpeak(text: String, callback: (String) -> Unit) {
         synchronized(tts) {

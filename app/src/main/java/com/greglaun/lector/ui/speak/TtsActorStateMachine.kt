@@ -3,6 +3,7 @@ package com.greglaun.lector.ui.speak
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 
+// todo(concurrency): Properly test this class
 class TtsActorStateMachine : TtsStateMachine {
     private var actorLoop: SendChannel<TtsMsg>? = null
     private val workerContext = newFixedThreadPoolContext(2, "WorkerContext")
@@ -93,6 +94,4 @@ class TtsActorStateMachine : TtsStateMachine {
             changeStateReady().await()
         }
     }
-
-
 }

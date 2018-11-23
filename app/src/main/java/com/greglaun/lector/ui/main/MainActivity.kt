@@ -20,6 +20,7 @@ import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
 import com.greglaun.lector.data.whitelist.HashSetWhitelist
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
+import com.greglaun.lector.ui.speak.TtsActorStateMachine
 import com.greglaun.lector.ui.speak.TtsPresenter
 import kotlinx.coroutines.experimental.runBlocking
 
@@ -72,7 +73,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
-        mainPresenter = MainPresenter(this, TtsPresenter(androidAudioView),
+        mainPresenter = MainPresenter(this,
+                TtsPresenter(androidAudioView, TtsActorStateMachine()),
                 mainPresenter.responseSource())
         mainPresenter.onAttach()
     }
