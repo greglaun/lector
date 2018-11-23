@@ -39,7 +39,7 @@ class MainPresenterTest {
     @Test
     fun onPlayButtonPressed() {
         mainPresenter.onPlayButtonPressed()
-        verify(mockTts, times(1)).startSpeaking()
+        verify(mockTts, times(1)).speakInLoop()
         verify(mockView, times(1)).enablePauseButton()
     }
 

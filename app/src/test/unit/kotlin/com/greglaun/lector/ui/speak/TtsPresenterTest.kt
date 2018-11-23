@@ -1,28 +1,17 @@
 package com.greglaun.lector.ui.speak
 
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 class TtsPresenterTest {
+    val audioView = mock(TTSContract.AudioView::class.java)
+    var ttsPresenter : TtsPresenter? = null
 
-    @Test
-    fun ttsActor() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun onStart() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun onStop() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun registerArticleOverCallback() {
-        assertTrue(false)
+    @Before
+    fun setUp() {
+        ttsPresenter = TtsPresenter(audioView)
     }
 
     @Test
