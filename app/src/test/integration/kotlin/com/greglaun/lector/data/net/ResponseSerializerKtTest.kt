@@ -1,14 +1,14 @@
 package com.greglaun.lector.data.net
 
+import junit.framework.Assert.assertTrue
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.Okio
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
-class UtilKtTest {
+class ResponseSerializerKtTest {
     val testUrlString = "https://en.wikipedia.org/robots.txt"
 
     @Test

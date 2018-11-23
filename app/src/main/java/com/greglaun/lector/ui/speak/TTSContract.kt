@@ -8,7 +8,7 @@ interface TTSContract {
     }
 
     interface Presenter {
-        fun startSpeaking()
+        fun speakInLoop()
         fun stopSpeaking()
         fun onUrlChanged(urlString : String)
         fun onStart()

@@ -5,7 +5,7 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun startSpeaking() {
+    override fun speakInLoop() {
         // Do nothing
     }
 

@@ -39,8 +39,7 @@ class MainPresenterTest {
     @Test
     fun onPlayButtonPressed() {
         mainPresenter.onPlayButtonPressed()
-        verify(mockTts, times(1)).startSpeaking(
-                onArticleOver() as () -> Unit)
+        verify(mockTts, times(1)).speakInLoop()
         verify(mockView, times(1)).enablePauseButton()
     }
 
@@ -66,7 +65,7 @@ class MainPresenterTest {
 
     @Test
     fun deleteArticle() {
-        mainPresenter.saveArticle("test")
+        mainPresenter.deleteArticle("test")
         verify(responseSource, times(1)).delete("test")
     }
 }

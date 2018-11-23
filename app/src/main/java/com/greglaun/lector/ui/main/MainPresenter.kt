@@ -32,7 +32,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onPlayButtonPressed() {
-        ttsPresenter.startSpeaking()
+        ttsPresenter.speakInLoop()
         view.enablePauseButton()
     }
 
