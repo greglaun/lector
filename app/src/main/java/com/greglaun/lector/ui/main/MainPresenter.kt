@@ -42,7 +42,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onUrlChanged(url: String) {
-        // todo(optimization): If urlToContext becomes complicated, move it somewhere else.
+        // todo(optimization): Pull context from REST API
         currentRequestContext = urlToContext(url)
         view.loadUrl(url)
         stopSpeakingAndEnablePlayButton()

@@ -18,7 +18,6 @@ class TtsActorKtTest {
     val articleState = ArticleState("MyTitle",  paragraphs,
             paragraphs.listIterator())
 
-
     @Before
     fun setUp() {
         stateMachine.startMachine(ttsClient)
