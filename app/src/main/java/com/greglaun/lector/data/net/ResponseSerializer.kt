@@ -128,13 +128,17 @@ fun deserializeResponse(input: Source) : Response {
                 .headers(varyHeaders)
                 .build()
         // Assume we can fit everything into memory. This should be okay for Wikipedia content
+        var mediaType: MediaType? = null
+        if (contentType != null) {
+            mediaType = MediaType.parse(contentType)
+        }
         return Response.Builder()
                 .request(cacheRequest)
                 .protocol(protocol)
                 .code(code)
                 .message(message)
                 .headers(responseHeaders)
-                .body(ResponseBody.create(MediaType.parse(contentType), source.readByteArray()))
+                .body(ResponseBody.create(mediaType, source.readByteArray()))
                 .handshake(handshake)
                 .build()
     } finally {

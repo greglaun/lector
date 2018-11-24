@@ -15,10 +15,11 @@ import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
-import com.greglaun.lector.data.cache.HashMapSavedArticleCache
+import com.greglaun.lector.android.room.ArticleCacheDatabase
+import com.greglaun.lector.android.room.RoomSavedArticleCache
+import com.greglaun.lector.android.room.RoomWhitelist
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
-import com.greglaun.lector.data.whitelist.HashSetWhitelist
 import com.greglaun.lector.data.whitelist.Whitelist
 import com.greglaun.lector.ui.speak.JSoupArticleStateSource
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
@@ -49,13 +50,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     private fun createResponseSource(): ResponseSource {
-//        val db = ArticleCacheDatabase.getInstance(this)
-//        val whitelist: Whitelist<String> = RoomWhitelist(db)
-//        return ResponseSource.createResponseSource(RoomSavedArticleCache(db), whitelist,
-//                getCacheDir())
-        val whitelist: Whitelist<String> = HashSetWhitelist()
-        return ResponseSource.createResponseSource(HashMapSavedArticleCache(), whitelist,
+        val db = ArticleCacheDatabase.getInstance(this)
+        val whitelist: Whitelist<String> = RoomWhitelist(db!!)
+        return ResponseSource.createResponseSource(RoomSavedArticleCache(db), whitelist,
                 getCacheDir())
+//        val whitelist: Whitelist<String> = HashSetWhitelist()
+//        return ResponseSource.createResponseSource(HashMapSavedArticleCache(), whitelist,
+//                getCacheDir())
     }
 
     override fun onResume() {
