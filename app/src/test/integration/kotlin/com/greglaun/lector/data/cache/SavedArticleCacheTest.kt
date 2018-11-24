@@ -1,6 +1,7 @@
 package com.greglaun.lector.data.cache
 
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
+import com.greglaun.lector.data.net.TEN_GB
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response
@@ -46,10 +47,11 @@ class SavedArticleCacheTest {
         runBlocking {
             // Response from network
             networkResponse = compositeCache.getWithContext(request, "Dog").await()
+
             // Response is in cache now
             cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
         }
-        assertTrue(networkResponse == cachedResponse)
     }
 
     @Test
@@ -74,8 +76,8 @@ class SavedArticleCacheTest {
             cachedCatResponse = savedArticleCache.getWithContext(catRequest, "Cat").await()
             cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
         }
-        assertTrue(networkDogResponse == cachedDogResponse)
-        assertTrue(networkCatResponse == cachedCatResponse)
+        assertTrue(networkDogResponse!!.peekBody(TEN_GB)!!.string() == cachedDogResponse!!.body()!!.string())
+        assertTrue(networkCatResponse!!.body()!!.string() == cachedCatResponse!!.body()!!.string())
 
         // Run garbage collection on a non-Dog articleContext
         savedArticleCache.garbageCollectContext("Cat")
@@ -83,7 +85,7 @@ class SavedArticleCacheTest {
             cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
         }
         // Response should still be in cache
-        assertTrue(networkDogResponse == cachedDogResponse)
+        assertTrue(networkDogResponse!!.body()!!.string() ==  cachedDogResponse!!.body()!!.string())
 
         // Garbage collect Dog
         savedArticleCache.garbageCollectContext("Dog")

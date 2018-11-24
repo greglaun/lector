@@ -16,7 +16,7 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
     override fun getWithContext(key: Request, keyContext: String): Deferred<Response?> {
        return GlobalScope.async {
             val cachedResponse = db.cachedResponseDao().get(key.url().toString().md5())
-           cachedResponse?.serialResponse?.toResponse()
+           cachedResponse?.response?.toResponse()
         }
     }
 
@@ -24,7 +24,7 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
         return GlobalScope.async {
             val cachedResponse = CachedResponse(null, key.url().toString().md5(),
                     value.serialize(), keyContext)
-            db.cachedResponseDao().insert(cachedResponse)
+                db.cachedResponseDao().insert(cachedResponse)
             Unit
         }
     }

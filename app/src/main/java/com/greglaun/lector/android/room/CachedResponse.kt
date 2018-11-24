@@ -11,5 +11,5 @@ import android.arch.persistence.room.*
 
 data class CachedResponse(@PrimaryKey(autoGenerate = true) var id: Long?,
                           @ColumnInfo(name = "url_hash") var urlHash: String, // Using md5
-                          @ColumnInfo(name = "serial_response") var serialResponse : String,
+                          @ColumnInfo(name = "serialized_response") var response : String,
                           var articleContext: String)

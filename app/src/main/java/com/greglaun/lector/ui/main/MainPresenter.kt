@@ -5,6 +5,8 @@ import com.greglaun.lector.data.cache.contextToTitle
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
 import okhttp3.Request
 import okhttp3.Response
 
@@ -42,7 +44,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onUrlChanged(url: String) {
-        // todo(optimization): If urlToContext becomes complicated, move it somewhere else.
+        // todo(optimization): Pull context from REST API
         currentRequestContext = urlToContext(url)
         view.loadUrl(url)
         stopSpeakingAndEnablePlayButton()
@@ -64,7 +66,10 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onDisplayReadingList() {
-        view.displayReadingList(getReadingList())
+        GlobalScope.launch{
+            val readingList = getReadingList()
+            view.displayReadingList(getReadingList())
+        }
     }
 
     // todo(data): Replace with live data or some other mechanism

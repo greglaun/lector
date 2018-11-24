@@ -13,12 +13,14 @@ import java.util.*
 
 val NEWLINE = '\n'.toInt()
 
+val TEN_GB = 10000000000
+
 // Initial iteration of code borrows heavily from OkHttp.
 fun serializeResponse(response : Response, sink : Sink) {
     val sink = Okio.buffer(sink)
 
     val url = response.request().url().toString()
-    val varyHeaders = HttpHeaders.varyHeaders(response)
+    var varyHeaders: Headers? = null
     val requestMethod = response.request().method()
     val protocol = response.protocol()
     val code = response.code()
@@ -30,15 +32,19 @@ fun serializeResponse(response : Response, sink : Sink) {
             .writeByte(NEWLINE)
     sink.writeUtf8(requestMethod)
             .writeByte(NEWLINE)
-    sink.writeDecimalLong(varyHeaders.size().toLong())
-            .writeByte(NEWLINE)
     run {
         var i = 0
-        val size = varyHeaders.size()
+        var size = 0
+        if (response.networkResponse() != null){
+            varyHeaders = HttpHeaders.varyHeaders(response)
+            size = varyHeaders!!.size()
+        }
+        sink.writeDecimalLong(size.toLong())
+                .writeByte(NEWLINE)
         while (i < size) {
-            sink.writeUtf8(varyHeaders.name(i))
+            sink.writeUtf8(varyHeaders!!.name(i))
                     .writeUtf8(": ")
-                    .writeUtf8(varyHeaders.value(i))
+                    .writeUtf8(varyHeaders!!.value(i))
                     .writeByte(NEWLINE)
             i++
         }
@@ -67,13 +73,12 @@ fun serializeResponse(response : Response, sink : Sink) {
         sink.writeUtf8(handshake.tlsVersion().javaName()).writeByte(NEWLINE)
     }
 
-    val writtenContentLength = sink.writeAll(response.body()!!.source())
+    sink.writeAll(response.peekBody(TEN_GB)!!.source())
     sink.close()
 }
 
 
 fun deserializeResponse(input: Source) : Response {
-    val response : Response
     // todo(beginner): Replace try-catch with try-with-resources
     try {
         val source = Okio.buffer(input)
@@ -123,13 +128,17 @@ fun deserializeResponse(input: Source) : Response {
                 .headers(varyHeaders)
                 .build()
         // Assume we can fit everything into memory. This should be okay for Wikipedia content
+        var mediaType: MediaType? = null
+        if (contentType != null) {
+            mediaType = MediaType.parse(contentType)
+        }
         return Response.Builder()
                 .request(cacheRequest)
                 .protocol(protocol)
                 .code(code)
                 .message(message)
                 .headers(responseHeaders)
-                .body(ResponseBody.create(MediaType.parse(contentType), source.readByteArray()))
+                .body(ResponseBody.create(mediaType, source.readByteArray()))
                 .handshake(handshake)
                 .build()
     } finally {
