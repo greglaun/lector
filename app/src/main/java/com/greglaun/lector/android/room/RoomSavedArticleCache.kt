@@ -24,7 +24,9 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
         return GlobalScope.async {
             val cachedResponse = CachedResponse(null, key.url().toString().md5(),
                     value.serialize(), keyContext)
-            db.cachedResponseDao().insert(cachedResponse)
+            synchronized(db) {
+                db.cachedResponseDao().insert(cachedResponse)
+            }
             Unit
         }
     }

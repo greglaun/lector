@@ -48,7 +48,20 @@ class CachedResponseDaoTest {
     fun insertForeignKeyPresent() {
         articleContextDao.insert(ArticleContext("Banana"))
         cachedResponseDao.insert(cachedResponse)
-        val retrieved = cachedResponseDao.getWithContext("Banana")
+        val retrieved = cachedResponseDao.getAllWithContext("Banana")
         assertThat(retrieved.get(0), equalTo(cachedResponse))
+    }
+
+    @Test
+    fun insertListForeignKeyPresent() {
+        articleContextDao.insert(ArticleContext("Banana"))
+        val responses = ArrayList<CachedResponse>()
+        for(i in 1..15) {
+            responses.add(CachedResponse(i.toLong(), "A string" + i.toString(),
+            "Another string" + i.toString(), "Banana"))
+        }
+        cachedResponseDao.insert(responses)
+        val retrieved = cachedResponseDao.getAllWithContext("Banana")
+        assertThat(retrieved.size, equalTo(responses.size))
     }
 }

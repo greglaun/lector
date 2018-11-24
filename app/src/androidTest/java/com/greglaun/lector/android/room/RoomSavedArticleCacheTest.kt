@@ -9,6 +9,7 @@ import junit.framework.Assert.assertNull
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -84,5 +85,10 @@ class RoomSavedArticleCacheTest {
             val result2 = cache!!.getWithContext(dogRequest!!, context).await()
             assertNull(result2)
         }
+    }
+
+    @Test
+    fun flushToDisk() {
+        assertTrue(false)
     }
 }

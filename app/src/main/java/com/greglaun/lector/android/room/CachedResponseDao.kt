@@ -12,13 +12,16 @@ interface CachedResponseDao {
     fun getAll(): List<CachedResponse>
 
     @Query("SELECT * from cachedresponse WHERE articleContext = :articleContext")
-    fun getWithContext(articleContext: String): List<CachedResponse>
+    fun getAllWithContext(articleContext: String): List<CachedResponse>
 
     @Query("SELECT * from cachedresponse WHERE url_hash = :urlHash LIMIT 1")
     fun get(urlHash : String): CachedResponse
 
     @Insert(onConflict = REPLACE)
     fun insert(cachedResponse: CachedResponse)
+
+    @Insert(onConflict = REPLACE)
+    fun insert(responseList: List<CachedResponse>)
 
     @Query("DELETE from cachedresponse")
     fun deleteAll()

@@ -24,7 +24,7 @@ class WhitelistSavedArticleCache<Key : Any, Value : Any, KeyContext : Any>
     override fun setWithContext(key: Key, value: Value, keyContext: KeyContext): Deferred<Unit> {
         return GlobalScope.async {
             if(whitelist.contains(keyContext).await()) {
-                delegateCache.setWithContext(key, value, keyContext)
+                delegateCache.setWithContext(key, value, keyContext).await()
             }
             Unit
         }

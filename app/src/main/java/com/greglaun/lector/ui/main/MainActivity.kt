@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.main
 
 import android.app.AlertDialog
+import android.arch.persistence.room.Room
 import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -15,10 +16,12 @@ import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
+import com.greglaun.lector.android.room.ArticleCacheDatabase
 import com.greglaun.lector.data.cache.HashMapSavedArticleCache
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
 import com.greglaun.lector.data.whitelist.HashSetWhitelist
+import com.greglaun.lector.data.whitelist.Whitelist
 import com.greglaun.lector.ui.speak.JSoupArticleStateSource
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsActorStateMachine
@@ -48,7 +51,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     private fun createResponseSource(): ResponseSource {
-        val whitelist: HashSetWhitelist<String> = HashSetWhitelist()
+        val db = Room.databaseBuilder(this, ArticleCacheDatabase::class.java,
+                "savedArticles").build()
+//        val whitelist: Whitelist<String> = RoomWhitelist(db)
+//        return ResponseSource.createResponseSource(RoomSavedArticleCache(db), whitelist,
+//                getCacheDir())
+        val whitelist: Whitelist<String> = HashSetWhitelist()
         return ResponseSource.createResponseSource(HashMapSavedArticleCache(), whitelist,
                 getCacheDir())
     }
@@ -100,7 +108,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         when (item.itemId) {
             R.id.action_play -> {
                 mainPresenter.onPlayButtonPressed()
@@ -127,7 +134,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun loadUrl(urlString: String) {
-        webView.loadUrl(urlString)
+        runOnUiThread {
+            webView.loadUrl(urlString)
+        }
     }
 
     override fun enablePlayButton() {
@@ -161,13 +170,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun displayReadingList(readingList : List<String>) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(getString(R.string.dialog_reading_list_title))
-        builder.setItems(readingList.toTypedArray()) { dialog, which ->
-            mainPresenter.onUrlChanged("https://en.m.wikipedia.org/wiki/"
-                    + titleToContext(readingList[which]))
+        runOnUiThread {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(getString(R.string.dialog_reading_list_title))
+            builder.setItems(readingList.toTypedArray()) { dialog, which ->
+                mainPresenter.onUrlChanged("https://en.m.wikipedia.org/wiki/"
+                        + titleToContext(readingList[which]))
+            }
+            builder.show()
         }
-        builder.show()
     }
 
     inner class WikiWebViewClient : WebViewClient() {
@@ -205,6 +216,5 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
         return super.shouldInterceptRequest(view, request)
     }
-
    }
 }
