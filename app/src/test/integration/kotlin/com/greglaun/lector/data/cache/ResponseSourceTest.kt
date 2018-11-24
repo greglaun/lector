@@ -36,11 +36,9 @@ class ResponseSourceTest {
         val request = Request.Builder()
                 .url(dogUrlString)
                 .build()
-        var networkResponse : Response? = null
         var cachedResponse : Response? = null
         runBlocking {
-            // Response from network
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            responseSource!!.getWithContext(request, "Dog").await()
             // Response is in cache now
             cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
         }
@@ -61,7 +59,7 @@ class ResponseSourceTest {
             // Response is in cache now
             cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
         }
-        assertTrue(networkResponse == cachedResponse)
+        assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
     }
 
     @Test

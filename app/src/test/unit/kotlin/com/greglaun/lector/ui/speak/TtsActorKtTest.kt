@@ -76,15 +76,14 @@ class TtsActorKtTest {
             assertTrue(SpeakerState.NOT_READY == state2)
         }
     }
-
-
+    
     @Test
     fun stopSpeaking() {
         runBlocking {
             stateMachine.changeStateUpdateArticle(urlString).await()
             stateMachine.changeStateReady().await()
             stateMachine.changeStateStartSpeaking().await()
-            stateMachine.actionStopSpeaking()
+            stateMachine.actionStopSpeaking().await()
             val state1 = stateMachine.actionSpeakOne().await() // 1
             assertTrue(SpeakerState.READY == state1)
         }

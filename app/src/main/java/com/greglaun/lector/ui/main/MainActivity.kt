@@ -54,9 +54,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val whitelist: Whitelist<String> = RoomWhitelist(db!!)
         return ResponseSource.createResponseSource(RoomSavedArticleCache(db), whitelist,
                 getCacheDir())
-//        val whitelist: Whitelist<String> = HashSetWhitelist()
-//        return ResponseSource.createResponseSource(HashMapSavedArticleCache(), whitelist,
-//                getCacheDir())
     }
 
     override fun onResume() {
