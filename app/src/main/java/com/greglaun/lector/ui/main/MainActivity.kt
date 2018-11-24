@@ -1,7 +1,6 @@
 package com.greglaun.lector.ui.main
 
 import android.app.AlertDialog
-import android.arch.persistence.room.Room
 import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -16,7 +15,6 @@ import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
-import com.greglaun.lector.android.room.ArticleCacheDatabase
 import com.greglaun.lector.data.cache.HashMapSavedArticleCache
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.titleToContext
@@ -51,8 +49,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     private fun createResponseSource(): ResponseSource {
-        val db = Room.databaseBuilder(this, ArticleCacheDatabase::class.java,
-                "savedArticles").build()
+//        val db = ArticleCacheDatabase.getInstance(this)
 //        val whitelist: Whitelist<String> = RoomWhitelist(db)
 //        return ResponseSource.createResponseSource(RoomSavedArticleCache(db), whitelist,
 //                getCacheDir())

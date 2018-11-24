@@ -46,10 +46,11 @@ class SavedArticleCacheTest {
         runBlocking {
             // Response from network
             networkResponse = compositeCache.getWithContext(request, "Dog").await()
+
             // Response is in cache now
             cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
         }
-        assertTrue(networkResponse == cachedResponse)
     }
 
     @Test

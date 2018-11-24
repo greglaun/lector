@@ -8,14 +8,14 @@ import java.util.*
 
 // An in-memory cache to be used for testing
 class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
-    val hashCache : HashMap<Request, Pair<Response, HashSet<String>>> = HashMap()
+    val hashCache : HashMap<Request, Pair<String, HashSet<String>>> = HashMap()
 
     override fun getWithContext(key: Request, keyContext : String)
             : Deferred<Response?> {
         if (!hashCache.containsKey(key)) {
             return CompletableDeferred(value = null)
         }
-        return CompletableDeferred(hashCache.get(key)!!.first)
+        return CompletableDeferred(hashCache.get(key)!!.first.toResponse())
 
     }
 
@@ -26,7 +26,7 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
         } else {
             val set = HashSet<String>()
             set.add(keyContext)
-            hashCache.put(key, Pair(value, set))
+            hashCache.put(key, Pair(value.serialize(), set))
         }
         return CompletableDeferred(Unit)
     }
