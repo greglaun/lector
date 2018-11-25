@@ -9,36 +9,39 @@ import android.arch.persistence.room.Update
 @Dao
 interface ArticleContextDao {
 
-    @Query("SELECT * from articlecontext")
-    fun getAll(): List<ArticleContext>
+    @Query("SELECT * from roomarticlecontext")
+    fun getAll(): List<RoomArticleContext>
 
-    @Query("SELECT * FROM articlecontext WHERE contextString = :contextString")
-    fun get(contextString: String): ArticleContext
+    @Query("SELECT * FROM roomarticlecontext WHERE contextString = :contextString")
+    fun get(contextString: String): RoomArticleContext
 
-    @Query("DELETE from ArticleContext WHERE contextString = :contextString")
+    @Query("DELETE from RoomArticleContext WHERE contextString = :contextString")
     fun delete(contextString: String)
 
-    @Query("UPDATE ArticleContext SET `temporary` = 0 WHERE contextString = :contextString")
+    @Query("UPDATE RoomArticleContext SET `temporary` = 0 WHERE contextString = :contextString")
     fun markPermanent(contextString: String)
 
-    @Query("UPDATE ArticleContext SET `temporary` = 1 WHERE contextString = :contextString")
+    @Query("UPDATE RoomArticleContext SET `temporary` = 1 WHERE contextString = :contextString")
     fun markTemporary(contextString: String)
 
-    @Query("SELECT contextString from ArticleContext WHERE `temporary` = 1")
-    fun getAllTemporary(): List<String>
+    @Query("SELECT * from RoomArticleContext WHERE `temporary` = 1")
+    fun getAllTemporary(): List<RoomArticleContext>
 
     @Insert(onConflict = REPLACE)
-    fun insert(articleContext: ArticleContext)
+    fun insert(articleContext: RoomArticleContext)
 
     @Update
-    fun updateArticleContext(articleContext: ArticleContext)
+    fun updateArticleContext(articleContext: RoomArticleContext)
 
-    @Query("DELETE from ArticleContext")
+    @Query("DELETE from RoomArticleContext")
     fun deleteAll()
 
-    @Query("DELETE from articlecontext WHERE `temporary` = 1")
+    @Query("DELETE from roomarticlecontext WHERE `temporary` = 1")
     fun deleteAllTemporary()
 
-    @Query("SELECT `temporary` from articlecontext WHERE contextString = :contextString")
+    @Query("SELECT `temporary` from roomarticlecontext WHERE contextString = :contextString")
     fun isTemporary(contextString: String): Boolean
+
+    @Query("SELECT * from RoomArticleContext WHERE `temporary` = 0")
+    fun getAllPermanent(): List<RoomArticleContext>
 }

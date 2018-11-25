@@ -50,7 +50,7 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
 
     override fun addContext(keyContext: String): Deferred<Unit> {
         return GlobalScope.async {
-            db.articleContextDao().insert(ArticleContext(null, keyContext))
+            db.articleContextDao().insert(RoomArticleContext(null, keyContext))
             Unit
         }
     }

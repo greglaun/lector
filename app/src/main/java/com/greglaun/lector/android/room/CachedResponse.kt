@@ -3,7 +3,7 @@ package com.greglaun.lector.android.room
 import android.arch.persistence.room.*
 
 @Entity(foreignKeys = arrayOf(ForeignKey(
-        entity = ArticleContext::class,
+        entity = RoomArticleContext::class,
         parentColumns = arrayOf("id"),
         childColumns = arrayOf("articleContextId"))),
         indices = arrayOf(Index(value = "articleContextId")))

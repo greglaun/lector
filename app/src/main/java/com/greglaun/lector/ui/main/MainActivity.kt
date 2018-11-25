@@ -16,10 +16,10 @@ import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.android.room.ArticleCacheDatabase
-import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
+import com.greglaun.lector.android.room.RoomSavedArticleCache
+import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSourceImpl
-import com.greglaun.lector.data.cache.titleToContext
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.JSoupArticleStateSource
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
@@ -164,13 +164,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun displayReadingList(readingList : List<String>) {
+    override fun displayReadingList(readingList : List<ArticleContext>) {
         runOnUiThread {
             val builder = AlertDialog.Builder(this)
+            val stringList = ArrayList<String>()
+            readingList.forEach {
+                stringList.add(it.contextString)
+            }
             builder.setTitle(getString(R.string.dialog_reading_list_title))
-            builder.setItems(readingList.toTypedArray()) { dialog, which ->
-                mainPresenter.onUrlChanged("https://en.m.wikipedia.org/wiki/"
-                        + titleToContext(readingList[which]))
+            builder.setItems(stringList.toTypedArray()) { dialog, which ->
+                mainPresenter.loadFromContext(readingList[which])
             }
             builder.show()
         }

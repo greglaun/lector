@@ -1,7 +1,7 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.ResponseSourceImpl
-import com.greglaun.lector.data.cache.contextToTitle
+import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.experimental.*
@@ -13,9 +13,8 @@ import okhttp3.Response
 // todo(global state): Move to better place.
 class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
-                    val responseSource: ResponseSourceImpl)
+                    val responseSource: ResponseSource)
     : MainContract.Presenter {
-
     val defaultContext = "BAD_CONTEXT"
     private var currentRequestContext = defaultContext // todo(strings): Use user's default page
     private val contextThread = newSingleThreadContext("ContextThread")
@@ -27,6 +26,10 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onDetach() {
         ttsPresenter.onStop()
+    }
+
+    override fun responseSource(): ResponseSource {
+        return responseSource
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -52,6 +55,11 @@ class MainPresenter(val view : MainContract.View,
         view.loadUrl(urlString)
         stopSpeakingAndEnablePlayButton()
         ttsPresenter.onUrlChanged(urlString)
+    }
+
+    override fun loadFromContext(articleContext: ArticleContext) {
+        onUrlChanged("http://m.wikipedia.org/wiki/" + articleContext.contextString)
+        // ttsPresenter.setPosition(articleContext.position)
     }
 
     private fun computeCurrentContext(urlString: String) {
@@ -113,22 +121,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onDisplayReadingList() {
         GlobalScope.launch{
-            val readingList = getReadingList()
-            view.displayReadingList(getReadingList())
+            view.displayReadingList(responseSource.getAllPermanent().await())
         }
-    }
-
-    // todo(data): Replace with live data or some other mechanism
-    fun getReadingList(): List<String> {
-        val readingList : MutableList<String> = ArrayList()
-        for (article in responseSource.iterator()) {
-            readingList.add(contextToTitle(article))
-        }
-        val readOnlyList : List<String> = readingList
-        return readOnlyList
-    }
-
-    override fun responseSource(): ResponseSourceImpl {
-        return responseSource
     }
 }

@@ -36,7 +36,7 @@ class SimpleEntityReadWriteTest {
     @Test
     @Throws(Exception::class)
     fun writeAndDeleteContext() {
-        val bananaContext = ArticleContext(null,"Banana")
+        val bananaContext = RoomArticleContext(null,"Banana")
         articleContextDao.insert(bananaContext)
         val retrieved = articleContextDao.get("Banana")
         assertThat(retrieved, equalTo(bananaContext))

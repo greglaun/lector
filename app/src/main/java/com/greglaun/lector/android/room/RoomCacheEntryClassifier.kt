@@ -1,5 +1,6 @@
 package com.greglaun.lector.android.room
 
+import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
@@ -14,7 +15,7 @@ class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifi
 
     override fun add(element: String): Deferred<Unit> {
         return GlobalScope.async {
-            db.articleContextDao().insert(ArticleContext(null, contextString = element))
+            db.articleContextDao().insert(RoomArticleContext(null, contextString = element))
         }
     }
 
@@ -32,7 +33,7 @@ class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifi
         }
     }
 
-    override fun getAllTemporary(): Deferred<List<String>> {
+    override fun getAllTemporary(): Deferred<List<ArticleContext>> {
         return GlobalScope.async {
             db.articleContextDao().getAllTemporary()
         }
@@ -53,6 +54,12 @@ class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifi
     override fun isTemporary(element: String): Deferred<Boolean> {
         return GlobalScope.async {
             db.articleContextDao().isTemporary(element)
+        }
+    }
+
+    override fun getAllPermanent(): Deferred<List<ArticleContext>> {
+        return GlobalScope.async {
+            db.articleContextDao().getAllPermanent()
         }
     }
 }

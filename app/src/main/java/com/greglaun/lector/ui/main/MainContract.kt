@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.ResponseSourceImpl
+import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
 import kotlinx.coroutines.experimental.Deferred
@@ -11,7 +12,7 @@ interface MainContract {
         fun loadUrl(urlString : String)
         fun enablePlayButton()
         fun enablePauseButton()
-        fun displayReadingList(readingList: List<String>)
+        fun displayReadingList(readingList: List<ArticleContext>)
         // todo(feature): highlightText(String)
     }
 
@@ -24,6 +25,7 @@ interface MainContract {
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
         fun onArticleOver()
-        fun responseSource(): ResponseSourceImpl
+        fun responseSource(): ResponseSource
+        fun loadFromContext(articleContext: ArticleContext)
     }
 }

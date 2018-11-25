@@ -68,11 +68,15 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return articleCache.garbageCollectTemporary(classifier)
     }
 
-    override fun getAllTemporary(): Deferred<List<String>> {
+    override fun getAllTemporary(): Deferred<List<ArticleContext>> {
         return cacheEntryClassifier.getAllTemporary()
     }
 
     override fun isTemporary(element: String): Deferred<Boolean> {
         return cacheEntryClassifier.isTemporary(element)
+    }
+
+    override fun getAllPermanent(): Deferred<List<ArticleContext>> {
+        return cacheEntryClassifier.getAllPermanent()
     }
 }

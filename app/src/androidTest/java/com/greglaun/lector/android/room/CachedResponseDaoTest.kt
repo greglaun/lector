@@ -46,7 +46,7 @@ class CachedResponseDaoTest {
 
     @Test
     fun insertForeignKeyPresent() {
-        articleContextDao.insert(ArticleContext(null, "Banana"))
+        articleContextDao.insert(RoomArticleContext(null, "Banana"))
         val bananaId = articleContextDao.get("Banana").id
         cachedResponse = CachedResponse(1, urlHash, serialResponse,
                 bananaId!!)
@@ -57,7 +57,7 @@ class CachedResponseDaoTest {
 
     @Test
     fun insertListForeignKeyPresent() {
-        articleContextDao.insert(ArticleContext(null, "Banana"))
+        articleContextDao.insert(RoomArticleContext(null, "Banana"))
         val bananaId = articleContextDao.get("Banana").id
         cachedResponse = CachedResponse(1, urlHash, serialResponse,
                 bananaId!!)
