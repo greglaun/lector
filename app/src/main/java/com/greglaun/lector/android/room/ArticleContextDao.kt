@@ -18,6 +18,12 @@ interface ArticleContextDao {
     @Query("DELETE from ArticleContext WHERE contextString = :contextString")
     fun delete(contextString: String)
 
+    @Query("UPDATE ArticleContext SET `temporary` = 0 WHERE contextString = :contextString")
+    fun markPermanent(contextString: String)
+
+    @Query("UPDATE ArticleContext SET `temporary` = 1 WHERE contextString = :contextString")
+    fun markTemporary(contextString: String)
+
     @Insert(onConflict = REPLACE)
     fun insert(articleContext: ArticleContext)
 
