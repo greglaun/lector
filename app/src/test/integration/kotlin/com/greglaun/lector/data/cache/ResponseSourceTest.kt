@@ -6,7 +6,8 @@ import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -29,20 +30,6 @@ class ResponseSourceTest {
         if (testDir.exists()) {
             testDir.deleteRecursively()
         }
-    }
-
-    @Test
-    fun cacheMissWhenNotWhitelisted() {
-        val request = Request.Builder()
-                .url(dogUrlString)
-                .build()
-        var cachedResponse : Response? = null
-        runBlocking {
-            responseSource!!.getWithContext(request, "Dog").await()
-            // Response is in cache now
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
-        }
-        assertNull(cachedResponse)
     }
 
     @Test

@@ -14,7 +14,7 @@ class RoomWhitelist(val db: ArticleCacheDatabase): Whitelist<String> {
 
     override fun add(element: String): Deferred<Unit> {
         return GlobalScope.async {
-            db.articleContextDao().insert(ArticleContext(element))
+            db.articleContextDao().insert(ArticleContext(null, contextString = element))
         }
     }
 
@@ -26,8 +26,16 @@ class RoomWhitelist(val db: ArticleCacheDatabase): Whitelist<String> {
 
     override fun iterator(): Iterator<String> {
         return db.articleContextDao().getAll().map {
-            it -> it.articleContext }
+            it -> it.contextString }
                 .iterator()
+    }
+
+    override fun update(from: String, to: String): Deferred<Unit> {
+        return GlobalScope.async {
+            val articleContext = db.articleContextDao().get(from)
+            articleContext.contextString = to
+            db.articleContextDao().updateArticleContext(articleContext)
+        }
     }
 
 }

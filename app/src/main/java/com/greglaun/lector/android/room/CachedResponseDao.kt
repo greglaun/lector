@@ -11,8 +11,8 @@ interface CachedResponseDao {
     @Query("SELECT * from cachedresponse")
     fun getAll(): List<CachedResponse>
 
-    @Query("SELECT * from cachedresponse WHERE articleContext = :articleContext")
-    fun getAllWithContext(articleContext: String): List<CachedResponse>
+    @Query("SELECT * from cachedresponse WHERE articleContextId = (SELECT id from articleContext where contextString = :contextString)")
+    fun getAllWithContext(contextString: String): List<CachedResponse>
 
     @Query("SELECT * from cachedresponse WHERE url_hash = :urlHash LIMIT 1")
     fun get(urlHash : String): CachedResponse
@@ -26,7 +26,7 @@ interface CachedResponseDao {
     @Query("DELETE from cachedresponse")
     fun deleteAll()
 
-    @Query("DELETE from cachedresponse WHERE articleContext=:articleContext")
-    fun deleteWithContext(articleContext: String)
+    @Query("DELETE from cachedresponse WHERE articleContextId = (SELECT id from articlecontext where contextString= :contextString)")
+    fun deleteWithContext(contextString: String)
 
 }

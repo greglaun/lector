@@ -5,7 +5,6 @@ import com.greglaun.lector.ui.speak.TTSContract
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 import java.io.File
 
@@ -56,12 +55,6 @@ class MainPresenterTest {
         mainPresenter.onUrlChanged("test")
         verify(mockView, times(1)).loadUrl("test")
         verify(mockTts, times(1)).onUrlChanged("test")
-    }
-
-    @Test
-    fun saveArticle() {
-        mainPresenter.saveArticle()
-        verify(responseSource, times(1)).add(ArgumentMatchers.anyString())
     }
 
     @Test

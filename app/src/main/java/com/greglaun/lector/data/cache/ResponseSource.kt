@@ -47,4 +47,8 @@ class ResponseSource(val articleCache: ContextAwareCache<Request, Response, Stri
     override fun iterator(): Iterator<String> {
         return whitelist.iterator()
     }
+
+    override fun update(from: String, to: String): Deferred<Unit> {
+        return whitelist.update(from, to)
+    }
 }

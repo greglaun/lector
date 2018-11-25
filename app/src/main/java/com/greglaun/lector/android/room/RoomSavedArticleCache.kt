@@ -13,6 +13,8 @@ import okhttp3.Response
 
 class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
         SavedArticleCache<Request, Response, String> {
+    val idCache = HashMap<String, Long>()
+
     override fun getWithContext(key: Request, keyContext: String): Deferred<Response?> {
        return GlobalScope.async {
             val cachedResponse = db.cachedResponseDao().get(key.url().toString().md5())
@@ -22,8 +24,15 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
 
     override fun setWithContext(key: Request, value: Response, keyContext: String): Deferred<Unit> {
         return GlobalScope.async {
+            var articleId: Long? = null
+            if (idCache.containsKey(keyContext)) {
+                articleId = idCache.get(keyContext)
+            } else {
+                articleId = db.articleContextDao().get(keyContext).id
+                idCache.put(keyContext, articleId!!)
+            }
             val cachedResponse = CachedResponse(null, key.url().toString().md5(),
-                    value.serialize(), keyContext)
+                    value.serialize(), articleId!!)
                 db.cachedResponseDao().insert(cachedResponse)
             Unit
         }
@@ -40,7 +49,7 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
 
     override fun addContext(keyContext: String): Deferred<Unit> {
         return GlobalScope.async {
-            db.articleContextDao().insert(ArticleContext(keyContext))
+            db.articleContextDao().insert(ArticleContext(null, keyContext))
             Unit
         }
     }

@@ -30,7 +30,7 @@ interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
         }
     }
 
-    // Throw away articleContext when composing with a ComposableCache
+    // Throw away contextString when composing with a ComposableCache
     fun compose(b: ComposableCache<Key, Value>):
             ContextAwareCache<Key, Value, KeyContext> {
         return object : ContextAwareCache<Key, Value, KeyContext> {

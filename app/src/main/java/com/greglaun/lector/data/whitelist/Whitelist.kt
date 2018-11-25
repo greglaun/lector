@@ -7,4 +7,5 @@ interface Whitelist<T> {
     fun add(element: T): Deferred<Unit>
     fun delete(element: T): Deferred<Unit>
     fun iterator(): Iterator<T>
+    fun update(from: T, to: T): Deferred<Unit>
 }

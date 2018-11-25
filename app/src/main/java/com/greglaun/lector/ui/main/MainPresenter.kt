@@ -4,10 +4,7 @@ import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.contextToTitle
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -18,9 +15,11 @@ class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource)
     : MainContract.Presenter {
+
     val defaultContext = "BAD_CONTEXT"
     private var currentRequestContext = defaultContext // todo(strings): Use user's default page
-    private var currentContextReady = CompletableDeferred<Boolean>()
+    private val contextThread = newSingleThreadContext("ContextThread")
+    private val tempPrefix = "LectorTemp:"
 
     override fun onAttach() {
         ttsPresenter.onStart()
@@ -58,7 +57,7 @@ class MainPresenter(val view : MainContract.View,
     private fun computeCurrentContext(urlString: String) {
         // todo(caching, REST): Replace this ugliness
         // todo(concurrency): Handle access of currentRequestContext from multiple threads
-        GlobalScope.launch {
+        CoroutineScope(contextThread).launch {
             if (urlString.contains("index.php?search=")) {
                 if (urlString.substringAfterLast("search=") == "") {
                     return@launch
@@ -79,10 +78,10 @@ class MainPresenter(val view : MainContract.View,
                         }
                     }
                 }
-
             } else {
                 currentRequestContext = urlToContext(urlString)
             }
+            responseSource.add(tempPrefix + currentRequestContext)
         }
     }
 
@@ -92,13 +91,14 @@ class MainPresenter(val view : MainContract.View,
                 .build(), currentRequestContext)
     }
 
-    private fun isWikiArticle(urlString: String): Boolean {
-        return urlString.contains("wikipedia.org/wiki/")
-    }
-
-
     override fun saveArticle() {
-        responseSource.add(currentRequestContext)
+        GlobalScope.launch {
+            if (responseSource.contains(tempPrefix + currentRequestContext).await()) {
+                responseSource.update(tempPrefix + currentRequestContext, currentRequestContext)
+            } else {
+                responseSource.add(currentRequestContext)
+            }
+        }
     }
 
     override fun deleteArticle(url: String) {

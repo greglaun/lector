@@ -23,4 +23,12 @@ class HashSetWhitelist<T>: Whitelist<T> {
     override fun iterator(): MutableIterator<T> {
         return hashSet.iterator()
     }
+
+    override fun update(from: T, to: T): Deferred<Unit> {
+        if (hashSet.contains(from)) {
+            hashSet.remove(from)
+            hashSet.add(to)
+        }
+        return CompletableDeferred(Unit)
+    }
 }
