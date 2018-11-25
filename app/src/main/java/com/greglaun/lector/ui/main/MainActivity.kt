@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_save -> {
-                mainPresenter.saveArticle(webView.url)
+                mainPresenter.saveArticle()
                 return true
             }
             R.id.action_reading_list -> {
@@ -179,9 +179,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     inner class WikiWebViewClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
            if (request.url.authority.endsWith("wikipedia.org")) {
-               if (request.url.toString().contains("index.php?search=")) {
-                   return false
-               }
                mainPresenter.onUrlChanged(request.url.toString())
                return true
            }

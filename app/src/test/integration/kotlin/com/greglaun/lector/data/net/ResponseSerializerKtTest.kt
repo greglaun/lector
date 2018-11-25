@@ -8,12 +8,19 @@ import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
+
+
 class ResponseSerializerKtTest {
-    val testUrlString = "https://en.wikipedia.org/robots.txt"
+//    val testUrlString = "https://en.wikipedia.org/robots.txt"
+val testUrlString = "https://en.wikipedia.org/w/index.php?search=Cat"
 
     @Test
     fun serializeDeserialize() {
-        val client = OkHttpClient()
+//        val client = OkHttpClient()
+        val client = OkHttpClient().newBuilder()
+                .followRedirects(false)
+                .followSslRedirects(false)
+                .build()
         val request = Request.Builder()
                 .url(testUrlString)
                 .build()
