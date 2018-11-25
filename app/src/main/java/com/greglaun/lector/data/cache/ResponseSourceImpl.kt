@@ -23,6 +23,7 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         }
 
     }
+
     override fun contains(element: String): Deferred<Boolean> {
         return cacheEntryClassifier.contains(element)
     }
@@ -41,10 +42,6 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
 
     override fun setWithContext(key: Request, value: Response, keyContext: String): Deferred<Unit> {
         return articleCache.setWithContext(key, value, keyContext)
-    }
-
-    override fun iterator(): Iterator<String> {
-        return cacheEntryClassifier.iterator()
     }
 
     override fun update(from: String, to: String): Deferred<Unit> {
@@ -71,7 +68,11 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return articleCache.garbageCollectTemporary(classifier)
     }
 
-    override fun getAllTemporary(): Deferred<ListIterator<String>> {
+    override fun getAllTemporary(): Deferred<List<String>> {
         return cacheEntryClassifier.getAllTemporary()
+    }
+
+    override fun isTemporary(element: String): Deferred<Boolean> {
+        return cacheEntryClassifier.isTemporary(element)
     }
 }

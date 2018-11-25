@@ -24,6 +24,9 @@ interface ArticleContextDao {
     @Query("UPDATE ArticleContext SET `temporary` = 1 WHERE contextString = :contextString")
     fun markTemporary(contextString: String)
 
+    @Query("SELECT contextString from ArticleContext WHERE `temporary` = 1")
+    fun getAllTemporary(): List<String>
+
     @Insert(onConflict = REPLACE)
     fun insert(articleContext: ArticleContext)
 
@@ -32,4 +35,10 @@ interface ArticleContextDao {
 
     @Query("DELETE from ArticleContext")
     fun deleteAll()
+
+    @Query("DELETE from articlecontext WHERE `temporary` = 1")
+    fun deleteAllTemporary()
+
+    @Query("SELECT `temporary` from articlecontext WHERE contextString = :contextString")
+    fun isTemporary(contextString: String): Boolean
 }

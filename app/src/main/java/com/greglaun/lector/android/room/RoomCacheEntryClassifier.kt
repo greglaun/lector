@@ -24,12 +24,6 @@ class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifi
         }
     }
 
-    override fun iterator(): Iterator<String> {
-        return db.articleContextDao().getAll().map {
-            it -> it.contextString }
-                .iterator()
-    }
-
     override fun update(from: String, to: String): Deferred<Unit> {
         return GlobalScope.async {
             val articleContext = db.articleContextDao().get(from)
@@ -38,4 +32,27 @@ class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifi
         }
     }
 
+    override fun getAllTemporary(): Deferred<List<String>> {
+        return GlobalScope.async {
+            db.articleContextDao().getAllTemporary()
+        }
+    }
+
+    override fun markTemporary(element: String): Deferred<Unit> {
+        return GlobalScope.async {
+            db.articleContextDao().markTemporary(element)
+        }
+    }
+
+    override fun markPermanent(element: String): Deferred<Unit> {
+        return GlobalScope.async {
+            db.articleContextDao().markPermanent(element)
+        }
+    }
+
+    override fun isTemporary(element: String): Deferred<Boolean> {
+        return GlobalScope.async {
+            db.articleContextDao().isTemporary(element)
+        }
+    }
 }

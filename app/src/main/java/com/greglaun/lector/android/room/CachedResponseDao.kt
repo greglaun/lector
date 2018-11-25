@@ -26,7 +26,9 @@ interface CachedResponseDao {
     @Query("DELETE from cachedresponse")
     fun deleteAll()
 
-    @Query("DELETE from cachedresponse WHERE articleContextId = (SELECT id from articlecontext where contextString= :contextString)")
+    @Query("DELETE from cachedresponse WHERE articleContextId = (SELECT id from articlecontext WHERE contextString= :contextString)")
     fun deleteWithContext(contextString: String)
 
+    @Query("DELETE from cachedresponse WHERE articleContextId = (SELECT id from articlecontext WHERE `temporary` = 1)")
+    fun deleteAllTemporary()
 }

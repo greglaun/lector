@@ -5,30 +5,53 @@ import kotlinx.coroutines.experimental.Deferred
 
 // A deterministic probabilistic set for testing
 class HashSetCacheEntryClassifier<T>: CacheEntryClassifier<T> {
-    val hashSet = HashSet<T>()
+    val hashMap = HashMap<T, Boolean>()
+
     override fun contains(element: T): Deferred<Boolean> {
-        return CompletableDeferred(hashSet.contains(element))
+        return CompletableDeferred(hashMap.contains(element))
     }
 
     override fun add(element : T): Deferred<Unit> {
-        hashSet.add(element)
+        hashMap.put(element, true)
         return CompletableDeferred(Unit)
     }
 
     override fun delete(element: T): Deferred<Unit> {
-        hashSet.remove(element)
+        hashMap.remove(element)
         return CompletableDeferred(Unit)
-    }
-
-    override fun iterator(): MutableIterator<T> {
-        return hashSet.iterator()
     }
 
     override fun update(from: T, to: T): Deferred<Unit> {
-        if (hashSet.contains(from)) {
-            hashSet.remove(from)
-            hashSet.add(to)
+        if (hashMap.contains(from)) {
+            hashMap.remove(from)
         }
         return CompletableDeferred(Unit)
+    }
+
+    override fun getAllTemporary(): Deferred<List<T>> {
+        val result = ArrayList<T>()
+        hashMap.forEach{
+            if (it.value) {
+                result.add(it.key)
+            }
+        }
+        return CompletableDeferred(result.toList())
+    }
+
+    override fun markTemporary(element: T): Deferred<Unit> {
+        hashMap.put(element, true)
+        return CompletableDeferred(Unit)
+    }
+
+    override fun markPermanent(element: T): Deferred<Unit> {
+        hashMap.put(element, false)
+        return CompletableDeferred(Unit)
+    }
+
+    override fun isTemporary(element: T): Deferred<Boolean> {
+        if (hashMap.containsKey(element)) {
+            return CompletableDeferred(hashMap.get(element)!!)
+        }
+        return CompletableDeferred(true)
     }
 }

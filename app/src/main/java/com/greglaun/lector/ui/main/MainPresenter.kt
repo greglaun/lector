@@ -58,37 +58,43 @@ class MainPresenter(val view : MainContract.View,
         // todo(caching, REST): Replace this ugliness
         // todo(concurrency): Handle access of currentRequestContext from multiple threads
         CoroutineScope(contextThread).launch {
-            if (urlString.contains("index.php?search=")) {
-                if (urlString.substringAfterLast("search=") == "") {
-                    return@launch
-                }
-                val client = OkHttpClient().newBuilder()
-                        .followRedirects(false)
-                        .followSslRedirects(false)
-                        .build()
-                val request = Request.Builder()
-                        .url(urlString)
-                        .build()
-                val response = client.newCall(request).execute()
-                if (response != null) {
-                    if (response.isRedirect) {
-                        val url = response.networkResponse()?.headers()?.toMultimap()?.get("Location")
-                        if (url != null) {
-                            currentRequestContext = urlToContext(url.get(0))
+            synchronized(currentRequestContext) {
+                if (urlString.contains("index.php?search=")) {
+                    if (urlString.substringAfterLast("search=") == "") {
+                        return@launch
+                    }
+                    val client = OkHttpClient().newBuilder()
+                            .followRedirects(false)
+                            .followSslRedirects(false)
+                            .build()
+                    val request = Request.Builder()
+                            .url(urlString)
+                            .build()
+                    val response = client.newCall(request).execute()
+                    if (response != null) {
+                        if (response.isRedirect) {
+                            val url = response.networkResponse()?.headers()?.toMultimap()?.get("Location")
+                            if (url != null) {
+                                currentRequestContext = urlToContext(url.get(0))
+                            }
                         }
                     }
+                } else {
+                    currentRequestContext = urlToContext(urlString)
                 }
-            } else {
-                currentRequestContext = urlToContext(urlString)
+                responseSource.add(currentRequestContext)
             }
-            responseSource.add(tempPrefix + currentRequestContext)
         }
     }
 
     override fun onRequest(url: String): Deferred<Response?> {
+        var curContext: String? = null
+        synchronized(currentRequestContext) {
+            curContext = currentRequestContext
+        }
         return  responseSource.getWithContext(Request.Builder()
                 .url(url)
-                .build(), currentRequestContext)
+                .build(), curContext!!)
     }
 
     override fun saveArticle() {

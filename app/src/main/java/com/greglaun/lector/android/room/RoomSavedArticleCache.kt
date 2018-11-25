@@ -4,6 +4,7 @@ import com.greglaun.lector.data.cache.SavedArticleCache
 import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.serialize
 import com.greglaun.lector.data.cache.toResponse
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
@@ -51,6 +52,14 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
         return GlobalScope.async {
             db.articleContextDao().insert(ArticleContext(null, keyContext))
             Unit
+        }
+    }
+
+    override fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>): Deferred<Unit> {
+        return GlobalScope.async {
+            // Ignore the passed-in classifier, since we already have access to the db
+            db.cachedResponseDao().deleteAllTemporary()
+            db.articleContextDao().deleteAllTemporary()
         }
     }
 }
