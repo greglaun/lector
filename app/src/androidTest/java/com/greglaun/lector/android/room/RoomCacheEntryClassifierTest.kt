@@ -12,9 +12,9 @@ import org.junit.Before
 import org.junit.Test
 
 
-class RoomWhitelistTest {
+class RoomCacheEntryClassifierTest {
     private var db: ArticleCacheDatabase? = null
-    private var whitelist: RoomWhitelist? = null
+    private var whitelist: RoomCacheEntryClassifier? = null
 
 
     @Before
@@ -22,7 +22,7 @@ class RoomWhitelistTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
                 context, ArticleCacheDatabase::class.java).build()
-        whitelist = RoomWhitelist(db as ArticleCacheDatabase)
+        whitelist = RoomCacheEntryClassifier(db as ArticleCacheDatabase)
     }
 
 

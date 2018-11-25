@@ -4,7 +4,7 @@ import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 
 // A deterministic probabilistic set for testing
-class HashSetWhitelist<T>: Whitelist<T> {
+class HashSetCacheEntryClassifier<T>: CacheEntryClassifier<T> {
     val hashSet = HashSet<T>()
     override fun contains(element: T): Deferred<Boolean> {
         return CompletableDeferred(hashSet.contains(element))

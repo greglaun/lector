@@ -5,9 +5,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class HashSetWhitelistTest {
+class HashSetCacheEntryClassifierTest {
 
-    val whiteList = HashSetWhitelist<String>()
+    val whiteList = HashSetCacheEntryClassifier<String>()
     val testString = "Potato"
 
     @Test

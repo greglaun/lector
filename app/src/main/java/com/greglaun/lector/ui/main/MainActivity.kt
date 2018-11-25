@@ -17,10 +17,10 @@ import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.android.room.ArticleCacheDatabase
 import com.greglaun.lector.android.room.RoomSavedArticleCache
-import com.greglaun.lector.android.room.RoomWhitelist
-import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.android.room.RoomCacheEntryClassifier
+import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.titleToContext
-import com.greglaun.lector.data.whitelist.Whitelist
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.JSoupArticleStateSource
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsActorStateMachine
@@ -49,10 +49,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
     }
 
-    private fun createResponseSource(): ResponseSource {
+    private fun createResponseSource(): ResponseSourceImpl {
         val db = ArticleCacheDatabase.getInstance(this)
-        val whitelist: Whitelist<String> = RoomWhitelist(db!!)
-        return ResponseSource.createResponseSource(RoomSavedArticleCache(db), whitelist,
+        val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db!!)
+        return ResponseSourceImpl.createResponseSource(RoomSavedArticleCache(db), cacheEntryClassifier,
                 getCacheDir())
     }
 

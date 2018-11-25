@@ -1,6 +1,6 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
 import kotlinx.coroutines.experimental.Deferred
@@ -24,6 +24,6 @@ interface MainContract {
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
         fun onArticleOver()
-        fun responseSource(): ResponseSource
+        fun responseSource(): ResponseSourceImpl
     }
 }

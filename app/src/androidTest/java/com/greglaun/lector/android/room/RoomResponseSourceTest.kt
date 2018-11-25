@@ -3,9 +3,9 @@ package com.greglaun.lector.android.room
 import android.arch.persistence.room.Room
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.SavedArticleCache
-import com.greglaun.lector.data.whitelist.Whitelist
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response
@@ -20,7 +20,7 @@ class RoomResponseSourceTest {
     private var catRequest: Request? = null
     private var dogRequest: Request? = null
     var savedArticleCache: SavedArticleCache<Request, Response, String>? = null
-    private var responseSource: ResponseSource? = null
+    private var responseSource: ResponseSourceImpl? = null
     val testDir = File("testDir")
 
     val dogUrlString = "https://www.wikipedia.org/wiki/Dog"
@@ -29,9 +29,9 @@ class RoomResponseSourceTest {
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val db = Room.inMemoryDatabaseBuilder(context, ArticleCacheDatabase::class.java).build()
-        val whitelist: Whitelist<String> = RoomWhitelist(db)
+        val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db)
         savedArticleCache = RoomSavedArticleCache(db)
-        responseSource =  ResponseSource.createResponseSource(savedArticleCache!!, whitelist,
+        responseSource =  ResponseSourceImpl.createResponseSource(savedArticleCache!!, cacheEntryClassifier,
                 testDir)
 
         dogRequest = Request.Builder()

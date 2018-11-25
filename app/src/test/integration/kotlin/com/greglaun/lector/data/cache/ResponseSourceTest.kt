@@ -1,7 +1,7 @@
 package com.greglaun.lector.data.cache
 
-import com.greglaun.lector.data.whitelist.HashSetWhitelist
-import com.greglaun.lector.data.whitelist.Whitelist
+import com.greglaun.lector.data.whitelist.HashSetCacheEntryClassifier
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response
@@ -13,7 +13,7 @@ import org.junit.Test
 import java.io.File
 
 class ResponseSourceTest {
-    var responseSource: ResponseSource? = null
+    var responseSource: ResponseSourceImpl? = null
     val testDir = File("testDir")
     val savedArticleCache = HashMapSavedArticleCache()
 
@@ -21,8 +21,8 @@ class ResponseSourceTest {
 
     @Before
     fun setUp() {
-        val whitelist: Whitelist<String> = HashSetWhitelist()
-        responseSource = ResponseSource.createResponseSource(savedArticleCache, whitelist, testDir)
+        val cacheEntryClassifier: CacheEntryClassifier<String> = HashSetCacheEntryClassifier()
+        responseSource = ResponseSourceImpl.createResponseSource(savedArticleCache, cacheEntryClassifier, testDir)
     }
 
     @After

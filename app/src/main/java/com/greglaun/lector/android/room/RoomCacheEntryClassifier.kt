@@ -1,11 +1,11 @@
 package com.greglaun.lector.android.room
 
-import com.greglaun.lector.data.whitelist.Whitelist
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
 
-class RoomWhitelist(val db: ArticleCacheDatabase): Whitelist<String> {
+class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifier<String> {
     override fun contains(element: String): Deferred<Boolean> {
         return GlobalScope.async{
             db.articleContextDao().get(element) != null

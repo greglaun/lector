@@ -1,6 +1,6 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.contextToTitle
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
@@ -13,7 +13,7 @@ import okhttp3.Response
 // todo(global state): Move to better place.
 class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
-                    val responseSource: ResponseSource)
+                    val responseSource: ResponseSourceImpl)
     : MainContract.Presenter {
 
     val defaultContext = "BAD_CONTEXT"
@@ -122,7 +122,7 @@ class MainPresenter(val view : MainContract.View,
         return readOnlyList
     }
 
-    override fun responseSource(): ResponseSource {
+    override fun responseSource(): ResponseSourceImpl {
         return responseSource
     }
 }
