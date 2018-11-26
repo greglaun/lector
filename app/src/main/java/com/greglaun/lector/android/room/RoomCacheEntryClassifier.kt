@@ -16,6 +16,7 @@ class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifi
     override fun add(element: String): Deferred<Unit> {
         return GlobalScope.async {
             db.articleContextDao().insert(RoomArticleContext(null, contextString = element))
+            Unit
         }
     }
 

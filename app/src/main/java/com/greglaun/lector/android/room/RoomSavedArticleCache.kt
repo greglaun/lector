@@ -29,7 +29,11 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
             if (idCache.containsKey(keyContext)) {
                 articleId = idCache.get(keyContext)
             } else {
-                articleId = db.articleContextDao().get(keyContext).id
+                articleId = db.articleContextDao().get(keyContext)?.id
+                if (articleId == null) {
+                    articleId = db.articleContextDao().insert(
+                            RoomArticleContext(null, keyContext, "", true))
+                }
                 idCache.put(keyContext, articleId!!)
             }
             val cachedResponse = CachedResponse(null, key.url().toString().md5(),

@@ -7,7 +7,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HashSetCacheEntryClassifierTest {
-
     val classifier = HashSetCacheEntryClassifier()
     val testString = "Potato"
 

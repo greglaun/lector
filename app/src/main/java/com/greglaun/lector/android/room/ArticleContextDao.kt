@@ -28,7 +28,7 @@ interface ArticleContextDao {
     fun getAllTemporary(): List<RoomArticleContext>
 
     @Insert(onConflict = REPLACE)
-    fun insert(articleContext: RoomArticleContext)
+    fun insert(articleContext: RoomArticleContext): Long
 
     @Update
     fun updateArticleContext(articleContext: RoomArticleContext)

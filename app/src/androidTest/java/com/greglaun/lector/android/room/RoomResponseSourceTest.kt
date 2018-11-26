@@ -50,23 +50,6 @@ class RoomResponseSourceTest {
         }
     }
 
-
-    @Test
-    fun cacheMissWhenNotWhitelisted() {
-        val request = Request.Builder()
-                .url(dogUrlString)
-                .build()
-        var networkResponse : Response? = null
-        var cachedResponse : Response? = null
-        runBlocking {
-            // Response from network
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
-            // Response is in cache now
-            cachedResponse = savedArticleCache!!.getWithContext(request, "Dog").await()
-        }
-        assertNull(cachedResponse)
-    }
-
     @Test
     fun cacheHitWhenWhitelisted() {
         val request = Request.Builder()

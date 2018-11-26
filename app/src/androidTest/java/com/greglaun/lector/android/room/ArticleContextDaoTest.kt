@@ -39,19 +39,36 @@ class SimpleEntityReadWriteTest {
         val bananaContext = RoomArticleContext(null,"Banana")
         articleContextDao.insert(bananaContext)
         val retrieved = articleContextDao.get("Banana")
-        assertThat(retrieved, equalTo(bananaContext))
+        assertThat(retrieved.contextString, equalTo(bananaContext.contextString))
         articleContextDao.delete("Banana")
         val retrievedNull = articleContextDao.get("Banana")
         assertNull(retrievedNull)
     }
 
     @Test
-    fun markTemporary() {
-        assertTrue(false)
-    }
+    fun markTemporaryAndPermanent() {
+        val apple = RoomArticleContext(null, "apple", "", true)
+        val sauce = RoomArticleContext(null, "sauce", "", true)
+        val pancakes = RoomArticleContext(null, "pancakes", "", true)
+        val appleId = articleContextDao.insert(apple)
+        val sauceId = articleContextDao.insert(sauce)
+        val pancakeId = articleContextDao.insert(pancakes)
 
-    @Test
-    fun markPermanent() {
-        assertTrue(false)
+        articleContextDao.markPermanent("apple")
+        articleContextDao.markPermanent("sauce")
+        articleContextDao.markTemporary("sauce")
+
+        apple.id = appleId
+        apple.temporary = false
+        sauce.id = sauceId
+        pancakes.id = pancakeId
+
+        val temporary = articleContextDao.getAllTemporary()
+        val permanent = articleContextDao.getAllPermanent()
+        assertTrue(permanent.size == 1)
+        assertTrue(permanent.contains(apple))
+        assertTrue(temporary.size == 2)
+        assertTrue(temporary.contains(sauce))
+        assertTrue(temporary.contains(pancakes))
     }
 }
