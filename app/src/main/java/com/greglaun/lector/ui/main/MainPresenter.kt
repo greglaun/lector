@@ -58,7 +58,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun loadFromContext(articleContext: ArticleContext) {
-        onUrlChanged("http://m.wikipedia.org/wiki/" + articleContext.contextString)
+        onUrlChanged("https://en.m.wikipedia.org/wiki/" + articleContext.contextString)
         // ttsPresenter.setPosition(articleContext.position)
     }
 
@@ -107,10 +107,8 @@ class MainPresenter(val view : MainContract.View,
 
     override fun saveArticle() {
         GlobalScope.launch {
-            if (responseSource.contains(tempPrefix + currentRequestContext).await()) {
-                responseSource.update(tempPrefix + currentRequestContext, currentRequestContext)
-            } else {
-                responseSource.add(currentRequestContext)
+            synchronized(currentRequestContext) {
+                responseSource.markPermanent(currentRequestContext)
             }
         }
     }
