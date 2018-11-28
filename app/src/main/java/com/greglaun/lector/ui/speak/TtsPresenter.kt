@@ -21,8 +21,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         stateMachine?.stopMachine()
     }
 
-    override fun speakInLoop() {
-        stateMachine?.actionSpeakInLoop()
+    override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
+        stateMachine?.actionSpeakInLoop(onPositionUpdate)
     }
 
     override fun onArticleOver() {
@@ -37,8 +37,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         this.onArticleOver = onArticleOver
     }
 
-    override fun onUrlChanged(urlString: String) {
-        stateMachine?.actionChangeUrl(urlString)
+    override fun onUrlChanged(urlString: String, postition: String) {
+        stateMachine?.actionChangeUrl(urlString, position = postition)
     }
 
     override fun stopSpeaking() {

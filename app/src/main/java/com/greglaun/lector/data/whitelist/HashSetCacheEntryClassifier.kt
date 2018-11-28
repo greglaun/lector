@@ -66,4 +66,13 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         }
         return CompletableDeferred(result.toList())
     }
+
+    override fun getArticleContext(context: String): Deferred<ArticleContext> {
+        return CompletableDeferred(BasicArticleContext.fromString(context))
+    }
+
+    override fun updatePosition(currentRequestContext: String, position: String): Deferred<Unit> {
+        // Do nothing for now
+        return CompletableDeferred(Unit)
+    }
 }

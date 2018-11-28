@@ -79,4 +79,12 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
     override fun getAllPermanent(): Deferred<List<ArticleContext>> {
         return cacheEntryClassifier.getAllPermanent()
     }
+
+    override fun getArticleContext(context: String): Deferred<ArticleContext> {
+        return cacheEntryClassifier.getArticleContext(context)
+    }
+
+    override fun updatePosition(context: String, position: String): Deferred<Unit> {
+        return cacheEntryClassifier.updatePosition(context, position)
+    }
 }

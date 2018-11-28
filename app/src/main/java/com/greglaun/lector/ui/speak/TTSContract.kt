@@ -1,5 +1,7 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.data.cache.POSITION_BEGINNING
+
 // This is an attempt at the MVP
 interface TTSContract {
     interface AudioView { // Surely there's a better name.
@@ -8,9 +10,9 @@ interface TTSContract {
     }
 
     interface Presenter {
-        fun speakInLoop()
+        fun speakInLoop(onPositionUpdate: ((String) -> Unit)?)
         fun stopSpeaking()
-        fun onUrlChanged(urlString : String)
+        fun onUrlChanged(urlString : String, position: String = POSITION_BEGINNING)
         fun onStart()
         fun onStop()
         fun registerArticleOverCallback(onArticleOver: () -> Unit)

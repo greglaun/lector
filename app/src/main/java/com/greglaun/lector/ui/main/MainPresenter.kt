@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.POSITION_BEGINNING
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
@@ -41,7 +42,9 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onPlayButtonPressed() {
-        ttsPresenter.speakInLoop()
+        ttsPresenter.speakInLoop({
+            responseSource.updatePosition(currentRequestContext, it)
+        })
         view.enablePauseButton()
     }
 
@@ -54,7 +57,15 @@ class MainPresenter(val view : MainContract.View,
         computeCurrentContext(urlString)
         view.loadUrl(urlString)
         stopSpeakingAndEnablePlayButton()
-        ttsPresenter.onUrlChanged(urlString)
+        GlobalScope.launch {
+            var position = POSITION_BEGINNING
+            if (responseSource.contains(urlToContext(urlString)).await()) {
+                position = responseSource.getArticleContext(urlToContext(urlString))
+                        .await().position
+            }
+            ttsPresenter.onUrlChanged(urlString, position)
+        }
+
     }
 
     override fun loadFromContext(articleContext: ArticleContext) {

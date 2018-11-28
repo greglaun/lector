@@ -5,11 +5,6 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun speakInLoop() {
-        // Do nothing
-    }
-
-
     override fun onStart() {
         // Do nothing
     }
@@ -22,7 +17,11 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun onUrlChanged(urlString: String) {
+    override fun onUrlChanged(urlString: String, position: String) {
+        // Do nothing
+    }
+
+    override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
         // Do nothing
     }
 }

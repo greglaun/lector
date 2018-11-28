@@ -1,5 +1,7 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.data.cache.POSITION_BEGINNING
+import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.utteranceId
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.actor
@@ -10,6 +12,7 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
         Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     var articleState: ArticleState? = null
     var state = SpeakerState.NOT_READY
+    var position: String = POSITION_BEGINNING
     for (msg in channel) {
         when (msg) {
             is UpdateArticleState -> {
@@ -31,6 +34,38 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
                 ttsClient.stopSpeechViewImmediately()
                 state = SpeakerState.READY
             }
+            is ForwardOne -> {
+                if (articleState != null && articleState.iterator != null &&
+                        articleState.iterator.hasNext()) {
+                    val initialState = state
+                    state = SpeakerState.SCRUBBING
+                    ttsClient.stopSpeechViewImmediately()
+                    articleState.iterator.next()
+                    state = initialState
+                }
+            }
+            is BackOne -> {
+                if (articleState != null && articleState.iterator != null &&
+                        articleState.iterator.hasPrevious()) {
+                    val initalState = state
+                    state = SpeakerState.SCRUBBING
+                    ttsClient.stopSpeechViewImmediately()
+                    articleState.iterator.previous()
+                    state = initalState
+                }
+            }
+            is AdvanceToPosition -> {
+                if (articleState != null && articleState.iterator != null &&
+                        articleState.iterator.hasPrevious()) {
+                    val initialState = state
+                    state = SpeakerState.SCRUBBING
+                    articleState = fastForward(articleState, msg.position)
+                    state = initialState
+                }
+            }
+            is GetPosition -> {
+                msg.position.complete(position)
+            }
             is SpeakOne -> {
                 if (state == SpeakerState.SPEAKING && articleState!!.iterator != null) {
                     if (!articleState.iterator.hasNext()) {
@@ -42,6 +77,7 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
                     }
                     ttsClient.speechViewSpeak(text) {
                         if (it == utteranceId(text)) {
+                            position = it.md5()
                             if (articleState?.iterator?.hasNext()) {
                                 articleState.iterator.next() // Advance again after completion
                             }
@@ -62,18 +98,38 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
     }
 })
 
+fun fastForward(articleState: ArticleState, position: String): ArticleState {
+    val initialState = articleState.copy()
+    var text = articleState.iterator.next()
+    if (position.md5() == text) {
+        return articleState
+    }
+    while (articleState!!.iterator!!.hasNext() && position != text.md5()) {
+        text = articleState.iterator.next()
+    }
+    if (position != text.md5()) {
+        return initialState
+    }
+    return articleState
+}
+
 enum class SpeakerState {
     NOT_READY,
     READY,
+    SCRUBBING,
     SPEAKING
 }
 
 // Message types for ttsActor
 sealed class TtsMsg
-object MarkReady : TtsMsg() // Mark as ready to speak
-object MarkNotReady : TtsMsg() // Mark as ready to speak
+object MarkReady: TtsMsg() // Mark as ready to speak
+object MarkNotReady: TtsMsg() // Mark as ready to speak
 class GetSpeakerState(val response: CompletableDeferred<SpeakerState>): TtsMsg()
 object StartSpeaking: TtsMsg()
 class SpeakOne(val speakerState: CompletableDeferred<SpeakerState>) : TtsMsg()
 object StopSpeaking : TtsMsg()
 class UpdateArticleState(val articleState: ArticleState): TtsMsg()
+class AdvanceToPosition(val position: String): TtsMsg()
+object ForwardOne: TtsMsg()
+object BackOne: TtsMsg()
+class GetPosition(val position: CompletableDeferred<String>): TtsMsg()

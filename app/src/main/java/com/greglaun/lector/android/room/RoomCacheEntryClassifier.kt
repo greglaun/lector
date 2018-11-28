@@ -63,4 +63,16 @@ class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifi
             db.articleContextDao().getAllPermanent()
         }
     }
+
+    override fun getArticleContext(context: String): Deferred<ArticleContext> {
+        return GlobalScope.async {
+            db.articleContextDao().get(context)
+        }
+    }
+
+    override fun updatePosition(currentRequestContext: String, position: String): Deferred<Unit> {
+        return GlobalScope.async {
+            db.articleContextDao().updatePosition(currentRequestContext, position)
+        }
+    }
 }

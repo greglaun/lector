@@ -44,4 +44,8 @@ interface ArticleContextDao {
 
     @Query("SELECT * from RoomArticleContext WHERE `temporary` = 0")
     fun getAllPermanent(): List<RoomArticleContext>
+
+    @Query("UPDATE RoomArticleContext SET position = :position WHERE contextString = :contextString")
+    fun updatePosition(contextString: String, position: String)
+
 }

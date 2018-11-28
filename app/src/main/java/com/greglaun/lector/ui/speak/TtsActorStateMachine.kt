@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.data.cache.POSITION_BEGINNING
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 
@@ -22,10 +23,21 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         }
     }
 
-    override fun changeStateUpdateArticle(urlString: String): Deferred<Unit> {
+    override fun changeStateUpdateArticle(urlString: String,
+                                          position: String)
+            : Deferred<Unit> {
         return CoroutineScope(workerContext).async {
             val articleState = articleStateSource.getArticle(urlString)
             actorLoop?.send(UpdateArticleState(articleState))
+
+            if (position == POSITION_BEGINNING) {
+                return@async
+            }
+            val readyDeferred = getState()
+            while(readyDeferred.await() != SpeakerState.READY) {
+                    delay(250)
+            }
+            actorLoop?.send(AdvanceToPosition(position))
             Unit
         }
     }
@@ -45,22 +57,23 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     // todo(testing): Properly test this loop
-    override fun actionSpeakInLoop(): Deferred<Unit> {
+    override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
         return CoroutineScope(workerContext).async {
-            var readyStatus = false
-            while(!readyStatus) {
-                val readyDeferred = getState()
-                if (readyDeferred.await() == SpeakerState.READY) {
-                    readyStatus = true
-                } else {
-                    delay(250)
-                }
+            val readyDeferred = getState()
+            while(readyDeferred.await() != SpeakerState.READY) {
+                delay(250)
             }
             changeStateStartSpeaking()
             var stillSpeaking = true
             while(stillSpeaking) {
-                val speakingState = actionSpeakOne()
-                stillSpeaking = speakingState.await() == SpeakerState.SPEAKING
+                var speakingState = actionSpeakOne()
+                val position = actionGetPosition().await()
+                onPositionUpdate?.invoke(position)
+                while (speakingState.await() == SpeakerState.SCRUBBING) {
+                    delay(10)
+                    speakingState = getState()
+                }
+                stillSpeaking = speakingState == SpeakerState.SPEAKING
             }
         }
     }
@@ -81,16 +94,24 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         }
     }
 
+    override fun actionGetPosition(): Deferred<String> {
+        return CoroutineScope(workerContext).async {
+            val positionDeferred = CompletableDeferred<String>()
+            actorLoop?.send(GetPosition(positionDeferred))
+            positionDeferred.await()
+        }
+    }
+
     override fun actionStopSpeaking(): Deferred<Unit?> {
         return CoroutineScope(workerContext).async {
             actorLoop?.send(StopSpeaking)
         }
     }
 
-    override fun actionChangeUrl(urlString: String): Deferred<Unit> {
+    override fun actionChangeUrl(urlString: String, position: String): Deferred<Unit> {
         return CoroutineScope(workerContext).async {
             changeStateNotReady().await()
-            changeStateUpdateArticle(urlString).await()
+            changeStateUpdateArticle(urlString, position).await()
             changeStateReady().await()
         }
     }
