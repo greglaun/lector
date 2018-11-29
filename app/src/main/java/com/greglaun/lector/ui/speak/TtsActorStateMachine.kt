@@ -29,13 +29,13 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         return CoroutineScope(workerContext).async {
             val articleState = articleStateSource.getArticle(urlString)
             actorLoop?.send(UpdateArticleState(articleState))
-
             if (position == POSITION_BEGINNING) {
                 return@async
             }
-            val readyDeferred = getState()
+            var readyDeferred = getState()
             while(readyDeferred.await() != SpeakerState.READY) {
-                    delay(250)
+                Thread.sleep(20)
+                readyDeferred = getState()
             }
             actorLoop?.send(AdvanceToPosition(position))
             Unit
@@ -59,9 +59,10 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     // todo(testing): Properly test this loop
     override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
         return CoroutineScope(workerContext).async {
-            val readyDeferred = getState()
+            var readyDeferred = getState()
             while(readyDeferred.await() != SpeakerState.READY) {
-                delay(250)
+                Thread.sleep(250)
+                readyDeferred = getState()
             }
             changeStateStartSpeaking()
             var stillSpeaking = true
@@ -70,10 +71,10 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
                 val position = actionGetPosition().await()
                 onPositionUpdate?.invoke(position)
                 while (speakingState.await() == SpeakerState.SCRUBBING) {
-                    delay(10)
+                    Thread.sleep(10)
                     speakingState = getState()
                 }
-                stillSpeaking = speakingState == SpeakerState.SPEAKING
+                stillSpeaking = speakingState.await() == SpeakerState.SPEAKING
             }
         }
     }
@@ -112,9 +113,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         return CoroutineScope(workerContext).async {
             changeStateNotReady().await()
             changeStateUpdateArticle(urlString, position).await()
-            changeStateReady().await()
+//            changeStateReady().await()
         }
     }
-
-
 }

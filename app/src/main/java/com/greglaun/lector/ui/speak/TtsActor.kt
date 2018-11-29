@@ -18,6 +18,7 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
             is UpdateArticleState -> {
                 state = SpeakerState.NOT_READY
                 articleState = msg.articleState
+                state = SpeakerState.READY
             }
             is MarkReady -> state = SpeakerState.READY
             is MarkNotReady -> {
