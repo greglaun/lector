@@ -1,6 +1,5 @@
 package com.greglaun.lector.ui.speak
 
-import com.greglaun.lector.data.cache.POSITION_BEGINNING
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 
@@ -28,16 +27,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
             : Deferred<Unit> {
         return CoroutineScope(workerContext).async {
             val articleState = articleStateSource.getArticle(urlString)
-            actorLoop?.send(UpdateArticleState(articleState))
-            if (position == POSITION_BEGINNING) {
-                return@async
-            }
-            var readyDeferred = getState()
-            while(readyDeferred.await() != SpeakerState.READY) {
-                Thread.sleep(20)
-                readyDeferred = getState()
-            }
-            actorLoop?.send(AdvanceToPosition(position))
+            actorLoop?.send(UpdateArticleState(articleState, position))
             Unit
         }
     }
@@ -113,7 +103,6 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         return CoroutineScope(workerContext).async {
             changeStateNotReady().await()
             changeStateUpdateArticle(urlString, position).await()
-//            changeStateReady().await()
         }
     }
 }

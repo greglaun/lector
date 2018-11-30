@@ -22,7 +22,7 @@ fun titleToContext(title : String) : String {
 }
 
 fun utteranceId(text : String) : String{
-    return text.hashCode().toString()
+    return text.md5()
 }
 
 fun String.md5(): String {

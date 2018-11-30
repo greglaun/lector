@@ -22,7 +22,9 @@ class MainPresenter(val view : MainContract.View,
     private val tempPrefix = "LectorTemp:"
 
     override fun onAttach() {
-        ttsPresenter.onStart()
+        ttsPresenter.onStart {
+            onArticleOver()
+        }
     }
 
     override fun onDetach() {
