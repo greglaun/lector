@@ -2,14 +2,12 @@ package com.greglaun.lector.android.room
 
 import android.arch.persistence.room.Room
 import android.content.Context
-import android.database.sqlite.SQLiteConstraintException
 import androidx.test.core.app.ApplicationProvider
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.assertNull
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
@@ -36,12 +34,13 @@ class RoomSavedArticleCacheTest {
 
     }
 
-    @Test(expected = SQLiteConstraintException::class)
+    @Test
     fun setContextUnprepared() {
         var context = "Potato"
         val catResponse = client.newCall(catRequest).execute()
 
         runBlocking {
+            // This should not cause an error
             cache!!.setWithContext(catRequest!!, catResponse!!, context).await()
         }
     }
@@ -85,10 +84,5 @@ class RoomSavedArticleCacheTest {
             val result2 = cache!!.getWithContext(dogRequest!!, context).await()
             assertNull(result2)
         }
-    }
-
-    @Test
-    fun flushToDisk() {
-        assertTrue(false)
     }
 }

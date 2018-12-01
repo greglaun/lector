@@ -1,6 +1,6 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.ui.speak.TTSContract
 import org.junit.After
 import org.junit.Before
@@ -12,14 +12,14 @@ class MainPresenterTest {
     lateinit var mainPresenter: MainContract.Presenter
     lateinit var mockView: MainContract.View
     lateinit var mockTts: TTSContract.Presenter
-    lateinit var responseSource: ResponseSource
+    lateinit var responseSource: ResponseSourceImpl
     val testDir = File("testDir")
 
     @Before
     fun setUp() {
         mockView = mock(MainContract.View::class.java)
         mockTts = mock(TTSContract.Presenter::class.java)
-        responseSource = mock(ResponseSource::class.java)
+        responseSource = mock(ResponseSourceImpl::class.java)
         mainPresenter = MainPresenter(mockView, mockTts, responseSource)
     }
 
@@ -55,12 +55,6 @@ class MainPresenterTest {
         mainPresenter.onUrlChanged("test")
         verify(mockView, times(1)).loadUrl("test")
         verify(mockTts, times(1)).onUrlChanged("test")
-    }
-
-    @Test
-    fun saveArticle() {
-        mainPresenter.saveArticle("test")
-        verify(responseSource, times(1)).add("test")
     }
 
     @Test

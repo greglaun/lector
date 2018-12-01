@@ -1,7 +1,10 @@
 package com.greglaun.lector.data.cache
 
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 import okhttp3.Response
 import java.util.*
@@ -47,5 +50,20 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
         // Do nothing
         return CompletableDeferred(Unit)
     }
+
+    override fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>): Deferred<Unit> {
+        return GlobalScope.async {
+            hashCache.forEach {
+                val iterator = it.value.second.iterator()
+                while (iterator.hasNext()) {
+                    val it = iterator.next()
+                    if (classifier.isTemporary(it).await()) {
+                        iterator.remove()
+                    }
+                }
+            }
+        }
+    }
+
 }
 

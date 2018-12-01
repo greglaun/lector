@@ -1,28 +1,38 @@
 package com.greglaun.lector.ui.main
 
+import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.POSITION_BEGINNING
 import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.data.cache.contextToTitle
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.ui.speak.TTSContract
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+
 
 // todo(global state): Move to better place.
 class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource)
     : MainContract.Presenter {
-    private var currentRequestContext = "BAD_CONTEXT" // todo(strings): Use user's default page
+    val defaultContext = "BAD_CONTEXT"
+    private var currentRequestContext = defaultContext // todo(strings): Use user's default page
+    private val contextThread = newSingleThreadContext("ContextThread")
+    private val tempPrefix = "LectorTemp:"
 
     override fun onAttach() {
-        ttsPresenter.onStart()
+        ttsPresenter.onStart {
+            onArticleOver()
+        }
     }
 
     override fun onDetach() {
         ttsPresenter.onStop()
+    }
+
+    override fun responseSource(): ResponseSource {
+        return responseSource
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -34,7 +44,9 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onPlayButtonPressed() {
-        ttsPresenter.speakInLoop()
+        ttsPresenter.speakInLoop({
+            responseSource.updatePosition(currentRequestContext, it)
+        })
         view.enablePauseButton()
     }
 
@@ -43,22 +55,75 @@ class MainPresenter(val view : MainContract.View,
         view.enablePlayButton()
     }
 
-    override fun onUrlChanged(url: String) {
-        // todo(optimization): Pull context from REST API
-        currentRequestContext = urlToContext(url)
-        view.loadUrl(url)
+    override fun onUrlChanged(urlString: String) {
+        computeCurrentContext(urlString)
+        view.loadUrl(urlString)
         stopSpeakingAndEnablePlayButton()
-        ttsPresenter.onUrlChanged(url)
+        GlobalScope.launch {
+            var position = POSITION_BEGINNING
+            if (responseSource.contains(urlToContext(urlString)).await()) {
+                position = responseSource.getArticleContext(urlToContext(urlString))
+                        .await().position
+            }
+            ttsPresenter.onUrlChanged(urlString, position)
+        }
+
+    }
+
+    override fun loadFromContext(articleContext: ArticleContext) {
+        onUrlChanged("https://en.m.wikipedia.org/wiki/" + articleContext.contextString)
+        // ttsPresenter.setPosition(articleContext.position)
+    }
+
+    private fun computeCurrentContext(urlString: String) {
+        // todo(caching, REST): Replace this ugliness
+        // todo(concurrency): Handle access of currentRequestContext from multiple threads
+        CoroutineScope(contextThread).launch {
+            synchronized(currentRequestContext) {
+                if (urlString.contains("index.php?search=")) {
+                    if (urlString.substringAfterLast("search=") == "") {
+                        return@launch
+                    }
+                    val client = OkHttpClient().newBuilder()
+                            .followRedirects(false)
+                            .followSslRedirects(false)
+                            .build()
+                    val request = Request.Builder()
+                            .url(urlString)
+                            .build()
+                    val response = client.newCall(request).execute()
+                    if (response != null) {
+                        if (response.isRedirect) {
+                            val url = response.networkResponse()?.headers()?.toMultimap()?.get("Location")
+                            if (url != null) {
+                                currentRequestContext = urlToContext(url.get(0))
+                            }
+                        }
+                    }
+                } else {
+                    currentRequestContext = urlToContext(urlString)
+                }
+                responseSource.add(currentRequestContext)
+            }
+        }
     }
 
     override fun onRequest(url: String): Deferred<Response?> {
+        var curContext: String? = null
+        synchronized(currentRequestContext) {
+            curContext = currentRequestContext
+        }
         return  responseSource.getWithContext(Request.Builder()
                 .url(url)
-                .build(), currentRequestContext)
+                .build(), curContext!!)
     }
 
-    override fun saveArticle(url: String) {
-        responseSource.add(urlToContext(url))
+    override fun saveArticle() {
+        GlobalScope.launch {
+            synchronized(currentRequestContext) {
+                responseSource.markPermanent(currentRequestContext)
+            }
+        }
     }
 
     override fun deleteArticle(url: String) {
@@ -67,22 +132,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onDisplayReadingList() {
         GlobalScope.launch{
-            val readingList = getReadingList()
-            view.displayReadingList(getReadingList())
+            view.displayReadingList(responseSource.getAllPermanent().await())
         }
-    }
-
-    // todo(data): Replace with live data or some other mechanism
-    fun getReadingList(): List<String> {
-        val readingList : MutableList<String> = ArrayList()
-        for (article in responseSource.iterator()) {
-            readingList.add(contextToTitle(article))
-        }
-        val readOnlyList : List<String> = readingList
-        return readOnlyList
-    }
-
-    override fun responseSource(): ResponseSource {
-        return responseSource
     }
 }

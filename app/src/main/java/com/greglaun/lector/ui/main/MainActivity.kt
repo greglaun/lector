@@ -16,11 +16,11 @@ import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.android.room.ArticleCacheDatabase
+import com.greglaun.lector.android.room.RoomCacheEntryClassifier
 import com.greglaun.lector.android.room.RoomSavedArticleCache
-import com.greglaun.lector.android.room.RoomWhitelist
-import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.data.cache.titleToContext
-import com.greglaun.lector.data.whitelist.Whitelist
+import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.ResponseSourceImpl
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.JSoupArticleStateSource
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsActorStateMachine
@@ -49,17 +49,25 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
     }
 
-    private fun createResponseSource(): ResponseSource {
+    private fun createResponseSource(): ResponseSourceImpl {
         val db = ArticleCacheDatabase.getInstance(this)
-        val whitelist: Whitelist<String> = RoomWhitelist(db!!)
-        return ResponseSource.createResponseSource(RoomSavedArticleCache(db), whitelist,
+        val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db!!)
+        return ResponseSourceImpl.createResponseSource(RoomSavedArticleCache(db), cacheEntryClassifier,
                 getCacheDir())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mainPresenter.onDetach()
     }
 
     override fun onResume() {
         super.onResume()
         checkTts()
+        mainPresenter.onAttach()
     }
+
+
 
     fun checkTts() {
         // todo(android): Clean this up, it is horribly messy.
@@ -113,7 +121,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_save -> {
-                mainPresenter.saveArticle(webView.url)
+                mainPresenter.saveArticle()
                 return true
             }
             R.id.action_reading_list -> {
@@ -164,13 +172,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun displayReadingList(readingList : List<String>) {
+    override fun displayReadingList(readingList : List<ArticleContext>) {
         runOnUiThread {
             val builder = AlertDialog.Builder(this)
+            val stringList = ArrayList<String>()
+            readingList.forEach {
+                stringList.add(it.contextString)
+            }
             builder.setTitle(getString(R.string.dialog_reading_list_title))
-            builder.setItems(readingList.toTypedArray()) { dialog, which ->
-                mainPresenter.onUrlChanged("https://en.m.wikipedia.org/wiki/"
-                        + titleToContext(readingList[which]))
+            builder.setItems(stringList.toTypedArray()) { dialog, which ->
+                mainPresenter.loadFromContext(readingList[which])
             }
             builder.show()
         }
@@ -179,9 +190,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     inner class WikiWebViewClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
            if (request.url.authority.endsWith("wikipedia.org")) {
-               if (request.url.toString().contains("index.php?search=")) {
-                   return false
-               }
                mainPresenter.onUrlChanged(request.url.toString())
                return true
            }

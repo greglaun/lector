@@ -1,5 +1,6 @@
 package com.greglaun.lector.data.cache
 
+import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
@@ -7,10 +8,20 @@ import kotlinx.coroutines.experimental.async
 interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
     fun getWithContext(key : Key, keyContext : KeyContext) : Deferred<Value?>
     fun setWithContext(key : Key, value : Value, keyContext : KeyContext) : Deferred<Unit>
+    fun garbageCollectContext(keyContext: String): Deferred<Unit>
+    fun garbageCollectTemporary(classifier: CacheEntryClassifier<KeyContext>): Deferred<Unit>
 
     fun compose(b: ContextAwareCache<Key, Value, KeyContext>)
             : ContextAwareCache<Key, Value, KeyContext> {
         return object : ContextAwareCache<Key, Value, KeyContext> {
+            override fun garbageCollectContext(keyContext: String): Deferred<Unit> {
+                return this@ContextAwareCache.garbageCollectContext(keyContext)
+            }
+
+            override fun garbageCollectTemporary(classifier: CacheEntryClassifier<KeyContext>): Deferred<Unit> {
+                return this@ContextAwareCache.garbageCollectTemporary(classifier)
+            }
+
             override fun getWithContext(key: Key, keyContext: KeyContext): Deferred<Value?> {
                 return GlobalScope.async {
                     this@ContextAwareCache.getWithContext(key, keyContext).await() ?: let {
@@ -30,10 +41,18 @@ interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
         }
     }
 
-    // Throw away articleContext when composing with a ComposableCache
+    // Throw away contextString when composing with a ComposableCache
     fun compose(b: ComposableCache<Key, Value>):
             ContextAwareCache<Key, Value, KeyContext> {
         return object : ContextAwareCache<Key, Value, KeyContext> {
+            override fun garbageCollectContext(keyContext: String): Deferred<Unit> {
+                return this@ContextAwareCache.garbageCollectContext(keyContext)
+            }
+
+            override fun garbageCollectTemporary(classifier: CacheEntryClassifier<KeyContext>): Deferred<Unit> {
+                return this@ContextAwareCache.garbageCollectTemporary(classifier)
+            }
+
             override fun getWithContext(key: Key, keyContext : KeyContext): Deferred<Value?> {
                 return GlobalScope.async {
                     this@ContextAwareCache.getWithContext(key, keyContext).await() ?: let {

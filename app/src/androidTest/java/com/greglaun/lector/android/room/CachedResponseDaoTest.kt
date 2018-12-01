@@ -20,9 +20,7 @@ class CachedResponseDaoTest {
     private var db: ArticleCacheDatabase? = null
     val serialResponse = "68747470733A2F2F656E2E77696B6970656469612E6F72672F726F626F74732E74787"
     val urlHash = "http://www.wikipedia.org/wiki/Test".hashCode().toString()
-    val cachedResponse = CachedResponse(1, urlHash, serialResponse,
-            "Banana")
-
+    var cachedResponse: CachedResponse? = null
 
     @Before
     fun createDb() {
@@ -41,24 +39,32 @@ class CachedResponseDaoTest {
 
     @Test(expected = SQLiteConstraintException::class)
     fun insertForeignKeyMissing() {
-        cachedResponseDao.insert(cachedResponse)
+        cachedResponse = CachedResponse(1, urlHash, serialResponse,
+                1L)
+        cachedResponseDao.insert(cachedResponse!!)
     }
 
     @Test
     fun insertForeignKeyPresent() {
-        articleContextDao.insert(ArticleContext("Banana"))
-        cachedResponseDao.insert(cachedResponse)
+        articleContextDao.insert(RoomArticleContext(null, "Banana"))
+        val bananaId = articleContextDao.get("Banana").id
+        cachedResponse = CachedResponse(1, urlHash, serialResponse,
+                bananaId!!)
+        cachedResponseDao.insert(cachedResponse!!)
         val retrieved = cachedResponseDao.getAllWithContext("Banana")
         assertThat(retrieved.get(0), equalTo(cachedResponse))
     }
 
     @Test
     fun insertListForeignKeyPresent() {
-        articleContextDao.insert(ArticleContext("Banana"))
+        articleContextDao.insert(RoomArticleContext(null, "Banana"))
+        val bananaId = articleContextDao.get("Banana").id
+        cachedResponse = CachedResponse(1, urlHash, serialResponse,
+                bananaId!!)
         val responses = ArrayList<CachedResponse>()
         for(i in 1..15) {
             responses.add(CachedResponse(i.toLong(), "A string" + i.toString(),
-            "Another string" + i.toString(), "Banana"))
+            "Another string" + i.toString(), bananaId))
         }
         cachedResponseDao.insert(responses)
         val retrieved = cachedResponseDao.getAllWithContext("Banana")
