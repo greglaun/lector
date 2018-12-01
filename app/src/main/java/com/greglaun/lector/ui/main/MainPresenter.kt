@@ -11,15 +11,12 @@ import okhttp3.Request
 import okhttp3.Response
 
 
-// todo(global state): Move to better place.
 class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource)
     : MainContract.Presenter {
-    val defaultContext = "BAD_CONTEXT"
-    private var currentRequestContext = defaultContext // todo(strings): Use user's default page
+    private var currentRequestContext = "MAIN_PAGE"
     private val contextThread = newSingleThreadContext("ContextThread")
-    private val tempPrefix = "LectorTemp:"
 
     override fun onAttach() {
         ttsPresenter.onStart {
