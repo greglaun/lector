@@ -56,10 +56,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 getCacheDir())
     }
 
+    override fun onPause() {
+        super.onPause()
+        mainPresenter.onDetach()
+    }
+
     override fun onResume() {
         super.onResume()
         checkTts()
+        mainPresenter.onAttach()
     }
+
+
 
     fun checkTts() {
         // todo(android): Clean this up, it is horribly messy.

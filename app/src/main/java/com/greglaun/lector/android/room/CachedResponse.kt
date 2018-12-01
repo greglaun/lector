@@ -1,11 +1,12 @@
 package com.greglaun.lector.android.room
 
 import android.arch.persistence.room.*
+import android.arch.persistence.room.ForeignKey.CASCADE
 
 @Entity(foreignKeys = arrayOf(ForeignKey(
         entity = RoomArticleContext::class,
         parentColumns = arrayOf("id"),
-        childColumns = arrayOf("articleContextId"))),
+        childColumns = arrayOf("articleContextId"), onDelete = CASCADE)),
         indices = arrayOf(Index(value = "articleContextId")))
 
 

@@ -5,7 +5,7 @@ import kotlinx.coroutines.experimental.channels.SendChannel
 
 class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStateMachine {
     private var actorLoop: SendChannel<TtsMsg>? = null
-    private val workerContext = newFixedThreadPoolContext(2, "WorkerContext")
+    private val actorClient = newSingleThreadContext("ActorClient")
 
     override fun startMachine(ttsActorClient: TtsActorClient) {
         actorLoop = ttsActor(ttsActorClient)
@@ -16,7 +16,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     override fun changeStateNotReady(): Deferred<Unit> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             actorLoop?.send(MarkNotReady)
             Unit
         }
@@ -25,7 +25,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     override fun changeStateUpdateArticle(urlString: String,
                                           position: String)
             : Deferred<Unit> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             val articleState = articleStateSource.getArticle(urlString)
             actorLoop?.send(UpdateArticleState(articleState, position))
             Unit
@@ -33,14 +33,14 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     override fun changeStateReady(): Deferred<Unit> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             actorLoop?.send(MarkReady)
             Unit
         }
     }
 
     override fun changeStateStartSpeaking(): Deferred<Unit> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             actorLoop?.send(StartSpeaking)
             Unit
         }
@@ -48,10 +48,10 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
 
     // todo(testing): Properly test this loop
     override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             var readyDeferred = getState()
             while(readyDeferred.await() != SpeakerState.READY) {
-                Thread.sleep(250)
+                Thread.sleep(20)
                 readyDeferred = getState()
             }
             changeStateStartSpeaking()
@@ -70,7 +70,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     override fun actionSpeakOne(): Deferred<SpeakerState> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             val speakingState = CompletableDeferred<SpeakerState>()
             actorLoop?.send(SpeakOne(speakingState))
             speakingState.await()
@@ -78,7 +78,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     override fun getState(): Deferred<SpeakerState> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             val stateDeferred = CompletableDeferred<SpeakerState>()
             actorLoop?.send(GetSpeakerState(stateDeferred))
             stateDeferred.await()
@@ -86,7 +86,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     override fun actionGetPosition(): Deferred<String> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             val positionDeferred = CompletableDeferred<String>()
             actorLoop?.send(GetPosition(positionDeferred))
             positionDeferred.await()
@@ -94,13 +94,13 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     override fun actionStopSpeaking(): Deferred<Unit?> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             actorLoop?.send(StopSpeaking)
         }
     }
 
     override fun actionChangeUrl(urlString: String, position: String): Deferred<Unit> {
-        return CoroutineScope(workerContext).async {
+        return CoroutineScope(actorClient).async {
             changeStateNotReady().await()
             changeStateUpdateArticle(urlString, position).await()
         }

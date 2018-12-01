@@ -45,7 +45,6 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
 
     override fun garbageCollectContext(keyContext: String): Deferred<Unit> {
         return GlobalScope.async {
-            db.cachedResponseDao().deleteWithContext(keyContext)
             db.articleContextDao().delete(keyContext)
             CompletableDeferred(Unit)
             Unit
@@ -62,7 +61,6 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
     override fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>): Deferred<Unit> {
         return GlobalScope.async {
             // Ignore the passed-in classifier, since we already have access to the db
-            db.cachedResponseDao().deleteAllTemporary()
             db.articleContextDao().deleteAllTemporary()
         }
     }
