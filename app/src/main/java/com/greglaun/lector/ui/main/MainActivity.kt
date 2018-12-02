@@ -136,6 +136,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
+    override fun highlightText(textToHighlight: String, onDone: ((String)-> Unit)?) {
+        // todo(javascript): Properly handle javascript?
+        val highlightColor = "yellow"
+        val js = "var selection = window.getSelection(); var txt = document.getElementsByTagName('p'); txt[0].style.backgroundColor = '$highlightColor'"
+        webView.evaluateJavascript(js) {
+            onDone?.invoke(it)
+        }
+    }
+
     override fun loadUrl(urlString: String) {
         runOnUiThread {
             webView.loadUrl(urlString)
@@ -203,12 +212,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
        override fun onPageFinished(view: WebView?, url: String?) {
            super.onPageFinished(view, url)
-           var result = webView.evaluateJavascript(
-                   "(function() { return (document.getElementsByTagName('html')[0].innerHTML); })();"
-           ) { html ->
-               Log.d("HTML", html)
-               // code here
-           }
+           highlightText("Cat")
        }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {

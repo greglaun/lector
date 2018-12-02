@@ -1,5 +1,7 @@
 package com.greglaun.lector.android.room
 
+import android.database.sqlite.SQLiteConstraintException
+import android.util.Log
 import com.greglaun.lector.data.cache.SavedArticleCache
 import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.serialize
@@ -26,19 +28,24 @@ class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
     override fun setWithContext(key: Request, value: Response, keyContext: String): Deferred<Unit> {
         return GlobalScope.async {
             var articleId: Long? = null
-            if (idCache.containsKey(keyContext)) {
-                articleId = idCache.get(keyContext)
-            } else {
-                articleId = db.articleContextDao().get(keyContext)?.id
-                if (articleId == null) {
-                    articleId = db.articleContextDao().insert(
-                            RoomArticleContext(null, keyContext, "", true))
+            try {
+                if (idCache.containsKey(keyContext)) {
+                    articleId = idCache.get(keyContext)
+                } else {
+                    articleId = db.articleContextDao().get(keyContext)?.id
+                    if (articleId == null) {
+                        articleId = db.articleContextDao().insert(
+                                RoomArticleContext(null, keyContext, "", true))
+                    }
+                    idCache.put(keyContext, articleId!!)
                 }
-                idCache.put(keyContext, articleId!!)
-            }
-            val cachedResponse = CachedResponse(null, key.url().toString().md5(),
-                    value.serialize(), articleId!!)
+                val cachedResponse = CachedResponse(null, key.url().toString().md5(),
+                        value.serialize(), articleId!!)
                 db.cachedResponseDao().insert(cachedResponse)
+            } catch (e : SQLiteConstraintException) {
+                Log.d("RoomSavedArticleCache", keyContext, e)
+                throw e
+            }
             Unit
         }
     }

@@ -13,7 +13,7 @@ interface MainContract {
         fun enablePlayButton()
         fun enablePauseButton()
         fun displayReadingList(readingList: List<ArticleContext>)
-        // todo(feature): highlightText(String)
+        fun highlightText(textToHighlight: String, onDone: ((String) -> Unit)? = null)
     }
 
     interface Presenter : LectorPresenter<View> {
