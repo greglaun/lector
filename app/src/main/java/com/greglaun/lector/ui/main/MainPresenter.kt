@@ -9,6 +9,7 @@ import kotlinx.coroutines.experimental.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.jsoup.Jsoup
 
 
 class MainPresenter(val view : MainContract.View,
@@ -65,6 +66,14 @@ class MainPresenter(val view : MainContract.View,
             ttsPresenter.onUrlChanged(urlString, position)
         }
 
+        // todo(delete): Delete this temporary code
+        GlobalScope.launch {
+            var doc = Jsoup.connect(urlString).get()
+            val paragraphs = doc!!.select("p").map { it ->
+                it.text()!!
+            }
+            view.highlightText(paragraphs.get(1))
+        }
     }
 
     override fun loadFromContext(articleContext: ArticleContext) {

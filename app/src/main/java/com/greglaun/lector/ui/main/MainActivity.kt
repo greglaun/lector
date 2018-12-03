@@ -139,9 +139,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun highlightText(textToHighlight: String, onDone: ((String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
         val highlightColor = "yellow"
-        val js = "var selection = window.getSelection(); var txt = document.getElementsByTagName('p'); txt[0].style.backgroundColor = '$highlightColor'"
-        webView.evaluateJavascript(js) {
-            onDone?.invoke(it)
+        val lectorClass = "lector-active"
+        val js = "var selection = window.getSelection();" +
+                "var active = document.getElementsByClassName('$lectorClass');" +
+                "if (active.length > 0) {for (let item of active) { item.classList.toggle('$lectorClass'); }} " +
+                "var txt = document.getElementsByTagName('p');" +
+                "for (let item of txt) {if (item.textContent == '$textToHighlight\\n') {" +
+                    "item.classList.toggle('$lectorClass');" +
+                    "item.style.backgroundColor = '$highlightColor';" +
+                        "}}"
+        runOnUiThread {
+            webView.evaluateJavascript(js) {
+                onDone?.invoke(it)
+            }
         }
     }
 
@@ -208,11 +218,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
            val intent = Intent(Intent.ACTION_VIEW, request.url)
            startActivity(intent)
            return false
-       }
-
-       override fun onPageFinished(view: WebView?, url: String?) {
-           super.onPageFinished(view, url)
-           highlightText("Cat")
        }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
