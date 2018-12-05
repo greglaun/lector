@@ -4,25 +4,24 @@ import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.POSITION_BEGINNING
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.urlToContext
+import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.TTSContract
+import com.greglaun.lector.ui.speak.TtsStateListener
 import kotlinx.coroutines.experimental.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.jsoup.Jsoup
 
 
 class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource)
-    : MainContract.Presenter {
+    : MainContract.Presenter, TtsStateListener {
     private var currentRequestContext = "MAIN_PAGE"
     private val contextThread = newSingleThreadContext("ContextThread")
 
     override fun onAttach() {
-        ttsPresenter.onStart {
-            onArticleOver()
-        }
+        ttsPresenter.onStart(this)
     }
 
     override fun onDetach() {
@@ -35,6 +34,14 @@ class MainPresenter(val view : MainContract.View,
 
     override fun getLectorView(): MainContract.View? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onUtteranceStarted(articleState: ArticleState) {
+        view.highlightText(articleState)
+    }
+
+    override fun onUtteranceEnded(articleState: ArticleState) {
+        view.unhighlightText(articleState)
     }
 
     override fun onArticleOver() {
@@ -64,15 +71,6 @@ class MainPresenter(val view : MainContract.View,
                         .await().position
             }
             ttsPresenter.onUrlChanged(urlString, position)
-        }
-
-        // todo(delete): Delete this temporary code
-        GlobalScope.launch {
-            var doc = Jsoup.connect(urlString).get()
-            val paragraphs = doc!!.select("p").map { it ->
-                it.text()!!
-            }
-            view.highlightText(paragraphs.get(1))
         }
     }
 

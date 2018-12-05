@@ -21,10 +21,7 @@ import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import com.greglaun.lector.ui.speak.JSoupArticleStateSource
-import com.greglaun.lector.ui.speak.NoOpTtsPresenter
-import com.greglaun.lector.ui.speak.TtsActorStateMachine
-import com.greglaun.lector.ui.speak.TtsPresenter
+import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -136,25 +133,37 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    override fun highlightText(textToHighlight: String, onDone: ((String)-> Unit)?) {
+    override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
+        val index = articleState.iterator.nextIndex()
         val highlightColor = "yellow"
         val lectorClass = "lector-active"
         val js = "var selection = window.getSelection();" +
                 "var active = document.getElementsByClassName('$lectorClass');" +
                 "if (active.length > 0) {for (let item of active) { item.classList.toggle('$lectorClass'); }} " +
                 "var txt = document.getElementsByTagName('p');" +
-                "for (let item of txt) {if (item.textContent == '$textToHighlight\\n') {" +
-                    "item.classList.toggle('$lectorClass');" +
-                    "item.style.backgroundColor = '$highlightColor';" +
-                        "}}"
+                "txt[$index].classList.toggle('$lectorClass');" +
+                "txt[$index].style.backgroundColor = '$highlightColor';"
+
         runOnUiThread {
             webView.evaluateJavascript(js) {
-                onDone?.invoke(it)
+                onDone?.invoke(articleState, it)
             }
         }
     }
 
+    override fun unhighlightText(articleState: ArticleState,  onDone: ((ArticleState, String)-> Unit)?) {
+        // todo(javascript): Properly handle javascript?
+        val lectorClass = "lector-active"
+        val js = "var selection = window.getSelection();" +
+                "var active = document.getElementsByClassName('$lectorClass');" +
+                "if (active.length > 0) {for (let item of active) { item.classList.toggle('$lectorClass'); }} "
+        runOnUiThread {
+            webView.evaluateJavascript(js) {
+                onDone?.invoke(articleState, it)
+            }
+        }
+    }
     override fun loadUrl(urlString: String) {
         runOnUiThread {
             webView.loadUrl(urlString)

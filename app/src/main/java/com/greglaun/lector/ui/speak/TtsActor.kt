@@ -7,8 +7,9 @@ import kotlinx.coroutines.experimental.channels.actor
 
 private val actorContext = newSingleThreadContext("ActorContext")
 
-fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<TtsMsg>(
-        Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
+fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
+        CoroutineScope(actorContext).actor<TtsMsg>(
+                Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     var articleState: ArticleState? = null
     var state = SpeakerState.NOT_READY
     var position: String = POSITION_BEGINNING
@@ -67,7 +68,7 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
             is SpeakOne -> {
                 if (!articleState!!.iterator.hasNext()) {
                     state = SpeakerState.NOT_READY
-                    ttsClient.onArticleOver()
+                    // ttsClient.onArticleOver()
                 }
                 if (state == SpeakerState.SPEAKING && articleState!!.iterator != null) {
                     val text = articleState!!.iterator.next()
@@ -85,7 +86,7 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
                             } else { // Article is over
                                 state = SpeakerState.NOT_READY
                                 msg.speakerState.complete(state)
-                                ttsClient.onArticleOver()
+                                // ttsClient.onArticleOver()
                             }
                         }
                     }
