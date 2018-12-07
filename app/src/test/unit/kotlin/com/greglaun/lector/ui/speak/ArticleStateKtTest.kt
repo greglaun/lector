@@ -20,7 +20,7 @@ class ArticleStateKtTest {
     @Test
     operator fun next() {
         assertTrue(articleState!!.hasNext())
-        assertNull(ArticleState(articleState!!.title, listOf("0")).next()!!.next())
+        assertNull(ArticleState(articleState!!.title, listOf("0")).next())
     }
 
     @Test

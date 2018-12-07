@@ -66,54 +66,27 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 msg.position.complete(position)
             }
             is SpeakOne -> {
-                val triple = SpeakOneImplementation(articleState, state, ttsClient, position, msg,
-                        ttsStateListener)
-                position = triple.first
-                state = triple.second
-                articleState = triple.third
+                state = checkIfOver(articleState!!, state, ttsStateListener)
+                if (state == SpeakerState.SPEAKING) {
+                    var text = articleState!!.current()!!
+                    ttsClient.speechViewSpeak(text) {
+                        if (it == utteranceId(text)) {
+                            position = it
+                            if (articleState!!.hasNext()) {
+                                articleState = articleState!!.next()!! // Advance again after completion
+                            } else {
+                                state = SpeakerState.NOT_READY
+                            }
+                            msg.speakerState.complete(state)
+                        }
+                    }
+                } else {
+                    msg.speakerState.complete(state)
+                }
             }
         }
     }
 })
-
-private fun SpeakOneImplementation(inArticleState: ArticleState?, state: SpeakerState,
-                                   ttsClient: TtsActorClient, position: String, msg: SpeakOne,
-                                   ttsStateListener: TtsStateListener):
-        Triple<String, SpeakerState, ArticleState> {
-    var returnArticleState = inArticleState
-    var state1 = state
-    var position1 = position
-    state1 = checkIfOver(returnArticleState!!, state1, ttsStateListener)
-    if (state1 == SpeakerState.SPEAKING) {
-        var text = inArticleState!!.current()!!
-        if (text == "") {
-            state1 = checkIfOver(returnArticleState, state1, ttsStateListener)
-            if (state1 == SpeakerState.SPEAKING) {
-                return Triple(position, state1, returnArticleState!!.next()!!)
-            } else {
-                return Triple(position, state1, returnArticleState!!)
-            }
-        }
-        ttsClient.speechViewSpeak(text) {
-            if (it == utteranceId(text)) {
-                position1 = it
-                if (inArticleState?.hasNext()) {
-                    returnArticleState = inArticleState.next()!! // Advance again after completion
-                }
-                if (returnArticleState!!.hasNext()) {
-                    msg.speakerState.complete(state1) // There is still more to speak
-                } else { // Article is over
-                    state1 = SpeakerState.NOT_READY
-                    msg.speakerState.complete(state1)
-                    // ttsClient.onArticleOver()
-                }
-            }
-        }
-    } else {
-        msg.speakerState.complete(state1)
-    }
-    return Triple(position1, state1, returnArticleState!!)
-}
 
 private fun checkIfOver(inArticleState: ArticleState, inSpeakerState: SpeakerState,
                         ttsStateListener: TtsStateListener): SpeakerState {
