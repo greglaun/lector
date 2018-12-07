@@ -19,8 +19,9 @@ class TtsPresenterTest {
 
     @Test
     fun onStart() {
-        ttsPresenter!!.onStart()
-        verify(stateMachine, times(1))!!.startMachine(ttsPresenter!!)
+        ttsPresenter!!.onStart(mock(TtsStateListener::class.java))
+        verify(stateMachine, times(1))!!.startMachine(ttsPresenter!!,
+                mock(TtsStateListener::class.java))
     }
 
     @Test
@@ -31,8 +32,9 @@ class TtsPresenterTest {
 
     @Test
     fun speakInLoop() {
-        ttsPresenter!!.speakInLoop()
-        verify(stateMachine, times(1))!!.actionSpeakInLoop()
+        ttsPresenter!!.speakInLoop(null)
+        verify(stateMachine, times(1))!!
+                .actionSpeakInLoop(null)
     }
 
     @Test

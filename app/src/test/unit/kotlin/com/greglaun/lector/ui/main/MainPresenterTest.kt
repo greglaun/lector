@@ -31,15 +31,9 @@ class MainPresenterTest {
     }
 
     @Test
-    fun onArticleOver() {
-        mainPresenter.onArticleOver()
-        verify(mockView, times(1)).enablePlayButton()
-    }
-
-    @Test
     fun onPlayButtonPressed() {
         mainPresenter.onPlayButtonPressed()
-        verify(mockTts, times(1)).speakInLoop()
+        verify(mockTts, times(1)).speakInLoop(null)
         verify(mockView, times(1)).enablePauseButton()
     }
 

@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
-        val index = articleState.iterator.nextIndex()
+        val index = articleState.current_index
         val highlightColor = "yellow"
         val lectorClass = "lector-active"
         val js = "var selection = window.getSelection();" +

@@ -18,8 +18,8 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
             is UpdateArticleState -> {
                 state = SpeakerState.NOT_READY
                 articleState = msg.articleState
-                if (articleState != null && articleState.iterator != null &&
-                        articleState.iterator.hasNext() && msg.position != POSITION_BEGINNING) {
+                if (articleState != null && articleState.current_index != null &&
+                        articleState.hasNext() && msg.position != POSITION_BEGINNING) {
                     state = SpeakerState.SCRUBBING
                     articleState = fastForward(articleState, msg.position)
                 }
@@ -41,22 +41,22 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 state = SpeakerState.READY
             }
             is ForwardOne -> {
-                if (articleState != null && articleState.iterator != null &&
-                        articleState.iterator.hasNext()) {
+                if (articleState != null && articleState.current_index != null &&
+                        articleState.hasNext()) {
                     val initialState = state
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
-                    articleState.iterator.next()
+                    articleState = articleState.next()
                     state = initialState
                 }
             }
             is BackOne -> {
-                if (articleState != null && articleState.iterator != null &&
-                        articleState.iterator.hasPrevious()) {
+                if (articleState != null && articleState.current_index != null &&
+                        articleState.hasPrevious()) {
                     val initalState = state
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
-                    articleState.iterator.previous()
+                    articleState = articleState.previous()
                     state = initalState
                 }
             }
@@ -66,54 +66,77 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 msg.position.complete(position)
             }
             is SpeakOne -> {
-                if (!articleState!!.iterator.hasNext()) {
-                    state = SpeakerState.NOT_READY
-                    // ttsClient.onArticleOver()
-                }
-                if (state == SpeakerState.SPEAKING && articleState!!.iterator != null) {
-                    val text = articleState!!.iterator.next()
-                    if (articleState.iterator.hasPrevious()) {
-                        articleState.iterator.previous() // Return to where we were in case resume
-                    }
-                    ttsClient.speechViewSpeak(text) {
-                        if (it == utteranceId(text)) {
-                            position = it
-                            if (articleState?.iterator?.hasNext()) {
-                                articleState.iterator.next() // Advance again after completion
-                            }
-                            if (articleState?.iterator?.hasNext()) {
-                                msg.speakerState.complete(state) // There is still more to speak
-                            } else { // Article is over
-                                state = SpeakerState.NOT_READY
-                                msg.speakerState.complete(state)
-                                // ttsClient.onArticleOver()
-                            }
-                        }
-                    }
-                } else {
-                    msg.speakerState.complete(state)
-                }
+                val triple = SpeakOneImplementation(articleState, state, ttsClient, position, msg,
+                        ttsStateListener)
+                position = triple.first
+                state = triple.second
+                articleState = triple.third
             }
         }
     }
 })
 
+private fun SpeakOneImplementation(inArticleState: ArticleState?, state: SpeakerState,
+                                   ttsClient: TtsActorClient, position: String, msg: SpeakOne,
+                                   ttsStateListener: TtsStateListener):
+        Triple<String, SpeakerState, ArticleState> {
+    var returnArticleState = inArticleState
+    var state1 = state
+    var position1 = position
+    state1 = checkIfOver(returnArticleState!!, state1, ttsStateListener)
+    if (state1 == SpeakerState.SPEAKING) {
+        var text = inArticleState!!.current()!!
+        if (text == "") {
+            state1 = checkIfOver(returnArticleState, state1, ttsStateListener)
+            if (state1 == SpeakerState.SPEAKING) {
+                return Triple(position, state1, returnArticleState!!.next()!!)
+            } else {
+                return Triple(position, state1, returnArticleState!!)
+            }
+        }
+        ttsClient.speechViewSpeak(text) {
+            if (it == utteranceId(text)) {
+                position1 = it
+                if (inArticleState?.hasNext()) {
+                    returnArticleState = inArticleState.next()!! // Advance again after completion
+                }
+                if (returnArticleState!!.hasNext()) {
+                    msg.speakerState.complete(state1) // There is still more to speak
+                } else { // Article is over
+                    state1 = SpeakerState.NOT_READY
+                    msg.speakerState.complete(state1)
+                    // ttsClient.onArticleOver()
+                }
+            }
+        }
+    } else {
+        msg.speakerState.complete(state1)
+    }
+    return Triple(position1, state1, returnArticleState!!)
+}
+
+private fun checkIfOver(inArticleState: ArticleState, inSpeakerState: SpeakerState,
+                        ttsStateListener: TtsStateListener): SpeakerState {
+    var outSpeakerState = inSpeakerState
+    if (!inArticleState.hasNext()) {
+        outSpeakerState = SpeakerState.NOT_READY
+        ttsStateListener.onArticleOver()
+    }
+    return outSpeakerState
+}
+
 fun fastForward(inState: ArticleState, position: String): ArticleState {
-    var articleState = inState
-    val initialIndex = articleState.iterator.nextIndex()
-    var text = articleState.iterator.next()
-    if (position == utteranceId(text)) {
-        return articleState
+    var returnArticle = inState
+    if (position == utteranceId(returnArticle.current()!!)) {
+        return returnArticle
     }
-    while (articleState!!.iterator!!.hasNext() && position != utteranceId(text)) {
-        text = articleState.iterator.next()
+    while (returnArticle.hasNext() && position != utteranceId(returnArticle!!.current()!!)) {
+        returnArticle = returnArticle.next()!!
     }
-    if (position != utteranceId(text)) {
-        articleState = ArticleState(articleState.title,
-                articleState.paragraphs,
-                articleState.paragraphs.listIterator(initialIndex))
+    if (position != utteranceId(returnArticle.current()!!)) {
+        return inState
     }
-    return articleState
+    return returnArticle
 }
 
 enum class SpeakerState {

@@ -15,12 +15,11 @@ class TtsActorKtTest {
 
     val urlString = "a url"
     val paragraphs = listOf("some", "paragraphs")
-    val articleState = ArticleState("MyTitle",  paragraphs,
-            paragraphs.listIterator())
+    val articleState = ArticleState("MyTitle",  paragraphs)
 
     @Before
     fun setUp() {
-        stateMachine.startMachine(ttsClient)
+        stateMachine.startMachine(ttsClient, mock(TtsStateListener::class.java))
         `when`(articleStateSource.getArticle(urlString)).thenReturn(articleState)
     }
 

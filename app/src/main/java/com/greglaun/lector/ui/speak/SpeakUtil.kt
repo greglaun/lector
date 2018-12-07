@@ -28,6 +28,6 @@ fun jsoupStateFromUrl(urlString: String): ArticleState {
     val paragraphs = doc!!.select("p").map { it ->
         it.text()!!
     }
-    return ArticleState(title, paragraphs, paragraphs.listIterator())
+    return ArticleState(title, paragraphs)
 }
 
