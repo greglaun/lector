@@ -7,8 +7,8 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     private var actorLoop: SendChannel<TtsMsg>? = null
     private val actorClient = newSingleThreadContext("ActorClient")
 
-    override fun startMachine(ttsActorClient: TtsActorClient) {
-        actorLoop = ttsActor(ttsActorClient)
+    override fun startMachine(ttsActorClient: TtsActorClient, ttsStateListener: TtsStateListener) {
+        actorLoop = ttsActor(ttsActorClient, ttsStateListener)
     }
 
     override fun stopMachine() {

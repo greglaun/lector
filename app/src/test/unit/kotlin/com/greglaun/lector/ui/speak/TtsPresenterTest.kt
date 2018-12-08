@@ -18,12 +18,6 @@ class TtsPresenterTest {
     }
 
     @Test
-    fun onStart() {
-        ttsPresenter!!.onStart()
-        verify(stateMachine, times(1))!!.startMachine(ttsPresenter!!)
-    }
-
-    @Test
     fun onStop() {
         ttsPresenter!!.onStop()
         verify(stateMachine, times(1))!!.stopMachine()
@@ -31,8 +25,9 @@ class TtsPresenterTest {
 
     @Test
     fun speakInLoop() {
-        ttsPresenter!!.speakInLoop()
-        verify(stateMachine, times(1))!!.actionSpeakInLoop()
+        ttsPresenter!!.speakInLoop(null)
+        verify(stateMachine, times(1))!!
+                .actionSpeakInLoop(null)
     }
 
     @Test

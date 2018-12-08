@@ -21,10 +21,7 @@ import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import com.greglaun.lector.ui.speak.JSoupArticleStateSource
-import com.greglaun.lector.ui.speak.NoOpTtsPresenter
-import com.greglaun.lector.ui.speak.TtsActorStateMachine
-import com.greglaun.lector.ui.speak.TtsPresenter
+import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -58,6 +55,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onPause() {
         super.onPause()
+        mainPresenter.stopSpeakingAndEnablePlayButton()
         mainPresenter.onDetach()
     }
 
@@ -136,6 +134,39 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
+    override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
+        // todo(javascript): Properly handle javascript?
+        val index = articleState.current_index
+        val highlightColor = "yellow"
+        val lectorClass = "lector-active"
+        val js = "var selection = window.getSelection();" +
+                "var active = document.getElementsByClassName('$lectorClass');" +
+                "if (active.length > 0) {for (let item of active) { item.classList.toggle('$lectorClass'); }} " +
+                "var txt = document.getElementsByTagName('p');" +
+                "txt[$index].classList.toggle('$lectorClass');" +
+                "txt[$index].style.backgroundColor = '$highlightColor';"
+
+        runOnUiThread {
+            webView.evaluateJavascript(js) {
+                onDone?.invoke(articleState, it)
+            }
+        }
+    }
+
+    override fun unhighlightText(articleState: ArticleState,  onDone: ((ArticleState, String)-> Unit)?) {
+        // todo(javascript): Properly handle javascript?
+        val lectorClass = "lector-active"
+        val js = "var selection = window.getSelection();" +
+                "var active = document.getElementsByClassName('$lectorClass');" +
+                "if (active.length > 0) {for (let item of active) {" +
+                "item.style.background='';" +
+                "item.classList.toggle('$lectorClass'); }} "
+        runOnUiThread {
+            webView.evaluateJavascript(js) {
+                onDone?.invoke(articleState, it)
+            }
+        }
+    }
     override fun loadUrl(urlString: String) {
         runOnUiThread {
             webView.loadUrl(urlString)
@@ -199,16 +230,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
            val intent = Intent(Intent.ACTION_VIEW, request.url)
            startActivity(intent)
            return false
-       }
-
-       override fun onPageFinished(view: WebView?, url: String?) {
-           super.onPageFinished(view, url)
-           var result = webView.evaluateJavascript(
-                   "(function() { return (document.getElementsByTagName('html')[0].innerHTML); })();"
-           ) { html ->
-               Log.d("HTML", html)
-               // code here
-           }
        }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {

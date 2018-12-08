@@ -7,8 +7,9 @@ import kotlinx.coroutines.experimental.channels.actor
 
 private val actorContext = newSingleThreadContext("ActorContext")
 
-fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<TtsMsg>(
-        Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
+fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
+        CoroutineScope(actorContext).actor<TtsMsg>(
+                Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     var articleState: ArticleState? = null
     var state = SpeakerState.NOT_READY
     var position: String = POSITION_BEGINNING
@@ -17,8 +18,8 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
             is UpdateArticleState -> {
                 state = SpeakerState.NOT_READY
                 articleState = msg.articleState
-                if (articleState != null && articleState.iterator != null &&
-                        articleState.iterator.hasNext() && msg.position != POSITION_BEGINNING) {
+                if (articleState != null && articleState.current_index != null &&
+                        articleState.hasNext() && msg.position != POSITION_BEGINNING) {
                     state = SpeakerState.SCRUBBING
                     articleState = fastForward(articleState, msg.position)
                 }
@@ -40,22 +41,22 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
                 state = SpeakerState.READY
             }
             is ForwardOne -> {
-                if (articleState != null && articleState.iterator != null &&
-                        articleState.iterator.hasNext()) {
+                if (articleState != null && articleState.current_index != null &&
+                        articleState.hasNext()) {
                     val initialState = state
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
-                    articleState.iterator.next()
+                    articleState = articleState.next()
                     state = initialState
                 }
             }
             is BackOne -> {
-                if (articleState != null && articleState.iterator != null &&
-                        articleState.iterator.hasPrevious()) {
+                if (articleState != null && articleState.current_index != null &&
+                        articleState.hasPrevious()) {
                     val initalState = state
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
-                    articleState.iterator.previous()
+                    articleState = articleState.previous()
                     state = initalState
                 }
             }
@@ -65,28 +66,23 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
                 msg.position.complete(position)
             }
             is SpeakOne -> {
-                if (!articleState!!.iterator.hasNext()) {
-                    state = SpeakerState.NOT_READY
-                    ttsClient.onArticleOver()
+                if (articleState != null) {
+                    state = checkIfOver(articleState, state, ttsStateListener)
                 }
-                if (state == SpeakerState.SPEAKING && articleState!!.iterator != null) {
-                    val text = articleState!!.iterator.next()
-                    if (articleState.iterator.hasPrevious()) {
-                        articleState.iterator.previous() // Return to where we were in case resume
-                    }
+                if (state == SpeakerState.SPEAKING) {
+                    ttsStateListener.onUtteranceStarted(articleState!!)
+                    var text = articleState!!.current()!!
                     ttsClient.speechViewSpeak(text) {
                         if (it == utteranceId(text)) {
+                            ttsStateListener.onUtteranceEnded(articleState!!)
                             position = it
-                            if (articleState?.iterator?.hasNext()) {
-                                articleState.iterator.next() // Advance again after completion
-                            }
-                            if (articleState?.iterator?.hasNext()) {
-                                msg.speakerState.complete(state) // There is still more to speak
-                            } else { // Article is over
+                            if (articleState!!.hasNext()) {
+                                articleState = articleState!!.next()!! // Advance again after completion
+                            } else {
                                 state = SpeakerState.NOT_READY
-                                msg.speakerState.complete(state)
-                                ttsClient.onArticleOver()
+                                ttsStateListener.onArticleOver()
                             }
+                            msg.speakerState.complete(state)
                         }
                     }
                 } else {
@@ -97,22 +93,28 @@ fun ttsActor(ttsClient: TtsActorClient) = CoroutineScope(actorContext).actor<Tts
     }
 })
 
+private fun checkIfOver(inArticleState: ArticleState, inSpeakerState: SpeakerState,
+                        ttsStateListener: TtsStateListener): SpeakerState {
+    var outSpeakerState = inSpeakerState
+    if (!inArticleState!!.hasNext()) {
+        outSpeakerState = SpeakerState.NOT_READY
+        ttsStateListener.onArticleOver()
+    }
+    return outSpeakerState
+}
+
 fun fastForward(inState: ArticleState, position: String): ArticleState {
-    var articleState = inState
-    val initialIndex = articleState.iterator.nextIndex()
-    var text = articleState.iterator.next()
-    if (position == utteranceId(text)) {
-        return articleState
+    var returnArticle = inState
+    if (position == utteranceId(returnArticle.current()!!)) {
+        return returnArticle
     }
-    while (articleState!!.iterator!!.hasNext() && position != utteranceId(text)) {
-        text = articleState.iterator.next()
+    while (returnArticle.hasNext() && position != utteranceId(returnArticle!!.current()!!)) {
+        returnArticle = returnArticle.next()!!
     }
-    if (position != utteranceId(text)) {
-        articleState = ArticleState(articleState.title,
-                articleState.paragraphs,
-                articleState.paragraphs.listIterator(initialIndex))
+    if (position != utteranceId(returnArticle.current()!!)) {
+        return inState
     }
-    return articleState
+    return returnArticle
 }
 
 enum class SpeakerState {

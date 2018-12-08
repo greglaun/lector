@@ -13,7 +13,7 @@ interface TTSContract {
         fun speakInLoop(onPositionUpdate: ((String) -> Unit)?)
         fun stopSpeaking()
         fun onUrlChanged(urlString : String, position: String = POSITION_BEGINNING)
-        fun onStart(onArticleOver: () -> Unit)
+        fun onStart(stateListener: TtsStateListener)
         fun onStop()
     }
 }

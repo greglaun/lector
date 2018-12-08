@@ -10,8 +10,4 @@ class FakeTtsActorClient : TtsActorClient {
     override fun stopSpeechViewImmediately() {
         // Do nothing
     }
-
-    override fun onArticleOver() {
-        // Do nothing
-    }
 }

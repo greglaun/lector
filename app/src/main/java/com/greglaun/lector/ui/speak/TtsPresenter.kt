@@ -3,7 +3,6 @@ package com.greglaun.lector.ui.speak
 class TtsPresenter(private val tts: TTSContract.AudioView,
                    val stateMachine: TtsStateMachine)
     : TTSContract.Presenter, TtsActorClient {
-    private var onArticleOver: (() -> Unit) = {}
 
     override fun speechViewSpeak(text: String, callback: (String) -> Unit) {
         synchronized(tts) {
@@ -13,9 +12,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         }
     }
 
-    override fun onStart(onArticleOver: () -> Unit) {
-        this.onArticleOver = onArticleOver
-        stateMachine?.startMachine(this)
+    override fun onStart(stateListener: TtsStateListener) {
+        stateMachine?.startMachine(this, stateListener)
     }
 
     override fun onStop() {
@@ -24,10 +22,6 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
         stateMachine?.actionSpeakInLoop(onPositionUpdate)
-    }
-
-    override fun onArticleOver() {
-        onArticleOver?.invoke()
     }
 
     override fun stopSpeechViewImmediately() {

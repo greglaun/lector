@@ -4,7 +4,7 @@ import com.greglaun.lector.data.cache.POSITION_BEGINNING
 import kotlinx.coroutines.experimental.Deferred
 
 interface TtsStateMachine {
-    fun startMachine(ttsActorClient: TtsActorClient)
+    fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener)
     fun stopMachine()
 
     fun getState(): Deferred<SpeakerState>
