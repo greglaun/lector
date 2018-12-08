@@ -141,7 +141,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val lectorClass = "lector-active"
         val js = "var txt = document.getElementsByTagName('p');" +
                  "txt[$index].classList.toggle('$lectorClass');" +
-                 "txt[$index].style.backgroundColor = '$highlightColor';"
+                 "txt[$index].style.backgroundColor = '$highlightColor';" +
+                "var windowHeight = window.innerHeight;" +
+                 "var xoff = txt[$index].offsetLeft;" +
+                "var yoff = txt[$index].offsetTop;" +
+                 "window.scrollTo(xoff - windowHeight/2, yoff - windowHeight/2);"
 
         runOnUiThread {
             webView.evaluateJavascript(js) {
