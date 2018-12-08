@@ -139,12 +139,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val index = articleState.current_index
         val highlightColor = "yellow"
         val lectorClass = "lector-active"
-        val js = "var selection = window.getSelection();" +
-                "var active = document.getElementsByClassName('$lectorClass');" +
-                "if (active.length > 0) {for (let item of active) { item.classList.toggle('$lectorClass'); }} " +
-                "var txt = document.getElementsByTagName('p');" +
-                "txt[$index].classList.toggle('$lectorClass');" +
-                "txt[$index].style.backgroundColor = '$highlightColor';"
+        val js = "var txt = document.getElementsByTagName('p');" +
+                 "txt[$index].classList.toggle('$lectorClass');" +
+                 "txt[$index].style.backgroundColor = '$highlightColor';"
 
         runOnUiThread {
             webView.evaluateJavascript(js) {
@@ -156,11 +153,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun unhighlightText(articleState: ArticleState,  onDone: ((ArticleState, String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
         val lectorClass = "lector-active"
-        val js = "var selection = window.getSelection();" +
-                "var active = document.getElementsByClassName('$lectorClass');" +
-                "if (active.length > 0) {for (let item of active) {" +
-                "item.style.background='';" +
-                "item.classList.toggle('$lectorClass'); }} "
+        val js = "var active = document.getElementsByClassName('$lectorClass');" +
+                 "if (active.length > 0) {for (let item of active) {" +
+                 "item.style.background='';" +
+                 "item.classList.toggle('$lectorClass'); }} "
         runOnUiThread {
             webView.evaluateJavascript(js) {
                 onDone?.invoke(articleState, it)
@@ -220,25 +216,39 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     inner class WikiWebViewClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-           if (request.url.authority.endsWith("wikipedia.org")) {
-               mainPresenter.onUrlChanged(request.url.toString())
-               return true
-           }
-           if (request.url.authority.endsWith("wikimedia.org")) {
-               return false
-           }
-           val intent = Intent(Intent.ACTION_VIEW, request.url)
-           startActivity(intent)
-           return false
-       }
-
-    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-        if (request.url.authority.endsWith("wikipedia.org")) {
-            return runBlocking {
-                okHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
+            if (request.url.authority.endsWith("wikipedia.org")) {
+                mainPresenter.onUrlChanged(request.url.toString())
+                return true
             }
+            if (request.url.authority.endsWith("wikimedia.org")) {
+                return false
+            }
+            val intent = Intent(Intent.ACTION_VIEW, request.url)
+            startActivity(intent)
+            return false
         }
-        return super.shouldInterceptRequest(view, request)
+
+        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+            if (request.url.authority.endsWith("wikipedia.org")) {
+                return runBlocking {
+                    okHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
+                }
+            }
+            return super.shouldInterceptRequest(view, request)
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            // todo (javascript): Only run on appropriate urls
+            // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
+            val js ="var blocks = document.querySelectorAll('[id^=mf-section-]');" +
+                    "console.log('HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII');" +
+                    "console.log('HIIIIIIIIII: ' + blocks.length);" +
+                     "if (blocks.length > 0) {" +
+                      "for (let item of blocks) {" +
+                    "item.className+=' open-block';" +
+                     "}}"
+            webView.evaluateJavascript(js, null)
+        }
     }
-   }
 }
