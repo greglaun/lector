@@ -70,14 +70,17 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                     state = checkIfOver(articleState, state, ttsStateListener)
                 }
                 if (state == SpeakerState.SPEAKING) {
+                    ttsStateListener.onUtteranceStarted(articleState!!)
                     var text = articleState!!.current()!!
                     ttsClient.speechViewSpeak(text) {
                         if (it == utteranceId(text)) {
+                            ttsStateListener.onUtteranceEnded(articleState!!)
                             position = it
                             if (articleState!!.hasNext()) {
                                 articleState = articleState!!.next()!! // Advance again after completion
                             } else {
                                 state = SpeakerState.NOT_READY
+                                ttsStateListener.onArticleOver()
                             }
                             msg.speakerState.complete(state)
                         }

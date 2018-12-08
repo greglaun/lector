@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onPause() {
         super.onPause()
+        mainPresenter.stopSpeakingAndEnablePlayButton()
         mainPresenter.onDetach()
     }
 
@@ -157,7 +158,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val lectorClass = "lector-active"
         val js = "var selection = window.getSelection();" +
                 "var active = document.getElementsByClassName('$lectorClass');" +
-                "if (active.length > 0) {for (let item of active) { item.classList.toggle('$lectorClass'); }} "
+                "if (active.length > 0) {for (let item of active) {" +
+                "item.style.background='';" +
+                "item.classList.toggle('$lectorClass'); }} "
         runOnUiThread {
             webView.evaluateJavascript(js) {
                 onDone?.invoke(articleState, it)
