@@ -18,13 +18,6 @@ class TtsPresenterTest {
     }
 
     @Test
-    fun onStart() {
-        ttsPresenter!!.onStart(mock(TtsStateListener::class.java))
-        verify(stateMachine, times(1))!!.startMachine(ttsPresenter!!,
-                mock(TtsStateListener::class.java))
-    }
-
-    @Test
     fun onStop() {
         ttsPresenter!!.onStop()
         verify(stateMachine, times(1))!!.stopMachine()

@@ -51,10 +51,8 @@ class TtsActorKtTest {
     @Test
     fun updateArticleSuccess() {
         runBlocking {
-            stateMachine.changeStateReady().await()
-            assertTrue(SpeakerState.READY == stateMachine.getState().await())
             stateMachine.changeStateUpdateArticle(urlString).await()
-            assertTrue(SpeakerState.NOT_READY == stateMachine.getState().await())
+            assertTrue(SpeakerState.READY == stateMachine.getState().await())
         }
     }
 
