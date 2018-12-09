@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -134,29 +133,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 mainPresenter.deleteArticle(webView.url)
                 return true
             }
+            R.id.action_forward -> {
+                mainPresenter.onForwardOne()
+                return true
+            }
+            R.id.action_rewind -> {
+                mainPresenter.onRewindOne()
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event == null) {
-            return super.onTouchEvent(event)
-        }
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> x1 = event.x
-            MotionEvent.ACTION_UP -> {
-                x2 = event.x
-                val deltaX = x2 - x1
-                if (Math.abs(deltaX) > MIN_DISTANCE) {
-                    if (x2 > x1) {
-                        mainPresenter.onSwipeRight()
-                    } else if (x1 < x2) {
-                        mainPresenter.onSwipeLeft()
-                    }
-                }
-            }
-        }
-        return super.onTouchEvent(event)
     }
 
     override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
@@ -179,7 +165,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    override fun unhighlightText(articleState: ArticleState,  onDone: ((ArticleState, String)-> Unit)?) {
+    override fun unhighlightAllText() {
         // todo(javascript): Properly handle javascript?
         val lectorClass = "lector-active"
         val js = "var active = document.getElementsByClassName('$lectorClass');" +
@@ -187,9 +173,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                  "item.style.background='';" +
                  "item.classList.toggle('$lectorClass'); }} "
         runOnUiThread {
-            webView.evaluateJavascript(js) {
-                onDone?.invoke(articleState, it)
-            }
+            webView.evaluateJavascript(js) {}
         }
     }
     override fun loadUrl(urlString: String) {

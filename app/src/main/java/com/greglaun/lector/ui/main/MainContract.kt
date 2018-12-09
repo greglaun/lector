@@ -16,8 +16,7 @@ interface MainContract {
         fun displayReadingList(readingList: List<ArticleContext>)
         fun highlightText(articleState: ArticleState,
                           onDone: ((ArticleState, String) -> Unit)? = null)
-        fun unhighlightText(articleState: ArticleState,
-                            onDone: ((ArticleState, String) -> Unit)? = null)
+        fun unhighlightAllText()
     }
 
     interface Presenter : LectorPresenter<View> {
@@ -28,8 +27,8 @@ interface MainContract {
         fun onUrlChanged(url : String)
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
-        fun onSwipeLeft()
-        fun onSwipeRight()
+        fun onRewindOne()
+        fun onForwardOne()
         fun responseSource(): ResponseSource
         fun loadFromContext(articleContext: ArticleContext)
     }

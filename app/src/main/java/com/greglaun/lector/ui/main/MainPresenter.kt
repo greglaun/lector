@@ -43,7 +43,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onUtteranceEnded(articleState: ArticleState) {
-        view.unhighlightText(articleState)
+        view.unhighlightAllText()
     }
 
     override fun onArticleOver() {
@@ -147,13 +147,15 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    override fun onSwipeLeft() {
+    override fun onRewindOne() {
+        view.unhighlightAllText()
         ttsPresenter.advanceOne {it ->
             view.highlightText(it)
         }
     }
 
-    override fun onSwipeRight() {
+    override fun onForwardOne() {
+        view.unhighlightAllText()
         ttsPresenter.advanceOne {it ->
             view.highlightText(it)
         }
