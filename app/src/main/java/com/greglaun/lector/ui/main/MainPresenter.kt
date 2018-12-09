@@ -13,6 +13,8 @@ import okhttp3.Request
 import okhttp3.Response
 
 
+
+
 class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource)
@@ -41,7 +43,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onUtteranceEnded(articleState: ArticleState) {
-        view.unhighlightText(articleState)
+        view.unhighlightAllText()
     }
 
     override fun onArticleOver() {
@@ -83,7 +85,9 @@ class MainPresenter(val view : MainContract.View,
         // todo(caching, REST): Replace this ugliness
         // todo(concurrency): Handle access of currentRequestContext from multiple threads
         CoroutineScope(contextThread).launch {
+            var computedContext = currentRequestContext
             synchronized(currentRequestContext) {
+                computedContext = currentRequestContext
                 if (urlString.contains("index.php?search=")) {
                     if (urlString.substringAfterLast("search=") == "") {
                         return@launch
@@ -107,7 +111,10 @@ class MainPresenter(val view : MainContract.View,
                 } else {
                     currentRequestContext = urlToContext(urlString)
                 }
-                responseSource.add(currentRequestContext)
+                computedContext = currentRequestContext
+            }
+            if (!responseSource.contains(computedContext).await()) {
+                responseSource.add(computedContext)
             }
         }
     }
@@ -137,6 +144,20 @@ class MainPresenter(val view : MainContract.View,
     override fun onDisplayReadingList() {
         GlobalScope.launch{
             view.displayReadingList(responseSource.getAllPermanent().await())
+        }
+    }
+
+    override fun onRewindOne() {
+        ttsPresenter.reverseOne {it ->
+            view.unhighlightAllText()
+            view.highlightText(it)
+        }
+    }
+
+    override fun onForwardOne() {
+        ttsPresenter.advanceOne {it ->
+            view.unhighlightAllText()
+            view.highlightText(it)
         }
     }
 }

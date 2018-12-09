@@ -4,6 +4,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
                    val stateMachine: TtsStateMachine)
     : TTSContract.Presenter, TtsActorClient {
 
+    var onPositionUpdate: ((String) -> Unit)? = null
+
     override fun speechViewSpeak(text: String, callback: (String) -> Unit) {
         synchronized(tts) {
             tts.speak(text) {
@@ -21,6 +23,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     }
 
     override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
+        this.onPositionUpdate = onPositionUpdate
         stateMachine?.actionSpeakInLoop(onPositionUpdate)
     }
 
@@ -34,6 +37,14 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     override fun stopSpeaking() {
         stateMachine?.actionStopSpeaking()
+    }
+
+    override fun advanceOne(onDone: (ArticleState) -> Unit) {
+            stateMachine?.stopAdvanceOneAndResume(onDone)
+    }
+
+    override fun reverseOne(onDone: (ArticleState) -> Unit) {
+        stateMachine?.stopReverseOneAndResume(onDone)
     }
 }
 

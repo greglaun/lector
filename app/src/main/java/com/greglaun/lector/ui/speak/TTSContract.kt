@@ -15,5 +15,7 @@ interface TTSContract {
         fun onUrlChanged(urlString : String, position: String = POSITION_BEGINNING)
         fun onStart(stateListener: TtsStateListener)
         fun onStop()
+        fun advanceOne(onDone: (ArticleState) -> Unit)
+        fun reverseOne(onDone: (ArticleState) -> Unit)
     }
 }

@@ -11,14 +11,7 @@ import java.security.MessageDigest
 
 fun urlToContext(urlString : String) : String {
     return urlString.substringBeforeLast("#").substringAfterLast("wiki/")
-}
-
-fun contextToTitle(requestContext : String) : String {
-    return requestContext.replace("_", " ")
-}
-
-fun titleToContext(title : String) : String {
-    return title.replace(" ", "_")
+            .replace("_", " ")
 }
 
 fun utteranceId(text : String) : String{

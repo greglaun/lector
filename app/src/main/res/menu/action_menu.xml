@@ -12,6 +12,21 @@
         android:title="@string/action_pause"
         app:showAsAction="always"
         android:visible="false"/>
+
+    <item
+        android:id="@+id/action_rewind"
+        android:icon="@drawable/baseline_fast_rewind_white_24dp"
+        android:title="@string/action_rewind"
+        app:showAsAction="always"/>
+
+
+    <item
+        android:id="@+id/action_forward"
+        android:icon="@drawable/baseline_fast_forward_white_24dp"
+        android:title="@string/action_forward"
+        app:showAsAction="always"/>
+
+
     <item
         android:id="@+id/action_save"
         android:title="@string/save"

@@ -43,7 +43,7 @@ class TtsActorKtTest {
         runBlocking {
             stateMachine.changeStateReady().await()
             assertTrue(SpeakerState.READY == stateMachine.getState().await())
-            stateMachine.changeStateNotReady().await()
+            stateMachine.changeStateStopSpeakingNotReady().await()
             assertTrue(SpeakerState.NOT_READY == stateMachine.getState().await())
         }
     }

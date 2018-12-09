@@ -9,7 +9,7 @@ interface TtsStateMachine {
 
     fun getState(): Deferred<SpeakerState>
 
-    fun changeStateNotReady(): Deferred<Unit>
+    fun changeStateStopSpeakingNotReady(): Deferred<Unit>
     fun changeStateReady(): Deferred<Unit>
     fun changeStateUpdateArticle(urlString: String, position: String = POSITION_BEGINNING)
             : Deferred<Unit>
@@ -20,4 +20,7 @@ interface TtsStateMachine {
     fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit>
     fun actionChangeUrl(urlString: String, position: String = POSITION_BEGINNING): Deferred<Unit>
     fun actionGetPosition(): Deferred<String>
+
+    fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit>
+    fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit>
 }

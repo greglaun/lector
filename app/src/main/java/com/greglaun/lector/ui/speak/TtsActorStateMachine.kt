@@ -6,6 +6,7 @@ import kotlinx.coroutines.experimental.channels.SendChannel
 class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStateMachine {
     private var actorLoop: SendChannel<TtsMsg>? = null
     private val actorClient = newSingleThreadContext("ActorClient")
+    var onPositionUpdate: ((String) -> Unit)? = null
 
     override fun startMachine(ttsActorClient: TtsActorClient, ttsStateListener: TtsStateListener) {
         actorLoop = ttsActor(ttsActorClient, ttsStateListener)
@@ -15,9 +16,9 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         actorLoop?.close()
     }
 
-    override fun changeStateNotReady(): Deferred<Unit> {
+    override fun changeStateStopSpeakingNotReady(): Deferred<Unit> {
         return CoroutineScope(actorClient).async {
-            actorLoop?.send(MarkNotReady)
+            actorLoop?.send(StopSeakingAndMarkNotReady)
             Unit
         }
     }
@@ -48,6 +49,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
 
     // todo(testing): Properly test this loop
     override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
+        this.onPositionUpdate = onPositionUpdate
         return CoroutineScope(actorClient).async {
             var readyDeferred = getState()
             while(readyDeferred.await() != SpeakerState.READY) {
@@ -59,11 +61,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
             while(stillSpeaking) {
                 var speakingState = actionSpeakOne()
                 val position = actionGetPosition().await()
-                onPositionUpdate?.invoke(position)
-                while (speakingState.await() == SpeakerState.SCRUBBING) {
-                    Thread.sleep(10)
-                    speakingState = getState()
-                }
+                this@TtsActorStateMachine.onPositionUpdate?.invoke(position)
                 stillSpeaking = speakingState.await() == SpeakerState.SPEAKING
             }
         }
@@ -101,8 +99,36 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
 
     override fun actionChangeUrl(urlString: String, position: String): Deferred<Unit> {
         return CoroutineScope(actorClient).async {
-            changeStateNotReady().await()
+            changeStateStopSpeakingNotReady().await()
             changeStateUpdateArticle(urlString, position).await()
+        }
+    }
+
+    override fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
+        return CoroutineScope(actorClient).async {
+            val oldSpeakingState = getState()
+            changeStateStopSpeakingNotReady().await()
+            val newArticleState = CompletableDeferred<ArticleState>()
+            actorLoop?.send(ForwardOne(newArticleState = newArticleState))
+            onDone(newArticleState.await())
+            changeStateReady().await()
+            if (oldSpeakingState.await() == SpeakerState.SPEAKING) {
+                actionSpeakInLoop { onPositionUpdate }.await()
+            }
+        }
+    }
+
+    override fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
+        return CoroutineScope(actorClient).async {
+            val oldSpeakingState = getState()
+            changeStateStopSpeakingNotReady().await()
+            val newArticleState = CompletableDeferred<ArticleState>()
+            actorLoop?.send(BackOne(newArticleState = newArticleState))
+            onDone(newArticleState.await())
+            changeStateReady().await()
+            if (oldSpeakingState.await() == SpeakerState.SPEAKING) {
+                actionSpeakInLoop { onPositionUpdate }.await()
+            }
         }
     }
 }
