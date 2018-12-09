@@ -26,7 +26,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 state = SpeakerState.READY
             }
             is MarkReady -> state = SpeakerState.READY
-            is MarkNotReady -> {
+            is StopSeakingAndMarkNotReady -> {
                 ttsClient.stopSpeechViewImmediately()
                 state = SpeakerState.NOT_READY
             }
@@ -49,6 +49,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                     articleState = articleState.next()
                     state = initialState
                 }
+                msg.newArticleState.complete(articleState!!)
             }
             is BackOne -> {
                 if (articleState != null && articleState.current_index != null &&
@@ -59,8 +60,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                     articleState = articleState.previous()
                     state = initalState
                 }
-            }
-            is AdvanceToPosition -> {
+                msg.newArticleState.complete(articleState!!)
             }
             is GetPosition -> {
                 msg.position.complete(position)
@@ -127,13 +127,12 @@ enum class SpeakerState {
 // Message types for ttsActor
 sealed class TtsMsg
 object MarkReady: TtsMsg() // Mark as ready to speak
-object MarkNotReady: TtsMsg() // Mark as ready to speak
+object StopSeakingAndMarkNotReady: TtsMsg() // Mark as ready to speak
 class GetSpeakerState(val response: CompletableDeferred<SpeakerState>): TtsMsg()
 object StartSpeaking: TtsMsg()
 class SpeakOne(val speakerState: CompletableDeferred<SpeakerState>) : TtsMsg()
 object StopSpeaking : TtsMsg()
 class UpdateArticleState(val articleState: ArticleState, val position: String): TtsMsg()
-class AdvanceToPosition(val position: String): TtsMsg()
-object ForwardOne: TtsMsg()
-object BackOne: TtsMsg()
+class ForwardOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
+class BackOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
 class GetPosition(val position: CompletableDeferred<String>): TtsMsg()

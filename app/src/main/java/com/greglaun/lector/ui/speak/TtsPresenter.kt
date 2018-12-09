@@ -3,7 +3,6 @@ package com.greglaun.lector.ui.speak
 class TtsPresenter(private val tts: TTSContract.AudioView,
                    val stateMachine: TtsStateMachine)
     : TTSContract.Presenter, TtsActorClient {
-
     override fun speechViewSpeak(text: String, callback: (String) -> Unit) {
         synchronized(tts) {
             tts.speak(text) {
@@ -34,6 +33,14 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     override fun stopSpeaking() {
         stateMachine?.actionStopSpeaking()
+    }
+
+    override fun advanceOne(onDone: (ArticleState) -> Unit) {
+        stateMachine?.stopAdvanceOneAndResume(onDone)
+    }
+
+    override fun reverseOne(onDone: (ArticleState) -> Unit) {
+        stateMachine?.stopReverseOneAndResume(onDone)
     }
 }
 

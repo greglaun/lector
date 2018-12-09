@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -31,7 +32,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     lateinit var mainPresenter : MainContract.Presenter
     var playMenuItem : MenuItem? = null
     var pauseMenuItem : MenuItem? = null
-    lateinit var cacheDir : String
+
+    private var x1: Float = 0.toFloat()
+    private var x2: Float = 0.toFloat()
+    private val MIN_DISTANCE = 150
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -134,6 +138,27 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (event == null) {
+            return super.onTouchEvent(event)
+        }
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> x1 = event.x
+            MotionEvent.ACTION_UP -> {
+                x2 = event.x
+                val deltaX = x2 - x1
+                if (Math.abs(deltaX) > MIN_DISTANCE) {
+                    if (x2 > x1) {
+                        mainPresenter.onSwipeRight()
+                    } else if (x1 < x2) {
+                        mainPresenter.onSwipeLeft()
+                    }
+                }
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
     override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
         val index = articleState.current_index
@@ -145,7 +170,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 "var windowHeight = window.innerHeight;" +
                  "var xoff = txt[$index].offsetLeft;" +
                 "var yoff = txt[$index].offsetTop;" +
-                 "window.scrollTo(xoff - windowHeight/2, yoff - windowHeight/2);"
+                 "window.scrollTo(xoff, yoff - windowHeight/3);"
 
         runOnUiThread {
             webView.evaluateJavascript(js) {
@@ -246,8 +271,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             // todo (javascript): Only run on appropriate urls
             // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
             val js ="var blocks = document.querySelectorAll('[id^=mf-section-]');" +
-                    "console.log('HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII');" +
-                    "console.log('HIIIIIIIIII: ' + blocks.length);" +
                      "if (blocks.length > 0) {" +
                       "for (let item of blocks) {" +
                     "item.className+=' open-block';" +

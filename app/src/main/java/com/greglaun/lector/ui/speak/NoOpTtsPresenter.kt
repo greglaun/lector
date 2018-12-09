@@ -20,4 +20,12 @@ class NoOpTtsPresenter : TTSContract.Presenter {
     override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
         // Do nothing
     }
+
+    override fun advanceOne(onDone: (ArticleState) -> Unit) {
+        // Do nothing
+    }
+
+    override fun reverseOne(onDone: (ArticleState) -> Unit) {
+        // Do nothing
+    }
 }

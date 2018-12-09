@@ -28,6 +28,8 @@ interface MainContract {
         fun onUrlChanged(url : String)
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
+        fun onSwipeLeft()
+        fun onSwipeRight()
         fun responseSource(): ResponseSource
         fun loadFromContext(articleContext: ArticleContext)
     }
