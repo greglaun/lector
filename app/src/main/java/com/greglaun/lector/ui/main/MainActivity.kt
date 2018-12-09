@@ -67,17 +67,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 createResponseSource())
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
-    }
-
-    override fun onStart() {
-        super.onStart()
         Intent(this, BindableTtsService::class.java).also { intent ->
             bindService(intent, bindableTtsConnection, Context.BIND_AUTO_CREATE)
         }
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
         unbindService(bindableTtsConnection)
         bindableTtsServiceIsBound = false
     }
