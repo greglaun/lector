@@ -148,15 +148,15 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onRewindOne() {
-        view.unhighlightAllText()
-        ttsPresenter.advanceOne {it ->
+        ttsPresenter.reverseOne {it ->
+            view.unhighlightAllText()
             view.highlightText(it)
         }
     }
 
     override fun onForwardOne() {
-        view.unhighlightAllText()
         ttsPresenter.advanceOne {it ->
+            view.unhighlightAllText()
             view.highlightText(it)
         }
     }

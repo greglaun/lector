@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val highlightColor = "yellow"
         val lectorClass = "lector-active"
         val js = "var txt = document.getElementsByTagName('p');" +
-                 "txt[$index].classList.toggle('$lectorClass');" +
+                 "txt[$index].classList.add('$lectorClass');" +
                  "txt[$index].style.backgroundColor = '$highlightColor';" +
                 "var windowHeight = window.innerHeight;" +
                  "var xoff = txt[$index].offsetLeft;" +
@@ -171,7 +171,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val js = "var active = document.getElementsByClassName('$lectorClass');" +
                  "if (active.length > 0) {for (let item of active) {" +
                  "item.style.background='';" +
-                 "item.classList.toggle('$lectorClass'); }} "
+                 "item.classList.remove('$lectorClass'); }} "
         runOnUiThread {
             webView.evaluateJavascript(js) {}
         }
