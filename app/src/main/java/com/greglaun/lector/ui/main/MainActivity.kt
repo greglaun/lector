@@ -1,10 +1,8 @@
 package com.greglaun.lector.ui.main
 
 import android.app.AlertDialog
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
+import android.media.AudioManager
 import android.os.Bundle
 import android.os.IBinder
 import android.speech.tts.TextToSpeech
@@ -39,8 +37,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     var playMenuItem : MenuItem? = null
     var pauseMenuItem : MenuItem? = null
 
+    private val intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+    private val noisyAudioStreamReceiver = BecomingNoisyReceiver()
+
     private lateinit var bindableTtsService: BindableTtsService
     private var bindableTtsServiceIsBound: Boolean = false
+
 
     private val bindableTtsConnection = object : ServiceConnection {
 
@@ -57,6 +59,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
+
+
+    private inner class BecomingNoisyReceiver : BroadcastReceiver() {
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                mainPresenter?.stopSpeakingAndEnablePlayButton()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -70,11 +83,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         Intent(this, BindableTtsService::class.java).also { intent ->
             bindService(intent, bindableTtsConnection, Context.BIND_AUTO_CREATE)
         }
+        registerReceiver(noisyAudioStreamReceiver, intentFilter)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unbindService(bindableTtsConnection)
+        unregisterReceiver(noisyAudioStreamReceiver)
         bindableTtsServiceIsBound = false
     }
 
