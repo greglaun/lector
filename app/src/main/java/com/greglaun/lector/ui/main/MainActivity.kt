@@ -1,8 +1,12 @@
 package com.greglaun.lector.ui.main
 
 import android.app.AlertDialog
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -14,6 +18,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
+import com.greglaun.lector.android.bound.BindableTtsService
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.android.room.ArticleCacheDatabase
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
@@ -21,7 +26,9 @@ import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import com.greglaun.lector.ui.speak.*
+import com.greglaun.lector.ui.speak.ArticleState
+import com.greglaun.lector.ui.speak.NoOpTtsPresenter
+import com.greglaun.lector.ui.speak.TtsPresenter
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -32,9 +39,23 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     var playMenuItem : MenuItem? = null
     var pauseMenuItem : MenuItem? = null
 
-    private var x1: Float = 0.toFloat()
-    private var x2: Float = 0.toFloat()
-    private val MIN_DISTANCE = 150
+    private lateinit var bindableTtsService: BindableTtsService
+    private var bindableTtsServiceIsBound: Boolean = false
+
+    private val bindableTtsConnection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as BindableTtsService.LocalBinder
+            bindableTtsService = binder.getService()
+            bindableTtsServiceIsBound = true
+            checkTts()
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            bindableTtsServiceIsBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,9 +65,21 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource())
-        checkTts()
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Intent(this, BindableTtsService::class.java).also { intent ->
+            bindService(intent, bindableTtsConnection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(bindableTtsConnection)
+        bindableTtsServiceIsBound = false
     }
 
     private fun createResponseSource(): ResponseSourceImpl {
@@ -56,19 +89,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 getCacheDir())
     }
 
-    override fun onPause() {
-        super.onPause()
-        mainPresenter.stopSpeakingAndEnablePlayButton()
-        mainPresenter.onDetach()
-    }
-
     override fun onResume() {
         super.onResume()
-        checkTts()
         mainPresenter.onAttach()
     }
-
-
 
     fun checkTts() {
         // todo(android): Clean this up, it is horribly messy.
@@ -86,8 +110,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
+//        val ttsStateMachine = TtsActorStateMachine(JSoupArticleStateSource())
+        val ttsStateMachine = bindableTtsService
         mainPresenter = MainPresenter(this,
-                TtsPresenter(androidAudioView, TtsActorStateMachine(JSoupArticleStateSource())),
+                TtsPresenter(androidAudioView, ttsStateMachine),
                 mainPresenter.responseSource())
         mainPresenter.onAttach()
     }
