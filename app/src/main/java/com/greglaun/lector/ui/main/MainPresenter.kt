@@ -137,8 +137,10 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    override fun deleteArticle(url: String) {
-        responseSource.delete(urlToContext(url))
+    override fun deleteCurrentArticle() {
+        synchronized(currentRequestContext) {
+            responseSource.delete(currentRequestContext)
+        }
     }
 
     override fun onDisplayReadingList() {

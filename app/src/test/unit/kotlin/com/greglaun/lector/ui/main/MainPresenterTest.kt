@@ -53,7 +53,7 @@ class MainPresenterTest {
 
     @Test
     fun deleteArticle() {
-        mainPresenter.deleteArticle("test")
+        mainPresenter.deleteCurrentArticle("test")
         verify(responseSource, times(1)).delete("test")
     }
 }

@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_delete -> {
-                mainPresenter.deleteArticle(webView.url)
+                mainPresenter.deleteCurrentArticle()
                 return true
             }
             R.id.action_forward -> {
