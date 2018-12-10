@@ -88,8 +88,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onDestroy() {
         super.onDestroy()
-        unbindService(bindableTtsConnection)
         unregisterReceiver(noisyAudioStreamReceiver)
+        unbindService(bindableTtsConnection)
         bindableTtsServiceIsBound = false
     }
 
@@ -121,7 +121,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
-//        val ttsStateMachine = TtsActorStateMachine(JSoupArticleStateSource())
         val ttsStateMachine = bindableTtsService
         mainPresenter = MainPresenter(this,
                 TtsPresenter(androidAudioView, ttsStateMachine),

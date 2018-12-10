@@ -20,8 +20,8 @@ fun retrieveTitle(doc: Document): String {
     return doc.title().replace(" - Wikipedia", "")
 }
 
-fun jsoupStateFromUrl(urlString: String): ArticleState {
-    var doc = Jsoup.connect(urlString).get()
+fun jsoupStateFromHtml(html: String): ArticleState {
+    var doc = Jsoup.parse(html)
     // Remove elements from the navboxes
     doc = removeUnwanted(doc)
     val title = retrieveTitle(doc)

@@ -66,9 +66,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 msg.position.complete(position)
             }
             is SpeakOne -> {
-                if (articleState != null) {
-                    state = checkIfOver(articleState, state, ttsStateListener)
-                }
                 if (state == SpeakerState.SPEAKING) {
                     ttsStateListener.onUtteranceStarted(articleState!!)
                     var text = articleState!!.current()!!
@@ -92,16 +89,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
         }
     }
 })
-
-private fun checkIfOver(inArticleState: ArticleState, inSpeakerState: SpeakerState,
-                        ttsStateListener: TtsStateListener): SpeakerState {
-    var outSpeakerState = inSpeakerState
-    if (!inArticleState!!.hasNext()) {
-        outSpeakerState = SpeakerState.NOT_READY
-        ttsStateListener.onArticleOver()
-    }
-    return outSpeakerState
-}
 
 fun fastForward(inState: ArticleState, position: String): ArticleState {
     var returnArticle = inState

@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import com.greglaun.lector.android.room.ArticleCacheDatabase
 import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.experimental.Deferred
 
@@ -11,7 +12,8 @@ class BindableTtsService : Service(), TtsStateMachine {
     // Binder given to clients
     private val mBinder = LocalBinder()
 
-    private val delegateStateMachine = TtsActorStateMachine(JSoupArticleStateSource())
+    val db = ArticleCacheDatabase.getInstance(this)
+    private val delegateStateMachine = TtsActorStateMachine(JSoupArticleStateSource(db!!))
 
     override fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener) {
         delegateStateMachine.startMachine(ttsActorClient, stateListener)
