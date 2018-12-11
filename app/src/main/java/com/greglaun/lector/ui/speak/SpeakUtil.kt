@@ -14,7 +14,7 @@ fun removeUnwanted(doc: Document): Document {
     doc.select("table.vertical-navbox").remove()
     doc.select("span.IPA").remove() // Phonetic pronunciation
     doc.select("[href*=Pronunciation_respelling_key]").remove() // Pronunciation
-    doc.select("[href*=cite]").remove() // In-text citations
+//    doc.select("[href*=cite]").remove() // In-text citations
     return doc
 }
 

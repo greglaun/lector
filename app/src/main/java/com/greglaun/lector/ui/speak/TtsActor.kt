@@ -50,6 +50,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 if (articleState != null && articleState.current_index != null &&
                         articleState.hasNext()) {
                     val initialState = state
+                    ttsClient.stopSpeechViewImmediately()
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
                     articleState = articleState.next()
@@ -61,6 +62,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 if (articleState != null && articleState.current_index != null &&
                         articleState.hasPrevious()) {
                     val initalState = state
+                    ttsClient.stopSpeechViewImmediately()
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
                     articleState = articleState.previous()
