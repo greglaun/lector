@@ -4,7 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import com.greglaun.lector.android.room.ArticleCacheDatabase
+import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.experimental.Deferred
 
@@ -12,63 +12,63 @@ class BindableTtsService : Service(), TtsStateMachine {
     // Binder given to clients
     private val mBinder = LocalBinder()
 
-    val db = ArticleCacheDatabase.getInstance(this)
-    private val delegateStateMachine = TtsActorStateMachine(JSoupArticleStateSource(db!!))
+    private var delegateStateMachine: TtsActorStateMachine? = null
 
+    // todo(error_handling): Remove ugly null assertions in this file
     override fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener) {
-        delegateStateMachine.startMachine(ttsActorClient, stateListener)
+        this.delegateStateMachine!!.startMachine(ttsActorClient, stateListener)
     }
 
     override fun stopMachine() {
-        delegateStateMachine.stopMachine()
+        delegateStateMachine!!.stopMachine()
     }
 
     override fun getState(): Deferred<SpeakerState> {
-        return delegateStateMachine.getState()
+        return delegateStateMachine!!.getState()
     }
 
     override fun changeStateStopSpeakingNotReady(): Deferred<Unit> {
-        return delegateStateMachine.changeStateStopSpeakingNotReady()
+        return delegateStateMachine!!.changeStateStopSpeakingNotReady()
     }
 
     override fun changeStateReady(): Deferred<Unit> {
-        return delegateStateMachine.changeStateReady()
+        return delegateStateMachine!!.changeStateReady()
     }
 
     override fun changeStateUpdateArticle(urlString: String, position: String): Deferred<Unit> {
-        return delegateStateMachine.changeStateUpdateArticle(urlString, position)
+        return delegateStateMachine!!.changeStateUpdateArticle(urlString, position)
     }
 
     override fun changeStateStartSpeaking(): Deferred<Unit> {
-        return delegateStateMachine.changeStateStartSpeaking()
+        return delegateStateMachine!!.changeStateStartSpeaking()
     }
 
     override fun actionSpeakOne(): Deferred<SpeakerState> {
-        return delegateStateMachine.actionSpeakOne()
+        return delegateStateMachine!!.actionSpeakOne()
     }
 
     override fun actionStopSpeaking(): Deferred<Unit?> {
-        return delegateStateMachine.actionStopSpeaking()
+        return delegateStateMachine!!.actionStopSpeaking()
     }
 
     override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
-        return delegateStateMachine.actionSpeakInLoop(onPositionUpdate)
+        return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
     }
 
     override fun actionChangeUrl(urlString: String, position: String): Deferred<Unit> {
-        return delegateStateMachine.actionChangeUrl(urlString, position)
+        return delegateStateMachine!!.actionChangeUrl(urlString, position)
     }
 
     override fun actionGetPosition(): Deferred<String> {
-        return delegateStateMachine.actionGetPosition()
+        return delegateStateMachine!!.actionGetPosition()
     }
 
     override fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
-        return delegateStateMachine.stopAdvanceOneAndResume(onDone)
+        return delegateStateMachine!!.stopAdvanceOneAndResume(onDone)
     }
 
     override fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
-        return delegateStateMachine.stopReverseOneAndResume(onDone)
+        return delegateStateMachine!!.stopReverseOneAndResume(onDone)
     }
 
     /**
@@ -77,7 +77,13 @@ class BindableTtsService : Service(), TtsStateMachine {
      */
     inner class LocalBinder : Binder() {
         // Return this instance of LocalService so clients can call public methods
-        fun getService(): BindableTtsService = this@BindableTtsService
+        fun getService(responseSource: ResponseSource): BindableTtsService {
+            if (responseSource == null) {
+                throw RuntimeException("Must have a valid responseSource.")
+            }
+            delegateStateMachine = TtsActorStateMachine(JSoupArticleStateSource(responseSource!!))
+            return this@BindableTtsService
+        }
     }
 
     override fun onBind(intent: Intent): IBinder {

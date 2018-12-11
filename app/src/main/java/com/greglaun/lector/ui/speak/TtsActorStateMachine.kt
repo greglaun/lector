@@ -27,8 +27,11 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
                                           position: String)
             : Deferred<Unit> {
         return CoroutineScope(actorClient).async {
-            val articleState = articleStateSource.getArticle(urlString)
-            actorLoop?.send(UpdateArticleState(articleState, position))
+            val articleState = articleStateSource.getArticle(urlString).await()
+            // todo(error_handling): Return Deferred<Boolean>?
+            if (articleState != null) {
+                actorLoop?.send(UpdateArticleState(articleState, position))
+            }
             Unit
         }
     }

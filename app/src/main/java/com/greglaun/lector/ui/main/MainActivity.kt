@@ -22,6 +22,7 @@ import com.greglaun.lector.android.room.ArticleCacheDatabase
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
 import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.ArticleState
@@ -43,15 +44,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var bindableTtsService: BindableTtsService
     private var bindableTtsServiceIsBound: Boolean = false
 
+    private var RESPONSE_SOURCE_INSTANCE: ResponseSource? = null
 
     private val bindableTtsConnection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as BindableTtsService.LocalBinder
-            bindableTtsService = binder.getService()
-            bindableTtsServiceIsBound = true
-            checkTts()
+            if (RESPONSE_SOURCE_INSTANCE != null) {
+                bindableTtsService = binder.getService(responseSource = RESPONSE_SOURCE_INSTANCE!!)
+                bindableTtsServiceIsBound = true
+                checkTts()
+            }
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -95,11 +99,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         bindableTtsServiceIsBound = false
     }
 
-    private fun createResponseSource(): ResponseSourceImpl {
-        val db = ArticleCacheDatabase.getInstance(this)
-        val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db!!)
-        return ResponseSourceImpl.createResponseSource(RoomSavedArticleCache(db), cacheEntryClassifier,
-                getCacheDir())
+    private fun createResponseSource(): ResponseSource {
+        if (RESPONSE_SOURCE_INSTANCE == null) {
+            val db = ArticleCacheDatabase.getInstance(this)
+            val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db!!)
+            RESPONSE_SOURCE_INSTANCE = ResponseSourceImpl.createResponseSource(RoomSavedArticleCache(db), cacheEntryClassifier,
+                    getCacheDir())
+        }
+        return RESPONSE_SOURCE_INSTANCE!!
     }
 
     override fun onResume() {
