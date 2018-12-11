@@ -37,8 +37,13 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 }
             }
             is StopSpeaking -> {
+                val previousState = state
                 ttsClient.stopSpeechViewImmediately()
-                state = SpeakerState.READY
+                if (previousState == SpeakerState.SPEAKING) {
+                    state = SpeakerState.READY
+                } else {
+                    state = previousState
+                }
             }
             is ForwardOne -> {
                 if (articleState != null && articleState.current_index != null &&

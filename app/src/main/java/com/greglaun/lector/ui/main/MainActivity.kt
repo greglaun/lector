@@ -89,7 +89,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(noisyAudioStreamReceiver)
-        unbindService(bindableTtsConnection)
+        if (bindableTtsService != null) {
+            unbindService(bindableTtsConnection)
+        }
         bindableTtsServiceIsBound = false
     }
 
