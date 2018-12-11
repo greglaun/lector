@@ -28,7 +28,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
             is MarkReady -> state = SpeakerState.READY
             is StopSeakingAndMarkNotReady -> {
                 ttsClient.stopSpeechViewImmediately()
-                state = SpeakerState.NOT_READY
+//                state = SpeakerState.NOT_READY
             }
             is GetSpeakerState -> msg.response.complete(state)
             is StartSpeaking -> {
