@@ -6,9 +6,9 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     var onPositionUpdate: ((String) -> Unit)? = null
 
-    override fun speechViewSpeak(text: String, callback: (String) -> Unit) {
+    override fun speechViewSpeak(text: String, utteranceId: String, callback: (String) -> Unit) {
         synchronized(tts) {
-            tts.speak(text) {
+            tts.speak(text, utteranceId) {
                 callback(it)
             }
         }

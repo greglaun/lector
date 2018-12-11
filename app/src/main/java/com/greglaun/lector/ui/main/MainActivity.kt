@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onDestroy() {
         super.onDestroy()
+        mainPresenter.stopSpeakingAndEnablePlayButton()
         unregisterReceiver(noisyAudioStreamReceiver)
         if (bindableTtsService != null) {
             unbindService(bindableTtsConnection)

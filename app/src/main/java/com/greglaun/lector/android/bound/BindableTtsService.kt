@@ -27,8 +27,8 @@ class BindableTtsService : Service(), TtsStateMachine {
         return delegateStateMachine!!.getState()
     }
 
-    override fun changeStateStopSpeakingNotReady(): Deferred<Unit> {
-        return delegateStateMachine!!.changeStateStopSpeakingNotReady()
+    override fun changeStateStopSpeaking(): Deferred<Unit> {
+        return delegateStateMachine!!.changeStateStopSpeaking()
     }
 
     override fun changeStateReady(): Deferred<Unit> {

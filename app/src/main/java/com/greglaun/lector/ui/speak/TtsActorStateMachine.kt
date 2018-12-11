@@ -16,7 +16,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         actorLoop?.close()
     }
 
-    override fun changeStateStopSpeakingNotReady(): Deferred<Unit> {
+    override fun changeStateStopSpeaking(): Deferred<Unit> {
         return CoroutineScope(actorClient).async {
             actorLoop?.send(StopSeakingAndMarkNotReady)
             Unit
@@ -55,9 +55,16 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         this.onPositionUpdate = onPositionUpdate
         return CoroutineScope(actorClient).async {
             var readyDeferred = getState()
+            var timesDelayed = 0
             while(readyDeferred.await() != SpeakerState.READY) {
+                // todo(concurrency): Ugly magical constants
+                if (timesDelayed >= 50) {
+                    changeStateStopSpeaking()
+                    break
+                }
                 Thread.sleep(20)
                 readyDeferred = getState()
+                timesDelayed += 1
             }
             changeStateStartSpeaking()
             var stillSpeaking = true
@@ -102,7 +109,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
 
     override fun actionChangeUrl(urlString: String, position: String): Deferred<Unit> {
         return CoroutineScope(actorClient).async {
-            changeStateStopSpeakingNotReady().await()
+            changeStateStopSpeaking().await()
             changeStateUpdateArticle(urlString, position).await()
         }
     }
@@ -110,7 +117,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     override fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
         return CoroutineScope(actorClient).async {
             val oldSpeakingState = getState()
-            changeStateStopSpeakingNotReady().await()
+            changeStateStopSpeaking().await()
             val newArticleState = CompletableDeferred<ArticleState>()
             actorLoop?.send(ForwardOne(newArticleState = newArticleState))
             onDone(newArticleState.await())
@@ -124,7 +131,7 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     override fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
         return CoroutineScope(actorClient).async {
             val oldSpeakingState = getState()
-            changeStateStopSpeakingNotReady().await()
+            changeStateStopSpeaking().await()
             val newArticleState = CompletableDeferred<ArticleState>()
             actorLoop?.send(BackOne(newArticleState = newArticleState))
             onDone(newArticleState.await())

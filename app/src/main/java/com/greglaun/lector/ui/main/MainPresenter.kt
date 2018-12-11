@@ -46,7 +46,7 @@ class MainPresenter(val view : MainContract.View,
         view.unhighlightAllText()
     }
 
-    override fun onArticleOver() {
+    override fun onSpeechStopped() {
         view.enablePlayButton()
     }
 

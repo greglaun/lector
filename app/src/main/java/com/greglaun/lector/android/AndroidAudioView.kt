@@ -8,16 +8,16 @@ import com.greglaun.lector.ui.speak.TTSContract
 class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         UtteranceProgressListener() {
     val callbacks : HashMap<String, (String) -> Unit> = HashMap()
-    override fun speak(textToSpeak: String, callback : (String)-> Unit) {
+    override fun speak(textToSpeak: String, utteranceId: String, callback : (String)-> Unit) {
         if (textToSpeak == "") {
             if (callback != null) {
                 callback(utteranceId(""))
             }
             return
         }
-        callbacks.put(utteranceId(textToSpeak), callback)
+        callbacks.put(utteranceId, callback)
         androidTts.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null,
-                utteranceId(textToSpeak))
+                utteranceId)
     }
 
     override fun stopImmediately() {

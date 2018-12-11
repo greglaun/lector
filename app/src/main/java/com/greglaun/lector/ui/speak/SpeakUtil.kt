@@ -3,6 +3,8 @@ package com.greglaun.lector.ui.speak
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
+val displayStyleRegex = Regex("\\{(\\\\displaystyle.*?)\\}")
+
 fun removeUnwanted(doc: Document): Document {
     // TODO: Pull these out as XML strings.
     doc.select("table.infobox").remove() // Many types of navboxes and infoboxes
@@ -31,3 +33,6 @@ fun jsoupStateFromHtml(html: String): ArticleState {
     return ArticleState(title, paragraphs)
 }
 
+fun cleanUtterance(text: String): String {
+    return displayStyleRegex.replace(text, "")
+}
