@@ -27,6 +27,7 @@ fun jsoupStateFromHtml(html: String): ArticleState {
     // Remove elements from the navboxes
     doc = removeUnwanted(doc)
     val title = retrieveTitle(doc)
+    // todo(html): Also get lists and block quotes
     val paragraphs = doc!!.select("p").map { it ->
         it.text()!!
     }

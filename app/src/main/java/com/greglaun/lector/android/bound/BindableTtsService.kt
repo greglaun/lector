@@ -9,8 +9,7 @@ import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.experimental.Deferred
 
 class BindableTtsService : Service(), TtsStateMachine {
-    // Binder given to clients
-    private val mBinder = LocalBinder()
+    private val binder = LocalBinder()
 
     private var delegateStateMachine: TtsActorStateMachine? = null
 
@@ -25,10 +24,6 @@ class BindableTtsService : Service(), TtsStateMachine {
 
     override fun getState(): Deferred<SpeakerState> {
         return delegateStateMachine!!.getState()
-    }
-
-    override fun changeStateStopSpeaking(): Deferred<Unit> {
-        return delegateStateMachine!!.changeStateStopSpeaking()
     }
 
     override fun changeStateReady(): Deferred<Unit> {
@@ -87,7 +82,7 @@ class BindableTtsService : Service(), TtsStateMachine {
     }
 
     override fun onBind(intent: Intent): IBinder {
-        return mBinder
+        return binder
     }
 }
 
