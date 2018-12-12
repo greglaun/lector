@@ -23,7 +23,7 @@ interface MainContract {
         fun onPlayButtonPressed()
         fun stopSpeakingAndEnablePlayButton()
         fun saveArticle()
-        fun deleteArticle(url : String)
+        fun deleteCurrentArticle()
         fun onUrlChanged(url : String)
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()

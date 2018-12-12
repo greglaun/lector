@@ -9,7 +9,6 @@ interface TtsStateMachine {
 
     fun getState(): Deferred<SpeakerState>
 
-    fun changeStateStopSpeakingNotReady(): Deferred<Unit>
     fun changeStateReady(): Deferred<Unit>
     fun changeStateUpdateArticle(urlString: String, position: String = POSITION_BEGINNING)
             : Deferred<Unit>

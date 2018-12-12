@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.speak
 
 import com.greglaun.lector.data.cache.POSITION_BEGINNING
+import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.utteranceId
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.actor
@@ -28,7 +29,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
             is MarkReady -> state = SpeakerState.READY
             is StopSeakingAndMarkNotReady -> {
                 ttsClient.stopSpeechViewImmediately()
-                state = SpeakerState.NOT_READY
+                ttsStateListener.onSpeechStopped()
             }
             is GetSpeakerState -> msg.response.complete(state)
             is StartSpeaking -> {
@@ -37,13 +38,19 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 }
             }
             is StopSpeaking -> {
+                val previousState = state
                 ttsClient.stopSpeechViewImmediately()
-                state = SpeakerState.READY
+                if (previousState == SpeakerState.SPEAKING) {
+                    state = SpeakerState.READY
+                } else {
+                    state = previousState
+                }
             }
             is ForwardOne -> {
                 if (articleState != null && articleState.current_index != null &&
                         articleState.hasNext()) {
                     val initialState = state
+                    ttsClient.stopSpeechViewImmediately()
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
                     articleState = articleState.next()
@@ -55,6 +62,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 if (articleState != null && articleState.current_index != null &&
                         articleState.hasPrevious()) {
                     val initalState = state
+                    ttsClient.stopSpeechViewImmediately()
                     state = SpeakerState.SCRUBBING
                     ttsClient.stopSpeechViewImmediately()
                     articleState = articleState.previous()
@@ -66,13 +74,10 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 msg.position.complete(position)
             }
             is SpeakOne -> {
-                if (articleState != null) {
-                    state = checkIfOver(articleState, state, ttsStateListener)
-                }
                 if (state == SpeakerState.SPEAKING) {
                     ttsStateListener.onUtteranceStarted(articleState!!)
                     var text = articleState!!.current()!!
-                    ttsClient.speechViewSpeak(text) {
+                    ttsClient.speechViewSpeak(cleanUtterance(text), text.md5()) {
                         if (it == utteranceId(text)) {
                             ttsStateListener.onUtteranceEnded(articleState!!)
                             position = it
@@ -80,7 +85,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                                 articleState = articleState!!.next()!! // Advance again after completion
                             } else {
                                 state = SpeakerState.NOT_READY
-                                ttsStateListener.onArticleOver()
+                                ttsStateListener.onSpeechStopped()
                             }
                             msg.speakerState.complete(state)
                         }
@@ -92,16 +97,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
         }
     }
 })
-
-private fun checkIfOver(inArticleState: ArticleState, inSpeakerState: SpeakerState,
-                        ttsStateListener: TtsStateListener): SpeakerState {
-    var outSpeakerState = inSpeakerState
-    if (!inArticleState!!.hasNext()) {
-        outSpeakerState = SpeakerState.NOT_READY
-        ttsStateListener.onArticleOver()
-    }
-    return outSpeakerState
-}
 
 fun fastForward(inState: ArticleState, position: String): ArticleState {
     var returnArticle = inState
