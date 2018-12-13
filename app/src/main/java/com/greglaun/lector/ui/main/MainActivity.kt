@@ -28,6 +28,8 @@ import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsPresenter
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -298,14 +300,32 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         override fun onPageFinished(view: WebView?, url: String?) {
             super.onPageFinished(view, url)
-            // todo (javascript): Only run on appropriate urls
-            // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
-            val js ="var blocks = document.querySelectorAll('[id^=mf-section-]');" +
-                     "if (blocks.length > 0) {" +
-                      "for (let item of blocks) {" +
-                    "item.className+=' open-block';" +
-                     "}}"
-            webView.evaluateJavascript(js, null)
+            expandCollapsableElements()
+            // todo(javascript): How to avoid having to do this for slow-loading pages?
+            GlobalScope.launch {
+                Thread.sleep(1000)
+                runOnUiThread {
+                    expandCollapsableElements()
+                }
+            }
         }
+    }
+
+    private fun expandCollapsableElements() {
+        // todo (javascript): Only run on appropriate urls
+        // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
+//        val js = "var blocks = document.querySelectorAll('[id^=mf-section-]');" +
+//                "if (blocks.length > 0) {" +
+//                "for (let item of blocks) {" +
+//                "item.className+=' open-block';" +
+//                "}}"
+
+            val js = "var blocks = document.getElementsByTagName('h2');" +
+                    "if (blocks.length > 0) {" +
+                    "for (let item of blocks) {" +
+                    "item.className+=' open-block';" +
+                    "if (!!item.previousSibling) { item.previousSibling.className+=' open-block';}" +
+                    "}}"
+                webView.evaluateJavascript(js, null)
     }
 }
