@@ -17,6 +17,8 @@ interface MainContract {
         fun highlightText(articleState: ArticleState,
                           onDone: ((ArticleState, String) -> Unit)? = null)
         fun unhighlightAllText()
+        fun showReadingList()
+        fun showWebView()
     }
 
     interface Presenter : LectorPresenter<View> {

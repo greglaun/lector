@@ -7,9 +7,12 @@ import android.os.Bundle
 import android.os.IBinder
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -35,6 +38,7 @@ import kotlinx.coroutines.experimental.runBlocking
 class MainActivity : AppCompatActivity(), MainContract.View {
     val TAG: String = MainActivity::class.java.simpleName
     private lateinit var webView : WebView
+    private lateinit var recyclerView: RecyclerView
 
     lateinit var mainPresenter : MainContract.Presenter
     var playMenuItem : MenuItem? = null
@@ -79,8 +83,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(WikiWebViewClient())
+
+        recyclerView = findViewById(R.id.recycler_view) as RecyclerView
 
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource())
@@ -149,6 +156,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             webView.goBack()
         }
         onPause()
+    }
+
+    override fun showReadingList() {
+        webView.visibility = GONE
+        recyclerView.visibility = VISIBLE
+
+    }
+
+    override fun showWebView() {
+        recyclerView.visibility = GONE
+        webView.visibility = VISIBLE
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
