@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.main
 
+import android.app.AlertDialog
 import android.content.*
 import android.media.AudioManager
 import android.os.Bundle
@@ -44,7 +45,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    private val readingList = mutableListOf<ArticleContext>()
     lateinit var mainPresenter : MainContract.Presenter
     var playMenuItem : MenuItem? = null
     var pauseMenuItem : MenuItem? = null
@@ -91,19 +91,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         webView.setWebViewClient(WikiWebViewClient())
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = ReadingListAdapter(readingList) {
-
-             mainPresenter.loadFromContext(it)
-        }
-
-        recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
-            setHasFixedSize(true)
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
-
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource())
+
+        viewAdapter = renewRecyclerAdapter()
+        recyclerView = renewRecyclerView()
+
+
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
         Intent(this, BindableTtsService::class.java).also { intent ->
@@ -111,6 +105,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
 
         registerReceiver(noisyAudioStreamReceiver, intentFilter)
+    }
+
+    private fun renewRecyclerView(): RecyclerView {
+        return findViewById<RecyclerView>(R.id.recycler_view).apply {
+            setHasFixedSize(true)
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
     }
 
     override fun onDestroy() {
@@ -159,7 +161,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         mainPresenter = MainPresenter(this,
                 TtsPresenter(androidAudioView, ttsStateMachine),
                 mainPresenter.responseSource())
+        viewAdapter = renewRecyclerAdapter()
+        renewRecyclerView()
         mainPresenter.onAttach()
+    }
+
+    private fun renewRecyclerAdapter(): ReadingListAdapter {
+        return ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
+            mainPresenter.loadFromContext(it)
+        }, { it: ArticleContext ->
+            mainPresenter.deleteRequested(it)
+        }
+        )
     }
 
     private fun onBadTts() {
@@ -169,8 +182,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onBackPressed() {
         if (webView.canGoBack()) {
             webView.goBack()
+        } else {
+            onPause()
         }
-        onPause()
     }
 
     override fun unHideReadingListView() {
@@ -209,10 +223,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 mainPresenter.onDisplayReadingList()
                 return true
             }
-            R.id.action_delete -> {
-                mainPresenter.deleteCurrentArticle()
-                return true
-            }
             R.id.action_forward -> {
                 mainPresenter.onForwardOne()
                 return true
@@ -237,7 +247,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                  "var xoff = txt[$index].offsetLeft;" +
                 "var yoff = txt[$index].offsetTop;" +
                  "window.scrollTo(xoff, yoff - windowHeight/3);"
-
         runOnUiThread {
             webView.evaluateJavascript(js) {
                 onDone?.invoke(articleState, it)
@@ -276,7 +285,28 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    override fun onError(resId: Int) {
+    override fun onReadingListChanged() {
+        runOnUiThread {
+            viewAdapter.notifyDataSetChanged()
+        }
+    }
+
+    override fun confirmMessage(message: String, yesButton: String, noButton: String, onConfirmed: (Boolean) -> Unit) {
+        AlertDialog.Builder(this)
+                .setMessage(message)
+                .setNegativeButton(android.R.string.no, { dialogInterface: DialogInterface, i: Int ->
+                    onConfirmed(false)
+                })
+                .setPositiveButton(android.R.string.yes, { dialogInterface: DialogInterface, i: Int ->
+                    onConfirmed(true)
+                }).create().show()
+    }
+
+    override fun confirmMessage(resourceId: Int, yesButton: Int, noButton: String, onConfirmed: (Boolean) -> Unit) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onError(resourceId: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -288,15 +318,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun showMessage(resId: Int) {
+    override fun showMessage(resourceId: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun displayReadingList(articleContextList : List<ArticleContext>) {
+    override fun displayReadingList() {
         runOnUiThread {
-            readingList.clear()
-            readingList.addAll(articleContextList)
-            viewAdapter.notifyDataSetChanged()
             unHideReadingListView()
         }
     }

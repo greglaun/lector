@@ -21,6 +21,7 @@ class MainPresenter(val view : MainContract.View,
     : MainContract.Presenter, TtsStateListener {
     private var currentRequestContext = "MAIN_PAGE"
     private val contextThread = newSingleThreadContext("ContextThread")
+    override val readingList = mutableListOf<ArticleContext>()
 
     override fun onAttach() {
         ttsPresenter.onStart(this)
@@ -138,15 +139,25 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    override fun deleteCurrentArticle() {
-        synchronized(currentRequestContext) {
-            responseSource.delete(currentRequestContext)
-        }
+    override fun deleteRequested(articleContext: ArticleContext) {
+        view.confirmMessage("Delete article ${articleContext.contextString}?",
+                onConfirmed = {
+                    if(it) {
+                        GlobalScope.launch {
+                            responseSource.delete(articleContext.contextString).await()
+                            readingList.remove(articleContext)
+                            view.onReadingListChanged()
+                        }
+                    }
+                })
     }
 
     override fun onDisplayReadingList() {
         GlobalScope.launch{
-            view.displayReadingList(responseSource.getAllPermanent().await())
+            readingList.clear()
+            readingList.addAll(responseSource.getAllPermanent().await())
+            view.onReadingListChanged()
+            view.displayReadingList()
         }
     }
 

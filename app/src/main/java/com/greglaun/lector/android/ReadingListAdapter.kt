@@ -8,7 +8,8 @@ import com.greglaun.lector.R
 import com.greglaun.lector.data.cache.ArticleContext
 
 class ReadingListAdapter(private val readingList: MutableList<ArticleContext>,
-                         private val onItemClicked: (ArticleContext) -> Unit) :
+                         private val onItemClicked: (ArticleContext) -> Unit,
+                         private val onItemLongClicked: (ArticleContext) -> Unit) :
         RecyclerView.Adapter<ReadingListAdapter.ReadingListViewHolder>() {
 
     class ReadingListViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
@@ -24,6 +25,10 @@ class ReadingListAdapter(private val readingList: MutableList<ArticleContext>,
         holder.textView.text = readingList[position].contextString
         holder.textView.setOnClickListener {
             onItemClicked.invoke(readingList[position])
+        }
+        holder.textView.setOnLongClickListener {
+            onItemLongClicked.invoke(readingList[position])
+            true
         }
     }
 

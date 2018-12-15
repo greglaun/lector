@@ -13,19 +13,21 @@ interface MainContract {
         fun loadUrl(urlString : String)
         fun enablePlayButton()
         fun enablePauseButton()
-        fun displayReadingList(readingList: List<ArticleContext>)
+        fun displayReadingList()
         fun highlightText(articleState: ArticleState,
                           onDone: ((ArticleState, String) -> Unit)? = null)
         fun unhighlightAllText()
         fun unHideReadingListView()
         fun hideReadingListView()
+        fun onReadingListChanged()
     }
 
     interface Presenter : LectorPresenter<View> {
+        val readingList: MutableList<ArticleContext>
         fun onPlayButtonPressed()
         fun stopSpeakingAndEnablePlayButton()
         fun saveArticle()
-        fun deleteCurrentArticle()
+        fun deleteRequested(articleContext: ArticleContext)
         fun onUrlChanged(url : String)
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
