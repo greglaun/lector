@@ -1,6 +1,5 @@
 package com.greglaun.lector.ui.main
 
-import android.app.AlertDialog
 import android.content.*
 import android.media.AudioManager
 import android.os.Bundle
@@ -94,7 +93,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         viewManager = LinearLayoutManager(this)
         viewAdapter = ReadingListAdapter(readingList) {
 
-            mainPresenter.loadFromContext(it)
+             mainPresenter.loadFromContext(it)
         }
 
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
@@ -295,18 +294,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun displayReadingList(articleContextList : List<ArticleContext>) {
         runOnUiThread {
-            val builder = AlertDialog.Builder(this)
-
-//            val stringList = ArrayList<String>()
-//            articleContextList.forEach {
-//                stringList.add(it.contextString)
-//            }
-//            builder.setTitle(getString(R.string.dialog_reading_list_title))
-//            builder.setItems(stringList.toTypedArray()) { dialog, which ->
-//                mainPresenter.loadFromContext(articleContextList[which])
-//            }
-//            builder.show()
-
             readingList.clear()
             readingList.addAll(articleContextList)
             viewAdapter.notifyDataSetChanged()
