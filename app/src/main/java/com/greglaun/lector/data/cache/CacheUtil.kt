@@ -7,11 +7,12 @@ import okio.Okio
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
+import java.net.URLDecoder
 import java.security.MessageDigest
 
 fun urlToContext(urlString : String) : String {
-    return urlString.substringBeforeLast("#").substringAfterLast("wiki/")
-            .replace("_", " ")
+    return URLDecoder.decode(urlString.substringBeforeLast("#").substringAfterLast("wiki/")
+            .replace("_", " "), "UTF-8")
 }
 
 fun utteranceId(text : String) : String{

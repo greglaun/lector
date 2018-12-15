@@ -7,15 +7,20 @@ import android.os.Bundle
 import android.os.IBinder
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
+import com.greglaun.lector.android.ReadingListAdapter
 import com.greglaun.lector.android.bound.BindableTtsService
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.android.room.ArticleCacheDatabase
@@ -28,11 +33,17 @@ import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsPresenter
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
     val TAG: String = MainActivity::class.java.simpleName
     private lateinit var webView : WebView
+    private lateinit var recyclerView: RecyclerView
+
+    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+    private lateinit var viewManager: RecyclerView.LayoutManager
 
     lateinit var mainPresenter : MainContract.Presenter
     var playMenuItem : MenuItem? = null
@@ -63,8 +74,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-
-
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
@@ -77,17 +86,33 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(WikiWebViewClient())
 
+        viewManager = LinearLayoutManager(this)
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource())
+
+        viewAdapter = renewRecyclerAdapter()
+        recyclerView = renewRecyclerView()
+
+
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
         Intent(this, BindableTtsService::class.java).also { intent ->
             bindService(intent, bindableTtsConnection, Context.BIND_AUTO_CREATE)
         }
+
         registerReceiver(noisyAudioStreamReceiver, intentFilter)
+    }
+
+    private fun renewRecyclerView(): RecyclerView {
+        return findViewById<RecyclerView>(R.id.recycler_view).apply {
+            setHasFixedSize(true)
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
     }
 
     override fun onDestroy() {
@@ -99,6 +124,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
         bindableTtsServiceIsBound = false
     }
+
 
     private fun createResponseSource(): ResponseSource {
         if (RESPONSE_SOURCE_INSTANCE == null) {
@@ -135,7 +161,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         mainPresenter = MainPresenter(this,
                 TtsPresenter(androidAudioView, ttsStateMachine),
                 mainPresenter.responseSource())
+        viewAdapter = renewRecyclerAdapter()
+        renewRecyclerView()
         mainPresenter.onAttach()
+    }
+
+    private fun renewRecyclerAdapter(): ReadingListAdapter {
+        return ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
+            mainPresenter.loadFromContext(it)
+        }, { it: ArticleContext ->
+            mainPresenter.deleteRequested(it)
+        }
+        )
     }
 
     private fun onBadTts() {
@@ -145,8 +182,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onBackPressed() {
         if (webView.canGoBack()) {
             webView.goBack()
+        } else {
+            onPause()
         }
-        onPause()
+    }
+
+    override fun unHideReadingListView() {
+        webView.visibility = GONE
+        recyclerView.visibility = VISIBLE
+    }
+
+    override fun hideReadingListView() {
+        recyclerView.visibility = GONE
+        webView.visibility = VISIBLE
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -175,10 +223,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 mainPresenter.onDisplayReadingList()
                 return true
             }
-            R.id.action_delete -> {
-                mainPresenter.deleteCurrentArticle()
-                return true
-            }
             R.id.action_forward -> {
                 mainPresenter.onForwardOne()
                 return true
@@ -203,7 +247,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                  "var xoff = txt[$index].offsetLeft;" +
                 "var yoff = txt[$index].offsetTop;" +
                  "window.scrollTo(xoff, yoff - windowHeight/3);"
-
         runOnUiThread {
             webView.evaluateJavascript(js) {
                 onDone?.invoke(articleState, it)
@@ -242,7 +285,28 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    override fun onError(resId: Int) {
+    override fun onReadingListChanged() {
+        runOnUiThread {
+            viewAdapter.notifyDataSetChanged()
+        }
+    }
+
+    override fun confirmMessage(message: String, yesButton: String, noButton: String, onConfirmed: (Boolean) -> Unit) {
+        AlertDialog.Builder(this)
+                .setMessage(message)
+                .setNegativeButton(android.R.string.no, { dialogInterface: DialogInterface, i: Int ->
+                    onConfirmed(false)
+                })
+                .setPositiveButton(android.R.string.yes, { dialogInterface: DialogInterface, i: Int ->
+                    onConfirmed(true)
+                }).create().show()
+    }
+
+    override fun confirmMessage(resourceId: Int, yesButton: Int, noButton: String, onConfirmed: (Boolean) -> Unit) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onError(resourceId: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -254,22 +318,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun showMessage(resId: Int) {
+    override fun showMessage(resourceId: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun displayReadingList(readingList : List<ArticleContext>) {
+    override fun displayReadingList() {
         runOnUiThread {
-            val builder = AlertDialog.Builder(this)
-            val stringList = ArrayList<String>()
-            readingList.forEach {
-                stringList.add(it.contextString)
-            }
-            builder.setTitle(getString(R.string.dialog_reading_list_title))
-            builder.setItems(stringList.toTypedArray()) { dialog, which ->
-                mainPresenter.loadFromContext(readingList[which])
-            }
-            builder.show()
+            unHideReadingListView()
         }
     }
 
@@ -290,7 +345,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
             if (request.url.authority.endsWith("wikipedia.org")) {
                 return runBlocking {
-                    okHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
+                    val response = mainPresenter.onRequest(request.url.toString()).await()
+                    if (response == null) {
+                        null
+                    } else {
+                        okHttpToWebView(response!!)
+                    }
                 }
             }
             return super.shouldInterceptRequest(view, request)
@@ -298,14 +358,32 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         override fun onPageFinished(view: WebView?, url: String?) {
             super.onPageFinished(view, url)
-            // todo (javascript): Only run on appropriate urls
-            // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
-            val js ="var blocks = document.querySelectorAll('[id^=mf-section-]');" +
-                     "if (blocks.length > 0) {" +
-                      "for (let item of blocks) {" +
-                    "item.className+=' open-block';" +
-                     "}}"
-            webView.evaluateJavascript(js, null)
+            expandCollapsableElements()
+            // todo(javascript): How to avoid having to do this for slow-loading pages?
+            GlobalScope.launch {
+                Thread.sleep(1000)
+                runOnUiThread {
+                    expandCollapsableElements()
+                }
+            }
         }
+    }
+
+    private fun expandCollapsableElements() {
+        // todo (javascript): Only run on appropriate urls
+        // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
+//        val js = "var blocks = document.querySelectorAll('[id^=mf-section-]');" +
+//                "if (blocks.length > 0) {" +
+//                "for (let item of blocks) {" +
+//                "item.className+=' open-block';" +
+//                "}}"
+
+            val js = "var blocks = document.getElementsByTagName('h2');" +
+                    "if (blocks.length > 0) {" +
+                    "for (let item of blocks) {" +
+                    "item.className+=' open-block';" +
+                    "if (!!item.previousSibling) { item.previousSibling.className+=' open-block';}" +
+                    "}}"
+                webView.evaluateJavascript(js, null)
     }
 }

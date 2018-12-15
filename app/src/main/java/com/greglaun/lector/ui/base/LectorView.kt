@@ -1,8 +1,12 @@
 package com.greglaun.lector.ui.base
 
 interface LectorView {
-    fun onError(resId: Int)
+    fun onError(resourceId: Int)
     fun onError(message: String)
     fun showMessage(message: String)
-    fun showMessage(resId: Int)
+    fun showMessage(resourceId: Int)
+    fun confirmMessage(message: String, yesButton: String = "Yes", noButton: String = "No",
+                       onConfirmed: (Boolean) -> Unit)
+    fun confirmMessage(resourceId: Int, yesButton: Int, noButton: String,
+                       onConfirmed: (Boolean) -> Unit)
 }
