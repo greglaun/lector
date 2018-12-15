@@ -14,9 +14,13 @@ import okhttp3.Response
 class NetworkCache(val httpClient : OkHttpClient)
     : ComposableCache<Request, Response> {
 
-    override fun get(key: Request): Deferred<Response> {
+    override fun get(key: Request): Deferred<Response?> {
         return GlobalScope.async {
-            httpClient.newCall(key).execute()
+            try {
+                httpClient.newCall(key).execute()
+            } catch (e: Exception) {
+                null
+            }
         }
     }
     override fun set(key: Request, value: Response): Deferred<Unit> {

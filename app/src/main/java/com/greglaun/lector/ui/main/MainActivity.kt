@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.speech.tts.TextToSpeech
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
@@ -19,6 +20,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
+import com.greglaun.lector.android.ReadingListAdapter
 import com.greglaun.lector.android.bound.BindableTtsService
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.android.room.ArticleCacheDatabase
@@ -40,6 +42,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var webView : WebView
     private lateinit var recyclerView: RecyclerView
 
+    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+    private lateinit var viewManager: RecyclerView.LayoutManager
+
+    private val readingList = mutableListOf<ArticleContext>()
     lateinit var mainPresenter : MainContract.Presenter
     var playMenuItem : MenuItem? = null
     var pauseMenuItem : MenuItem? = null
@@ -69,8 +75,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-
-
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
@@ -87,7 +91,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(WikiWebViewClient())
 
-        recyclerView = findViewById(R.id.recycler_view) as RecyclerView
+        viewManager = LinearLayoutManager(this)
+        viewAdapter = ReadingListAdapter(readingList) {
+
+            mainPresenter.loadFromContext(it)
+        }
+
+        recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
+            setHasFixedSize(true)
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
 
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource())
@@ -96,6 +110,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         Intent(this, BindableTtsService::class.java).also { intent ->
             bindService(intent, bindableTtsConnection, Context.BIND_AUTO_CREATE)
         }
+
         registerReceiver(noisyAudioStreamReceiver, intentFilter)
     }
 
@@ -108,6 +123,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
         bindableTtsServiceIsBound = false
     }
+
 
     private fun createResponseSource(): ResponseSource {
         if (RESPONSE_SOURCE_INSTANCE == null) {
@@ -158,13 +174,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         onPause()
     }
 
-    override fun showReadingList() {
+    override fun unHideReadingListView() {
         webView.visibility = GONE
         recyclerView.visibility = VISIBLE
-
     }
 
-    override fun showWebView() {
+    override fun hideReadingListView() {
         recyclerView.visibility = GONE
         webView.visibility = VISIBLE
     }
@@ -278,18 +293,24 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun displayReadingList(readingList : List<ArticleContext>) {
+    override fun displayReadingList(articleContextList : List<ArticleContext>) {
         runOnUiThread {
             val builder = AlertDialog.Builder(this)
-            val stringList = ArrayList<String>()
-            readingList.forEach {
-                stringList.add(it.contextString)
-            }
-            builder.setTitle(getString(R.string.dialog_reading_list_title))
-            builder.setItems(stringList.toTypedArray()) { dialog, which ->
-                mainPresenter.loadFromContext(readingList[which])
-            }
-            builder.show()
+
+//            val stringList = ArrayList<String>()
+//            articleContextList.forEach {
+//                stringList.add(it.contextString)
+//            }
+//            builder.setTitle(getString(R.string.dialog_reading_list_title))
+//            builder.setItems(stringList.toTypedArray()) { dialog, which ->
+//                mainPresenter.loadFromContext(articleContextList[which])
+//            }
+//            builder.show()
+
+            readingList.clear()
+            readingList.addAll(articleContextList)
+            viewAdapter.notifyDataSetChanged()
+            unHideReadingListView()
         }
     }
 
@@ -310,7 +331,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
             if (request.url.authority.endsWith("wikipedia.org")) {
                 return runBlocking {
-                    okHttpToWebView(mainPresenter.onRequest(request.url.toString()).await()!!)
+                    val response = mainPresenter.onRequest(request.url.toString()).await()
+                    if (response == null) {
+                        null
+                    } else {
+                        okHttpToWebView(response!!)
+                    }
                 }
             }
             return super.shouldInterceptRequest(view, request)

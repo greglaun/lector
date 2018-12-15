@@ -77,6 +77,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun loadFromContext(articleContext: ArticleContext) {
+        view.hideReadingListView()
         onUrlChanged("https://en.m.wikipedia.org/wiki/" + articleContext.contextString)
         // ttsPresenter.setPosition(articleContext.position)
     }
