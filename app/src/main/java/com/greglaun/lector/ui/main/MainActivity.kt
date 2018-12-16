@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.os.IBinder
 import android.speech.tts.TextToSpeech
+import android.speech.tts.Voice
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -154,6 +155,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun onSuccessfulTts(androidTts: TextToSpeech) {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
+        val currentVoice = androidTts.voice
+        val newVoice = Voice("myNewVoice", currentVoice.locale,500,
+                currentVoice.latency, false, currentVoice.features)
+        val success = androidTts.setVoice(newVoice)
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
         val ttsStateMachine = bindableTtsService
