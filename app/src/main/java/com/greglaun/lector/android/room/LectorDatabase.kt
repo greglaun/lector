@@ -6,7 +6,7 @@ import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 
 @Database(entities = arrayOf(RoomArticleContext::class, CachedResponse::class,
-        RoomCourseContext::class, CourseArticleJoin::class), version = 1)
+        RoomCourseContext::class, CourseArticleJoin::class), version = 2)
 abstract class LectorDatabase : RoomDatabase() {
 
     abstract fun articleContextDao(): ArticleContextDao
