@@ -13,9 +13,9 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         return CompletableDeferred(hashMap.contains(element))
     }
 
-    override fun add(element : String): Deferred<Unit> {
+    override fun add(element : String): Deferred<Long> {
         hashMap.put(element, true)
-        return CompletableDeferred(Unit)
+        return CompletableDeferred(1L)
     }
 
     override fun delete(element: String): Deferred<Unit> {

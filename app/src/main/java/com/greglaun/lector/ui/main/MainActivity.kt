@@ -20,15 +20,18 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.R
 import com.greglaun.lector.android.AndroidAudioView
+import com.greglaun.lector.android.CourseListAdapter
 import com.greglaun.lector.android.ReadingListAdapter
 import com.greglaun.lector.android.bound.BindableTtsService
 import com.greglaun.lector.android.okHttpToWebView
-import com.greglaun.lector.android.room.ArticleCacheDatabase
+import com.greglaun.lector.android.room.LectorDatabase
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
+import com.greglaun.lector.android.room.RoomCourseSource
 import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
+import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
@@ -40,10 +43,14 @@ import kotlinx.coroutines.experimental.runBlocking
 class MainActivity : AppCompatActivity(), MainContract.View {
     val TAG: String = MainActivity::class.java.simpleName
     private lateinit var webView : WebView
-    private lateinit var recyclerView: RecyclerView
 
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
+    private lateinit var readingListRecyclerView: RecyclerView
+    private lateinit var readingListViewAdapter: RecyclerView.Adapter<*>
+    private lateinit var readingListViewManager: RecyclerView.LayoutManager
+
+    private lateinit var courseListRecyclerView: RecyclerView
+    private lateinit var courseListViewAdapter: RecyclerView.Adapter<*>
+    private lateinit var courseListViewManager: RecyclerView.LayoutManager
 
     lateinit var mainPresenter : MainContract.Presenter
     var playMenuItem : MenuItem? = null
@@ -75,7 +82,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
-
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
                 mainPresenter?.stopSpeakingAndEnablePlayButton()
@@ -90,13 +96,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         webView = findViewById(R.id.webview) as WebView
         webView.setWebViewClient(WikiWebViewClient())
 
-        viewManager = LinearLayoutManager(this)
+        readingListViewManager = LinearLayoutManager(this)
+        courseListViewManager = LinearLayoutManager(this)
+
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
-                createResponseSource())
+                createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
 
-        viewAdapter = renewRecyclerAdapter()
-        recyclerView = renewRecyclerView()
-
+        renewReadingListRecycler(mainPresenter as MainPresenter)
+        renewCourseListRecycler(mainPresenter as MainPresenter)
 
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
@@ -105,14 +112,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
 
         registerReceiver(noisyAudioStreamReceiver, intentFilter)
-    }
-
-    private fun renewRecyclerView(): RecyclerView {
-        return findViewById<RecyclerView>(R.id.recycler_view).apply {
-            setHasFixedSize(true)
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
     }
 
     override fun onDestroy() {
@@ -128,7 +127,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun createResponseSource(): ResponseSource {
         if (RESPONSE_SOURCE_INSTANCE == null) {
-            val db = ArticleCacheDatabase.getInstance(this)
+            val db = LectorDatabase.getInstance(this)
             val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db!!)
             RESPONSE_SOURCE_INSTANCE = ResponseSourceImpl.createResponseSource(RoomSavedArticleCache(db), cacheEntryClassifier,
                     getCacheDir())
@@ -160,19 +159,40 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val ttsStateMachine = bindableTtsService
         mainPresenter = MainPresenter(this,
                 TtsPresenter(androidAudioView, ttsStateMachine),
-                mainPresenter.responseSource())
-        viewAdapter = renewRecyclerAdapter()
-        renewRecyclerView()
+                mainPresenter.responseSource(), mainPresenter.courseSource())
+        renewReadingListRecycler(mainPresenter as MainPresenter)
+        renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
     }
 
-    private fun renewRecyclerAdapter(): ReadingListAdapter {
-        return ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
+    private fun renewReadingListRecycler(mainPresenter: MainPresenter) {
+        readingListViewAdapter = ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
             mainPresenter.loadFromContext(it)
         }, { it: ArticleContext ->
             mainPresenter.deleteRequested(it)
         }
         )
+
+        readingListRecyclerView = findViewById<RecyclerView>(R.id.rv_reading_list).apply {
+            setHasFixedSize(true)
+            layoutManager = readingListViewManager
+            adapter = readingListViewAdapter
+        }
+    }
+
+    private fun renewCourseListRecycler(mainPresenter: MainPresenter) {
+        courseListViewAdapter = CourseListAdapter(mainPresenter.courseList, { it: CourseContext ->
+            mainPresenter.courseDetailsRequested(it)
+        }, { it: CourseContext ->
+            mainPresenter.deleteRequested(it)
+        }
+        )
+
+        courseListRecyclerView = findViewById<RecyclerView>(R.id.rv_course_list).apply {
+            setHasFixedSize(true)
+            layoutManager = courseListViewManager
+            adapter = courseListViewAdapter
+        }
     }
 
     private fun onBadTts() {
@@ -180,7 +200,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun onBackPressed() {
-        if (webView.canGoBack()) {
+        if (webView.visibility != VISIBLE) {
+          unhideWebView()
+        } else if (webView.canGoBack()) {
             webView.goBack()
         } else {
             onPause()
@@ -189,11 +211,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun unHideReadingListView() {
         webView.visibility = GONE
-        recyclerView.visibility = VISIBLE
+        courseListRecyclerView.visibility = GONE
+        readingListRecyclerView.visibility = VISIBLE
     }
 
-    override fun hideReadingListView() {
-        recyclerView.visibility = GONE
+    override fun unHideCourseListView() {
+        webView.visibility = GONE
+        readingListRecyclerView.visibility = GONE
+        courseListRecyclerView.visibility = VISIBLE
+    }
+
+    override fun unhideWebView() {
+        readingListRecyclerView.visibility = GONE
+        courseListRecyclerView.visibility = GONE
         webView.visibility = VISIBLE
     }
 
@@ -221,6 +251,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
             R.id.action_reading_list -> {
                 mainPresenter.onDisplayReadingList()
+                return true
+            }
+            R.id.action_courses -> {
+                mainPresenter.onDisplayCourses()
                 return true
             }
             R.id.action_forward -> {
@@ -287,7 +321,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onReadingListChanged() {
         runOnUiThread {
-            viewAdapter.notifyDataSetChanged()
+            readingListViewAdapter.notifyDataSetChanged()
+        }
+    }
+
+    override fun onCoursesChanged() {
+        runOnUiThread {
+            courseListViewAdapter.notifyDataSetChanged()
         }
     }
 
@@ -325,6 +365,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun displayReadingList() {
         runOnUiThread {
             unHideReadingListView()
+        }
+    }
+
+    override fun displayCourses() {
+        runOnUiThread {
+            unHideCourseListView()
         }
     }
 
