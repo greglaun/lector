@@ -141,6 +141,15 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
+    override fun courseDetailsRequested(courseContext: CourseContext) {
+        GlobalScope.launch {
+            courseContext.id?.apply {
+                val articlesForCourse = courseSource.getArticlesForCourse(this).await()
+                displayArticleList(articlesForCourse)
+            }
+        }
+    }
+
     override fun deleteRequested(articleContext: ArticleContext) {
         view.confirmMessage("Delete article ${articleContext.contextString}?",
                 onConfirmed = {
@@ -154,13 +163,31 @@ class MainPresenter(val view : MainContract.View,
                 })
     }
 
+    override fun deleteRequested(courseContext: CourseContext) {
+        view.confirmMessage("Delete course ${courseContext.courseName}?",
+                onConfirmed = {
+                    if(it) {
+                        GlobalScope.launch {
+                            courseSource.delete(courseContext.courseName).await()
+                            courseList.remove(courseContext)
+                            view.onCoursesChanged()
+                        }
+                    }
+                })
+    }
+
     override fun onDisplayReadingList() {
         GlobalScope.launch{
-            readingList.clear()
-            readingList.addAll(responseSource.getAllPermanent().await())
-            view.onReadingListChanged()
-            view.displayReadingList()
+            val articleList = responseSource.getAllPermanent().await()
+            displayArticleList(articleList)
         }
+    }
+
+    private fun displayArticleList(articleList: List<ArticleContext>) {
+        readingList.clear()
+        readingList.addAll(articleList)
+        view.onReadingListChanged()
+        view.displayReadingList()
     }
 
     override fun onDisplayCourses() {

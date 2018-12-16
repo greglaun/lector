@@ -179,9 +179,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun renewCourseListRecycler(mainPresenter: MainPresenter) {
         courseListViewAdapter = CourseListAdapter(mainPresenter.courseList, { it: CourseContext ->
-//            mainPresenter.loadFromContext(it)
+            mainPresenter.courseDetailsRequested(it)
         }, { it: CourseContext ->
-//            mainPresenter.deleteRequested(it)
+            mainPresenter.deleteRequested(it)
         }
         )
 

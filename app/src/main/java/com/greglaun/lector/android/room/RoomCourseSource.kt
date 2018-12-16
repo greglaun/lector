@@ -19,4 +19,10 @@ class RoomCourseSource(var db: LectorDatabase) : CourseSource {
             db.courseArticleJoinDao().getArticlesWithCourseId(courseId)
         }
     }
+
+    override fun delete(courseName: String): Deferred<Unit> {
+        return GlobalScope.async {
+            db.courseContextDao().delete(courseName)
+        }
+    }
 }

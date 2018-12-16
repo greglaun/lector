@@ -43,5 +43,7 @@ interface MainContract {
         fun courseSource(): CourseSource
         fun loadFromContext(articleContext: ArticleContext)
         fun onDisplayCourses()
+        fun deleteRequested(courseContext: CourseContext)
+        fun courseDetailsRequested(courseContext: CourseContext)
     }
 }

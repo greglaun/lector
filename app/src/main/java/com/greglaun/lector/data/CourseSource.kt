@@ -7,4 +7,5 @@ import kotlinx.coroutines.experimental.Deferred
 interface CourseSource {
     fun getCourses(): Deferred<List<CourseContext>>
     fun getArticlesForCourse(courseId: Long): Deferred<List<ArticleContext>>
+    fun delete(courseName: String): Deferred<Unit>
 }

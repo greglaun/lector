@@ -4,5 +4,4 @@ interface CourseContext {
     val id: Long?
     val courseName: String
     val position: Int
-//    val articlesInCourse: List<ArticleContext>
 }
