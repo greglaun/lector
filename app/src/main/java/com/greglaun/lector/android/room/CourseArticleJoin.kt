@@ -19,6 +19,6 @@ import android.arch.persistence.room.Index
                     childColumns = ["article_id"])
         ])
 data class CourseArticleJoin(
-        @ColumnInfo(name = "course_id") val placeId: Long,
-        @ColumnInfo(name = "article_id") val categoryId: Long
+        @ColumnInfo(name = "course_id") val courseId: Long,
+        @ColumnInfo(name = "article_id") val articleId: Long
 )

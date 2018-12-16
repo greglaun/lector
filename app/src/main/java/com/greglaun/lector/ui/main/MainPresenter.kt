@@ -1,7 +1,13 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.CourseSource
-import com.greglaun.lector.data.cache.*
+import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.POSITION_BEGINNING
+import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.urlToContext
+import com.greglaun.lector.data.course.ConcreteCourseContext
+import com.greglaun.lector.data.course.CourseContext
+import com.greglaun.lector.data.course.CourseDescription
+import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.TTSContract
 import com.greglaun.lector.ui.speak.TtsStateListener
@@ -82,7 +88,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun loadFromContext(articleContext: ArticleContext) {
         onUrlChanged("https://en.m.wikipedia.org/wiki/" + articleContext.contextString)
-        view.hideReadingListView()
+        view.unhideWebView()
     }
 
     private fun computeCurrentContext(urlString: String) {
@@ -192,10 +198,32 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onDisplayCourses() {
         GlobalScope.launch{
+            // BEGIN DELETE
+            val myCourse = CourseDescription("Fruit",
+                    listOf("https://en.wikipedia.org/wiki/Apple",
+                            "https://en.wikipedia.org/wiki/Pear"))
+            addCourse(myCourse)
+            // END DELETE
+
             courseList.clear()
             courseList.addAll(courseSource.getCourses().await())
             view.onCoursesChanged()
             view.displayCourses()
+        }
+    }
+
+    fun addCourse(courseDescription: CourseDescription) {
+        runBlocking {
+            val courseId = courseSource.add(ConcreteCourseContext(null,
+                    courseDescription.courseName,
+                    0)).await()
+            courseDescription.articleUrls.map {
+                async {
+                    responseSource.add(urlToContext(it)).await()
+                    courseSource.addArticleForSource(courseDescription.courseName,
+                            urlToContext(it)).await()
+                }
+            }.forEach {it.await() }
         }
     }
 

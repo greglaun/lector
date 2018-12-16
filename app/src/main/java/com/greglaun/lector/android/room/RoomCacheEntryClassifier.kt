@@ -13,10 +13,14 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         }
     }
 
-    override fun add(element: String): Deferred<Unit> {
+    override fun add(element: String): Deferred<Long> {
         return GlobalScope.async {
-            db.articleContextDao().insert(RoomArticleContext(null, contextString = element))
-            Unit
+            val existingEntry = db.articleContextDao().get(element)
+            if (existingEntry == null) {
+                db.articleContextDao().insert(RoomArticleContext(null, contextString = element))
+            } else {
+                existingEntry.id!!
+            }
         }
     }
 

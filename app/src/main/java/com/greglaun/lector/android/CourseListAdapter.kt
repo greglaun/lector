@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import com.greglaun.lector.R
-import com.greglaun.lector.data.cache.CourseContext
+import com.greglaun.lector.data.course.CourseContext
 
-class CourseListAdapter(private val courseList: MutableList<CourseContext>,
+class CourseListAdapter(val courseList: MutableList<CourseContext>,
                         private val onItemClicked: (CourseContext) -> Unit,
                         private val onItemLongClicked: (CourseContext) -> Unit) :
         RecyclerView.Adapter<CourseListAdapter.courseListViewHolder>() {

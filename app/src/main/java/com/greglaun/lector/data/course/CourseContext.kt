@@ -1,4 +1,4 @@
-package com.greglaun.lector.data.cache
+package com.greglaun.lector.data.course
 
 interface CourseContext {
     val id: Long?

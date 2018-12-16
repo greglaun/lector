@@ -18,4 +18,10 @@ interface CourseArticleJoinDao {
 
     @Insert
     fun insert(join: CourseArticleJoin)
+
+    @Query("""
+           SELECT * from coursearticlejoin WHERE course_id = :courseId
+           AND article_id = :articleId""")
+    fun get(courseId: Long, articleId: Long): CourseArticleJoin
+
 }

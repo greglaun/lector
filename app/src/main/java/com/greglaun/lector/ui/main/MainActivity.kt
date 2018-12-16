@@ -29,9 +29,9 @@ import com.greglaun.lector.android.room.RoomCacheEntryClassifier
 import com.greglaun.lector.android.room.RoomCourseSource
 import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.data.cache.ArticleContext
-import com.greglaun.lector.data.cache.CourseContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
+import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
@@ -98,8 +98,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         readingListViewManager = LinearLayoutManager(this)
         courseListViewManager = LinearLayoutManager(this)
+
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
+
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
 
@@ -159,6 +161,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 TtsPresenter(androidAudioView, ttsStateMachine),
                 mainPresenter.responseSource(), mainPresenter.courseSource())
         renewReadingListRecycler(mainPresenter as MainPresenter)
+        renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
     }
 
@@ -185,7 +188,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
         )
 
-        courseListRecyclerView = findViewById<RecyclerView>(R.id.rv_reading_list).apply {
+        courseListRecyclerView = findViewById<RecyclerView>(R.id.rv_course_list).apply {
             setHasFixedSize(true)
             layoutManager = courseListViewManager
             adapter = courseListViewAdapter
@@ -197,7 +200,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun onBackPressed() {
-        if (webView.canGoBack()) {
+        if (webView.visibility != VISIBLE) {
+          unhideWebView()
+        } else if (webView.canGoBack()) {
             webView.goBack()
         } else {
             onPause()
@@ -208,7 +213,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         webView.visibility = GONE
         courseListRecyclerView.visibility = GONE
         readingListRecyclerView.visibility = VISIBLE
-
     }
 
     override fun unHideCourseListView() {
@@ -217,7 +221,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         courseListRecyclerView.visibility = VISIBLE
     }
 
-    override fun hideReadingListView() {
+    override fun unhideWebView() {
         readingListRecyclerView.visibility = GONE
         courseListRecyclerView.visibility = GONE
         webView.visibility = VISIBLE
