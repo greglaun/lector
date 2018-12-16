@@ -8,5 +8,5 @@
     <string name="save">Save</string>
     <string name="pref_reading_list">reading_list</string>
     <string name="dialog_reading_list_title">Reading List</string>
-    <string name="delete">Delete</string>
+    <string name="courses">Courses</string>
 </resources>

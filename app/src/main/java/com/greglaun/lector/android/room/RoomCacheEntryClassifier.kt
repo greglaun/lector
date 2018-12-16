@@ -6,7 +6,7 @@ import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
 
-class RoomCacheEntryClassifier(val db: ArticleCacheDatabase): CacheEntryClassifier<String> {
+class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<String> {
     override fun contains(element: String): Deferred<Boolean> {
         return GlobalScope.async{
             db.articleContextDao().get(element) != null

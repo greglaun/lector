@@ -12,7 +12,7 @@ import org.junit.Before
 import org.junit.Test
 
 class RoomSavedArticleCacheTest {
-    private var db: ArticleCacheDatabase? = null
+    private var db: LectorDatabase? = null
     private var cache: RoomSavedArticleCache? = null
     private var catRequest: Request? = null
     private var dogRequest: Request? = null
@@ -22,7 +22,7 @@ class RoomSavedArticleCacheTest {
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
-                context, ArticleCacheDatabase::class.java).build()
+                context, LectorDatabase::class.java).build()
         cache = RoomSavedArticleCache(db!!)
 
         dogRequest = Request.Builder()

@@ -17,7 +17,7 @@ import java.io.IOException
 class CachedResponseDaoTest {
     private lateinit var cachedResponseDao: CachedResponseDao
     private lateinit var articleContextDao: ArticleContextDao
-    private var db: ArticleCacheDatabase? = null
+    private var db: LectorDatabase? = null
     val serialResponse = "68747470733A2F2F656E2E77696B6970656469612E6F72672F726F626F74732E74787"
     val urlHash = "http://www.wikipedia.org/wiki/Test".hashCode().toString()
     var cachedResponse: CachedResponse? = null
@@ -26,7 +26,7 @@ class CachedResponseDaoTest {
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
-                context, ArticleCacheDatabase::class.java).build()
+                context, LectorDatabase::class.java).build()
         cachedResponseDao = db!!.cachedResponseDao()
         articleContextDao = db!!.articleContextDao()
     }

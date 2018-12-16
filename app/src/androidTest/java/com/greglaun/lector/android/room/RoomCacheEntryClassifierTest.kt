@@ -13,7 +13,7 @@ import org.junit.Test
 
 
 class RoomCacheEntryClassifierTest {
-    private var db: ArticleCacheDatabase? = null
+    private var db: LectorDatabase? = null
     private var whitelist: RoomCacheEntryClassifier? = null
 
 
@@ -21,8 +21,8 @@ class RoomCacheEntryClassifierTest {
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
-                context, ArticleCacheDatabase::class.java).build()
-        whitelist = RoomCacheEntryClassifier(db as ArticleCacheDatabase)
+                context, LectorDatabase::class.java).build()
+        whitelist = RoomCacheEntryClassifier(db as LectorDatabase)
     }
 
 

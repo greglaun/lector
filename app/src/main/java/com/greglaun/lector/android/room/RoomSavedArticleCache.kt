@@ -14,7 +14,7 @@ import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 import okhttp3.Response
 
-class RoomSavedArticleCache(var db: ArticleCacheDatabase) :
+class RoomSavedArticleCache(var db: LectorDatabase) :
         SavedArticleCache<Request, Response, String> {
 
     override fun getWithContext(key: Request, keyContext: String): Deferred<Response?> {

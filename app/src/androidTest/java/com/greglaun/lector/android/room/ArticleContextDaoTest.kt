@@ -17,13 +17,13 @@ import java.io.IOException
 @RunWith(AndroidJUnit4::class)
 class SimpleEntityReadWriteTest {
     private lateinit var articleContextDao: ArticleContextDao
-    private var db: ArticleCacheDatabase? = null
+    private var db: LectorDatabase? = null
 
     @Before
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
-                context, ArticleCacheDatabase::class.java).build()
+                context, LectorDatabase::class.java).build()
         articleContextDao = db!!.articleContextDao()
     }
 

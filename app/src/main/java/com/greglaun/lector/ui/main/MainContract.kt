@@ -1,6 +1,8 @@
 package com.greglaun.lector.ui.main
 
+import com.greglaun.lector.data.CourseSource
 import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.CourseContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
@@ -17,13 +19,17 @@ interface MainContract {
         fun highlightText(articleState: ArticleState,
                           onDone: ((ArticleState, String) -> Unit)? = null)
         fun unhighlightAllText()
-        fun unHideReadingListView()
         fun hideReadingListView()
+        fun unHideReadingListView()
+        fun unHideCourseListView()
         fun onReadingListChanged()
+        fun onCoursesChanged()
+        fun displayCourses()
     }
 
     interface Presenter : LectorPresenter<View> {
         val readingList: MutableList<ArticleContext>
+        val courseList: MutableList<CourseContext>
         fun onPlayButtonPressed()
         fun stopSpeakingAndEnablePlayButton()
         fun saveArticle()
@@ -34,6 +40,8 @@ interface MainContract {
         fun onRewindOne()
         fun onForwardOne()
         fun responseSource(): ResponseSource
+        fun courseSource(): CourseSource
         fun loadFromContext(articleContext: ArticleContext)
+        fun onDisplayCourses()
     }
 }

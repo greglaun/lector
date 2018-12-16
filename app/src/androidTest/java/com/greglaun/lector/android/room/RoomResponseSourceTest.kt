@@ -28,7 +28,7 @@ class RoomResponseSourceTest {
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val db = Room.inMemoryDatabaseBuilder(context, ArticleCacheDatabase::class.java).build()
+        val db = Room.inMemoryDatabaseBuilder(context, LectorDatabase::class.java).build()
         val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db)
         savedArticleCache = RoomSavedArticleCache(db)
         responseSource =  ResponseSourceImpl.createResponseSource(savedArticleCache!!, cacheEntryClassifier,

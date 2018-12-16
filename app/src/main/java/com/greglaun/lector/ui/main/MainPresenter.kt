@@ -1,9 +1,7 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.ArticleContext
-import com.greglaun.lector.data.cache.POSITION_BEGINNING
-import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.data.cache.urlToContext
+import com.greglaun.lector.data.CourseSource
+import com.greglaun.lector.data.cache.*
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.TTSContract
 import com.greglaun.lector.ui.speak.TtsStateListener
@@ -12,16 +10,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-
-
-
 class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
-                    val responseSource: ResponseSource)
+                    val responseSource: ResponseSource,
+                    val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener {
     private var currentRequestContext = "MAIN_PAGE"
     private val contextThread = newSingleThreadContext("ContextThread")
+
+    // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
+    override val courseList = mutableListOf<CourseContext>()
 
     override fun onAttach() {
         ttsPresenter.onStart(this)
@@ -33,6 +32,10 @@ class MainPresenter(val view : MainContract.View,
 
     override fun responseSource(): ResponseSource {
         return responseSource
+    }
+
+    override fun courseSource(): CourseSource {
+        return courseSource
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -157,6 +160,15 @@ class MainPresenter(val view : MainContract.View,
             readingList.addAll(responseSource.getAllPermanent().await())
             view.onReadingListChanged()
             view.displayReadingList()
+        }
+    }
+
+    override fun onDisplayCourses() {
+        GlobalScope.launch{
+            courseList.clear()
+            courseList.addAll(courseSource.getCourses().await())
+            view.onCoursesChanged()
+            view.displayCourses()
         }
     }
 

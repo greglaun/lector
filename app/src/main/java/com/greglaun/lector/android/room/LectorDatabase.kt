@@ -5,20 +5,23 @@ import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 
-@Database(entities = arrayOf(RoomArticleContext::class, CachedResponse::class), version = 1)
-abstract class ArticleCacheDatabase : RoomDatabase() {
+@Database(entities = arrayOf(RoomArticleContext::class, CachedResponse::class,
+        RoomCourseContext::class, CourseArticleJoin::class), version = 1)
+abstract class LectorDatabase : RoomDatabase() {
 
     abstract fun articleContextDao(): ArticleContextDao
     abstract fun cachedResponseDao(): CachedResponseDao
+    abstract fun courseContextDao():  CourseContextDao
+    abstract fun courseArticleJoinDao(): CourseArticleJoinDao
 
     companion object {
-        private var INSTANCE: ArticleCacheDatabase? = null
+        private var INSTANCE: LectorDatabase? = null
 
-        fun getInstance(context: Context): ArticleCacheDatabase? {
+        fun getInstance(context: Context): LectorDatabase? {
             if (INSTANCE == null) {
-                synchronized(ArticleCacheDatabase::class) {
+                synchronized(LectorDatabase::class) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            ArticleCacheDatabase::class.java, "saved_articles.db")
+                            LectorDatabase::class.java, "saved_articles.db")
                             .build()
                 }
             }
