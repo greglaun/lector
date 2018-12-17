@@ -2,8 +2,10 @@ package com.greglaun.lector.android
 
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.ui.speak.TTSContract
+import java.util.*
 
 class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         UtteranceProgressListener() {
@@ -37,6 +39,33 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
             val callback = callbacks.get(utteranceId)
             if (callback != null) {
                 callback(utteranceId)
+            }
+        }
+    }
+
+    override fun toggleHandsomeBritish() {
+        if (androidTts.voice.locale == Locale.UK) {
+            androidTts.voice = androidTts.defaultVoice
+            return
+        }
+        val britishVoices = mutableListOf<Voice>()
+        var britishVoice: Voice? = null
+        val voices = androidTts.voices
+        for (voice in voices) {
+            if (voice.name == "en-GB-language") {
+                britishVoice = voice
+                continue
+            }
+            if (voice.locale == Locale.UK && !voice.isNetworkConnectionRequired &&
+                    voice.quality >= Voice.QUALITY_VERY_HIGH) {
+                britishVoices.add(voice)
+            }
+        }
+        if (britishVoice != null) {
+            androidTts.voice = britishVoice
+        } else {
+            if (britishVoices.size != 0) {
+                androidTts.voice = britishVoices.get(0) // Just set any old British voiceo
             }
         }
     }

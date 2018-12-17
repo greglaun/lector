@@ -45,5 +45,6 @@ interface MainContract {
         fun onDisplayCourses()
         fun deleteRequested(courseContext: CourseContext)
         fun courseDetailsRequested(courseContext: CourseContext)
+        fun toggleHandsomBritish()
     }
 }

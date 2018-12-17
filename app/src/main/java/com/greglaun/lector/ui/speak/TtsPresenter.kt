@@ -3,7 +3,6 @@ package com.greglaun.lector.ui.speak
 class TtsPresenter(private val tts: TTSContract.AudioView,
                    val stateMachine: TtsStateMachine)
     : TTSContract.Presenter, TtsActorClient {
-
     var onPositionUpdate: ((String) -> Unit)? = null
 
     override fun speechViewSpeak(text: String, utteranceId: String, callback: (String) -> Unit) {
@@ -45,6 +44,10 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     override fun reverseOne(onDone: (ArticleState) -> Unit) {
         stateMachine?.stopReverseOneAndResume(onDone)
+    }
+
+    override fun toggleHandsomeBritish() {
+        tts.toggleHandsomeBritish()
     }
 }
 

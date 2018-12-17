@@ -240,4 +240,10 @@ class MainPresenter(val view : MainContract.View,
             view.highlightText(it)
         }
     }
+
+    override fun toggleHandsomBritish() {
+        ttsPresenter.stopSpeaking()
+        view.enablePlayButton()
+        ttsPresenter.toggleHandsomeBritish()
+    }
 }

@@ -28,4 +28,8 @@ class NoOpTtsPresenter : TTSContract.Presenter {
     override fun reverseOne(onDone: (ArticleState) -> Unit) {
         // Do nothing
     }
+
+    override fun toggleHandsomeBritish() {
+        // Do nothing
+    }
 }

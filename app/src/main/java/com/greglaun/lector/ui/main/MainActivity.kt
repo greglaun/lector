@@ -265,6 +265,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 mainPresenter.onRewindOne()
                 return true
             }
+            R.id.action_toggle_handsome_british -> {
+                mainPresenter.toggleHandsomBritish()
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
     }

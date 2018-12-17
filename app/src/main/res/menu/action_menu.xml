@@ -41,4 +41,9 @@
         android:id="@+id/action_reading_list"
         android:title="@string/reading_list"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_toggle_handsome_british"
+        android:title="@string/toggle_handsome_british"
+        app:showAsAction="never"/>
 </menu>
