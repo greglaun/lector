@@ -7,6 +7,7 @@ interface TTSContract {
     interface AudioView { // Surely there's a better name.
         fun speak(textToSpeak : String, utteranceId: String, callback : (String) -> Unit)
         fun stopImmediately()
+        fun toggleHandsomeBritish()
     }
 
     interface Presenter {
@@ -17,5 +18,6 @@ interface TTSContract {
         fun onStop()
         fun advanceOne(onDone: (ArticleState) -> Unit)
         fun reverseOne(onDone: (ArticleState) -> Unit)
+        fun toggleHandsomeBritish()
     }
 }
