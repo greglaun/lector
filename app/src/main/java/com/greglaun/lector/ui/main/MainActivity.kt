@@ -28,6 +28,7 @@ import com.greglaun.lector.android.room.LectorDatabase
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
 import com.greglaun.lector.android.room.RoomCourseSource
 import com.greglaun.lector.android.room.RoomSavedArticleCache
+import com.greglaun.lector.android.settings.SettingsActivity
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
@@ -267,6 +268,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
             R.id.action_toggle_handsome_british -> {
                 mainPresenter.toggleHandsomBritish()
+                return true
+            }
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
                 return true
             }
             else -> return super.onOptionsItemSelected(item)

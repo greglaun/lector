@@ -9,6 +9,7 @@ import java.util.*
 
 class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         UtteranceProgressListener() {
+    var originalSpeed = 1.0f
     val callbacks : HashMap<String, (String) -> Unit> = HashMap()
     override fun speak(textToSpeak: String, utteranceId: String, callback : (String)-> Unit) {
         if (textToSpeak == "") {
@@ -46,6 +47,7 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
     override fun toggleHandsomeBritish() {
         if (androidTts.voice.locale == Locale.UK) {
             androidTts.voice = androidTts.defaultVoice
+            androidTts.setSpeechRate(2f)
             return
         }
         val britishVoices = mutableListOf<Voice>()
@@ -63,9 +65,11 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         }
         if (britishVoice != null) {
             androidTts.voice = britishVoice
+            androidTts.setSpeechRate(1.0f)
         } else {
             if (britishVoices.size != 0) {
                 androidTts.voice = britishVoices.get(0) // Just set any old British voiceo
+                androidTts.setSpeechRate(1.0f)
             }
         }
     }

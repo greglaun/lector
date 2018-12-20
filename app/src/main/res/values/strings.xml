@@ -10,4 +10,5 @@
     <string name="dialog_reading_list_title">Reading List</string>
     <string name="courses">Courses</string>
     <string name="toggle_handsome_british">Toggle British</string>
+    <string name="settings">Settings</string>
 </resources>
