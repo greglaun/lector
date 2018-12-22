@@ -1,8 +1,8 @@
 package com.greglaun.lector.android.settings
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceFragmentCompat
 import com.greglaun.lector.R
 
 

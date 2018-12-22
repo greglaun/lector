@@ -47,7 +47,7 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
     override fun toggleHandsomeBritish() {
         if (androidTts.voice.locale == Locale.UK) {
             androidTts.voice = androidTts.defaultVoice
-            androidTts.setSpeechRate(2f)
+            androidTts.setSpeechRate(2.7f)
             return
         }
         val britishVoices = mutableListOf<Voice>()
