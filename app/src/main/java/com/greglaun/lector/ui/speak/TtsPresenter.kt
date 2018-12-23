@@ -46,8 +46,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         stateMachine?.stopReverseOneAndResume(onDone)
     }
 
-    override fun toggleHandsomeBritish() {
-        tts.toggleHandsomeBritish()
+    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
+        tts.setHandsomeBritish(shouldBeBritish)
     }
 }
 

@@ -241,9 +241,9 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    override fun toggleHandsomBritish() {
+    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         ttsPresenter.stopSpeaking()
         view.enablePlayButton()
-        ttsPresenter.toggleHandsomeBritish()
+        ttsPresenter.setHandsomeBritish(shouldBeBritish)
     }
 }

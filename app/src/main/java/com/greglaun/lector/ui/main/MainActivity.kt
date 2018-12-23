@@ -5,6 +5,7 @@ import android.content.*
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.IBinder
+import android.preference.PreferenceManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
@@ -19,16 +20,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.greglaun.lector.R
-import com.greglaun.lector.android.AndroidAudioView
-import com.greglaun.lector.android.CourseListAdapter
-import com.greglaun.lector.android.ReadingListAdapter
+import com.greglaun.lector.android.*
 import com.greglaun.lector.android.bound.BindableTtsService
-import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.android.room.LectorDatabase
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
 import com.greglaun.lector.android.room.RoomCourseSource
 import com.greglaun.lector.android.room.RoomSavedArticleCache
-import com.greglaun.lector.android.settings.SettingsActivity
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
@@ -64,6 +61,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private var bindableTtsServiceIsBound: Boolean = false
 
     private var RESPONSE_SOURCE_INSTANCE: ResponseSource? = null
+    private var sharedPreferenceListener: LectorPreferenceChangeListener? = null
 
     private val bindableTtsConnection = object : ServiceConnection {
 
@@ -102,7 +100,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
-
+        sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
+        sharedPreferenceListener?.setFromPreferences(this)
+        
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
 
@@ -118,6 +118,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onDestroy() {
         super.onDestroy()
         mainPresenter.stopSpeakingAndEnablePlayButton()
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(sharedPreferenceListener)
         unregisterReceiver(noisyAudioStreamReceiver)
         if (bindableTtsService != null) {
             unbindService(bindableTtsConnection)
@@ -139,6 +141,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onResume() {
         super.onResume()
         mainPresenter.onAttach()
+        PreferenceManager.getDefaultSharedPreferences(this).
+                registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
     }
 
     fun checkTts() {
@@ -164,6 +168,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
+        sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
+        sharedPreferenceListener?.setFromPreferences(this)
     }
 
     private fun renewReadingListRecycler(mainPresenter: MainPresenter) {
@@ -264,10 +272,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
             R.id.action_rewind -> {
                 mainPresenter.onRewindOne()
-                return true
-            }
-            R.id.action_toggle_handsome_british -> {
-                mainPresenter.toggleHandsomBritish()
                 return true
             }
             R.id.action_settings -> {

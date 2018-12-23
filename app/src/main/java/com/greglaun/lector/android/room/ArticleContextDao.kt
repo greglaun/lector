@@ -1,7 +1,10 @@
 package com.greglaun.lector.android.room
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface ArticleContextDao {

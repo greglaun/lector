@@ -29,7 +29,7 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun toggleHandsomeBritish() {
+    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         // Do nothing
     }
 }

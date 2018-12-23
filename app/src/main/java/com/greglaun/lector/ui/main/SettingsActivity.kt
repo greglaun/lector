@@ -1,4 +1,4 @@
-package com.greglaun.lector.android.settings
+package com.greglaun.lector.ui.main
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -9,9 +9,10 @@ import com.greglaun.lector.R
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_settings)
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.content, SettingsActivity.SettingsFragment())
+                .replace(R.id.content, SettingsFragment())
                 .commit()
     }
 

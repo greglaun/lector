@@ -1,8 +1,8 @@
 package com.greglaun.lector.android.room
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Index
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.POSITION_BEGINNING
 
