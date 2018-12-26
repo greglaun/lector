@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
         sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
         sharedPreferenceListener?.setFromPreferences(this)
-        
+
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
 

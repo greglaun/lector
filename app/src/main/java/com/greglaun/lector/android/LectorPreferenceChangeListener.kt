@@ -15,6 +15,11 @@ class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter):
                         mainPresenter.setHandsomeBritish(it)
                     }
                 }
+                "tts_speed" -> {
+                    sharedPreferences.getInt(key, 100).let{
+                        mainPresenter.setSpeechRate(it.toFloat())
+                    }
+                }
             }
         }
     }
@@ -25,5 +30,8 @@ class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter):
         if (shouldBeBritish) {
             mainPresenter.setHandsomeBritish(shouldBeBritish)
         }
+
+        val speechRate = sharedPreferences.getInt("tts_speed", 100)
+        mainPresenter.setSpeechRate(speechRate.toFloat())
     }
 }

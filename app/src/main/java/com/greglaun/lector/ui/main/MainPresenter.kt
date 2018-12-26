@@ -246,4 +246,10 @@ class MainPresenter(val view : MainContract.View,
         view.enablePlayButton()
         ttsPresenter.setHandsomeBritish(shouldBeBritish)
     }
+
+    override fun setSpeechRate(speechRate: Float) {
+        ttsPresenter.stopSpeaking()
+        view.enablePlayButton()
+        ttsPresenter.setSpeechRate(speechRate)
+    }
 }

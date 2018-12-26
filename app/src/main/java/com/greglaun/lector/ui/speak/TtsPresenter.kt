@@ -49,5 +49,9 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         tts.setHandsomeBritish(shouldBeBritish)
     }
+
+    override fun setSpeechRate(speechRate: Float) {
+        tts.setSpeechRate(speechRate)
+    }
 }
 

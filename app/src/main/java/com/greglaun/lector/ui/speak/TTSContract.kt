@@ -8,6 +8,7 @@ interface TTSContract {
         fun speak(textToSpeak : String, utteranceId: String, callback : (String) -> Unit)
         fun stopImmediately()
         fun setHandsomeBritish(shouldBeBritish: Boolean)
+        fun setSpeechRate(speechRate: Float)
     }
 
     interface Presenter {
@@ -19,5 +20,6 @@ interface TTSContract {
         fun advanceOne(onDone: (ArticleState) -> Unit)
         fun reverseOne(onDone: (ArticleState) -> Unit)
         fun setHandsomeBritish(shouldBeBritish: Boolean)
+        fun setSpeechRate(speechRate: Float)
     }
 }

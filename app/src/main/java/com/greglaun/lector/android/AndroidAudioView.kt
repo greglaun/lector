@@ -9,7 +9,6 @@ import java.util.*
 
 class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         UtteranceProgressListener() {
-    var originalSpeed = 1.0f
     val callbacks : HashMap<String, (String) -> Unit> = HashMap()
     override fun speak(textToSpeak: String, utteranceId: String, callback : (String)-> Unit) {
         if (textToSpeak == "") {
@@ -72,5 +71,9 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
                 androidTts.setSpeechRate(1.0f)
             }
         }
+    }
+
+    override fun setSpeechRate(speechRate: Float) {
+        androidTts.setSpeechRate(speechRate)
     }
 }

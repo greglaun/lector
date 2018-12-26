@@ -32,4 +32,8 @@ class NoOpTtsPresenter : TTSContract.Presenter {
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         // Do nothing
     }
+
+    override fun setSpeechRate(speechRate: Float) {
+        // Do nothing
+    }
 }
