@@ -45,6 +45,7 @@ interface MainContract {
         fun onDisplayCourses()
         fun deleteRequested(courseContext: CourseContext)
         fun courseDetailsRequested(courseContext: CourseContext)
-        fun toggleHandsomBritish()
+        fun setHandsomeBritish(shouldBeBritish: Boolean)
+        fun setSpeechRate(speechRate: Float)
     }
 }

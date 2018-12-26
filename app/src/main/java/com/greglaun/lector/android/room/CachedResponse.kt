@@ -1,7 +1,7 @@
 package com.greglaun.lector.android.room
 
-import android.arch.persistence.room.*
-import android.arch.persistence.room.ForeignKey.CASCADE
+import androidx.room.*
+import androidx.room.ForeignKey.CASCADE
 
 @Entity(foreignKeys = arrayOf(ForeignKey(
         entity = RoomArticleContext::class,

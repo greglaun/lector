@@ -1,8 +1,8 @@
 package com.greglaun.lector.android.room
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Index
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.greglaun.lector.data.course.CourseContext
 
 @Entity(indices = arrayOf(Index(value = "courseName", unique = true)))

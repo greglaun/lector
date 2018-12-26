@@ -43,9 +43,10 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         }
     }
 
-    override fun toggleHandsomeBritish() {
-        if (androidTts.voice.locale == Locale.UK) {
+    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
+        if (!shouldBeBritish) {
             androidTts.voice = androidTts.defaultVoice
+            androidTts.setSpeechRate(2.7f)
             return
         }
         val britishVoices = mutableListOf<Voice>()
@@ -63,10 +64,16 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         }
         if (britishVoice != null) {
             androidTts.voice = britishVoice
+            androidTts.setSpeechRate(1.0f)
         } else {
             if (britishVoices.size != 0) {
                 androidTts.voice = britishVoices.get(0) // Just set any old British voiceo
+                androidTts.setSpeechRate(1.0f)
             }
         }
+    }
+
+    override fun setSpeechRate(speechRate: Float) {
+        androidTts.setSpeechRate(speechRate)
     }
 }

@@ -1,9 +1,9 @@
 package com.greglaun.lector.android
 
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.greglaun.lector.R
 import com.greglaun.lector.data.cache.ArticleContext
 

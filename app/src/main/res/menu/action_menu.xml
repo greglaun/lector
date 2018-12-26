@@ -43,7 +43,8 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_toggle_handsome_british"
-        android:title="@string/toggle_handsome_british"
+        android:id="@+id/action_settings"
+        android:title="@string/settings"
         app:showAsAction="never"/>
+
 </menu>
