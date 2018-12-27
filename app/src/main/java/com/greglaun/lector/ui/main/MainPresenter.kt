@@ -252,4 +252,8 @@ class MainPresenter(val view : MainContract.View,
         view.enablePlayButton()
         ttsPresenter.setSpeechRate(speechRate)
     }
+
+    override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
+        view.evaluateJavascript(js, callback)
+    }
 }

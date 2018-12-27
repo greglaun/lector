@@ -74,6 +74,6 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
     }
 
     override fun setSpeechRate(speechRate: Float) {
-        androidTts.setSpeechRate(speechRate)
+        androidTts.setSpeechRate(speechRate/100.0f)
     }
 }

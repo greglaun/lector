@@ -1,4 +1,4 @@
-package com.greglaun.lector.data.download
+package com.greglaun.lector.data.net
 
 import kotlinx.coroutines.experimental.Deferred
 

@@ -1,14 +1,14 @@
 package com.greglaun.lector.android
 
-import com.greglaun.lector.data.download.DownloadCompleter
-import com.greglaun.lector.data.net.AbstractWebView
+import com.greglaun.lector.data.net.DownloadCompleter
+import com.greglaun.lector.data.net.DownloadTool
 import com.greglaun.lector.data.net.InternetChecker
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
 
-class AndroidDownloadCompleter(val internetChecker: InternetChecker, val webView: AbstractWebView)
+class AndroidDownloadCompleter(val internetChecker: InternetChecker, val downloadTool: DownloadTool)
     : DownloadCompleter {
     val articlesToDownload = hashMapOf<String, Boolean>()
 
@@ -41,7 +41,7 @@ class AndroidDownloadCompleter(val internetChecker: InternetChecker, val webView
 
     fun downloadOneArticle(urlString: String) {
         if (internetChecker.internetIsAvailable()) {
-            webView.downloadUrl(urlString) {
+            downloadTool.downloadUrl(urlString) {
                 articlesToDownload.put(urlString, true)
             }
         }

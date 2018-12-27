@@ -25,6 +25,7 @@ interface MainContract {
         fun onReadingListChanged()
         fun onCoursesChanged()
         fun displayCourses()
+        fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
     }
 
     interface Presenter : LectorPresenter<View> {
@@ -47,5 +48,6 @@ interface MainContract {
         fun courseDetailsRequested(courseContext: CourseContext)
         fun setHandsomeBritish(shouldBeBritish: Boolean)
         fun setSpeechRate(speechRate: Float)
+        fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
     }
 }
