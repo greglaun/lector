@@ -1,13 +1,12 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.ArticleContext
-import com.greglaun.lector.data.cache.POSITION_BEGINNING
-import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.data.cache.urlToContext
+import com.greglaun.lector.data.cache.*
 import com.greglaun.lector.data.course.ConcreteCourseContext
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseDescription
 import com.greglaun.lector.data.course.CourseSource
+import com.greglaun.lector.data.net.DownloadCompleter
+import com.greglaun.lector.data.net.DownloadCompletionScheduler
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.TTSContract
 import com.greglaun.lector.ui.speak.TtsStateListener
@@ -21,8 +20,13 @@ class MainPresenter(val view : MainContract.View,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener {
+
+    override var downloadCompleter: DownloadCompleter? = null
+
     private var currentRequestContext = "MAIN_PAGE"
     private val contextThread = newSingleThreadContext("ContextThread")
+
+    private var downloadScheduler: DownloadCompletionScheduler? = null
 
     // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
@@ -30,10 +34,16 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onAttach() {
         ttsPresenter.onStart(this)
+        downloadCompleter?.let {
+            downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
+            downloadScheduler?.startDownloads()
+        }
+
     }
 
     override fun onDetach() {
         ttsPresenter.onStop()
+        downloadScheduler?.stopDownloads()
     }
 
     override fun responseSource(): ResponseSource {
@@ -87,9 +97,10 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun loadFromContext(articleContext: ArticleContext) {
-        onUrlChanged("https://en.m.wikipedia.org/wiki/" + articleContext.contextString)
+        onUrlChanged(contextToUrl(articleContext.contextString))
         view.unhideWebView()
     }
+
 
     private fun computeCurrentContext(urlString: String) {
         // todo(caching, REST): Replace this ugliness
@@ -255,5 +266,9 @@ class MainPresenter(val view : MainContract.View,
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
         view.evaluateJavascript(js, callback)
+    }
+
+    override fun onPageDownloadFinished(urlString: String) {
+        responseSource.markFinished(urlToContext(urlString))
     }
 }

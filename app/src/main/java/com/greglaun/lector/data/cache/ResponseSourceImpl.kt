@@ -87,4 +87,12 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
     override fun updatePosition(context: String, position: String): Deferred<Unit> {
         return cacheEntryClassifier.updatePosition(context, position)
     }
+
+    override fun getUnfinished(): Deferred<List<String>> {
+        return cacheEntryClassifier.getUnfinished()
+    }
+
+    override fun markFinished(element: String): Deferred<Unit> {
+        return cacheEntryClassifier.markFinished(element)
+    }
 }

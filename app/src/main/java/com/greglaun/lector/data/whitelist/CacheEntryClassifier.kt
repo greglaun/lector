@@ -1,9 +1,10 @@
 package com.greglaun.lector.data.whitelist
 
 import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.net.UnfinishedDownloadSource
 import kotlinx.coroutines.experimental.Deferred
 
-interface CacheEntryClassifier<T> {
+interface CacheEntryClassifier<T>: UnfinishedDownloadSource {
     // todo(cleanup): Move ArticleContext functions to another interface? Or re-architect?
     fun contains(element : T): Deferred<Boolean>
     fun add(element: T): Deferred<Long>

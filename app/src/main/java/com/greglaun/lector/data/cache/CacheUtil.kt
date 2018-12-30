@@ -15,6 +15,10 @@ fun urlToContext(urlString : String) : String {
             .replace("_", " "), "UTF-8")
 }
 
+fun contextToUrl(contextString: String) =
+        "https://en.m.wikipedia.org/wiki/" + contextString
+
+
 fun utteranceId(text : String) : String{
     return text.md5()
 }

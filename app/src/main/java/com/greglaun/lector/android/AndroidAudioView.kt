@@ -39,6 +39,7 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
             val callback = callbacks.get(utteranceId)
             if (callback != null) {
                 callback(utteranceId)
+                callbacks.remove(utteranceId)
             }
         }
     }

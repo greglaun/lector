@@ -17,10 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.greglaun.lector.R
-import com.greglaun.lector.android.AndroidAudioView
-import com.greglaun.lector.android.CourseListAdapter
-import com.greglaun.lector.android.LectorPreferenceChangeListener
-import com.greglaun.lector.android.ReadingListAdapter
+import com.greglaun.lector.android.*
 import com.greglaun.lector.android.bound.BindableTtsService
 import com.greglaun.lector.android.room.LectorDatabase
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
@@ -109,10 +106,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 runOnUiThread {
                     expandCollapsableElements()
                 }
+                it?.let {
+                    mainPresenter.onPageDownloadFinished(it)
+                }
             }
         })
 
         downloaderWebView = findViewById(R.id.downloader_webview) as WebView
+        mainPresenter.downloadCompleter = AndroidDownloadCompleter(
+                AndroidInternetChecker(this),
+                WebviewDownloadTool(downloaderWebView, mainPresenter, this))
 
         readingListViewManager = LinearLayoutManager(this)
         courseListViewManager = LinearLayoutManager(this)
@@ -185,6 +188,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
+
+        mainPresenter.downloadCompleter = mainPresenter.downloadCompleter
 
         webView.webViewClient = WikiWebViewClient(mainPresenter, {
             val intent = Intent(Intent.ACTION_VIEW, it.url)

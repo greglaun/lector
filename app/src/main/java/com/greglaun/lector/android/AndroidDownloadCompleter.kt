@@ -3,46 +3,25 @@ package com.greglaun.lector.android
 import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadTool
 import com.greglaun.lector.data.net.InternetChecker
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 
-class AndroidDownloadCompleter(val internetChecker: InternetChecker, val downloadTool: DownloadTool)
+class AndroidDownloadCompleter(val internetChecker: InternetChecker,
+                               val downloadTool: DownloadTool)
     : DownloadCompleter {
-    val articlesToDownload = hashMapOf<String, Boolean>()
+    val articlesToDownload = mutableSetOf<String>()
 
     override fun addUrlsFOrDownload(urlStrings: List<String>) {
-        urlStrings.forEach{
-            if (!articlesToDownload.containsKey(it))
-            articlesToDownload.put(it, false)
+        urlStrings.forEach {
+            if (!articlesToDownload.contains(it))
+                articlesToDownload.add(it)
         }
     }
 
-    override fun downloadUrls(): Deferred<Unit> {
-        if (internetChecker.internetIsAvailable()) {
-            return GlobalScope.async {
-                articlesToDownload.forEach {
-                    downloadOneArticle(it.key)
-                }
-            }
-        } else {
-            return CompletableDeferred(Unit)
-        }
-    }
-
-    override fun isDone(): Boolean {
-        var isDone = true
-        articlesToDownload.forEach {
-            isDone = isDone && it.value
-        }
-        return isDone
-    }
-
-    fun downloadOneArticle(urlString: String) {
-        if (internetChecker.internetIsAvailable()) {
-            downloadTool.downloadUrl(urlString) {
-                articlesToDownload.put(urlString, true)
+    override fun downloadNextUrl(onArticleDownloaded: (String) -> Unit) {
+        if (internetChecker.internetIsAvailable() && !articlesToDownload.isEmpty()) {
+            val current = articlesToDownload.iterator().next()
+            downloadTool.downloadUrl(current) {
+                onArticleDownloaded(current)
+                articlesToDownload.remove(current)
             }
         }
     }
