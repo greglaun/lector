@@ -12,10 +12,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,6 +23,7 @@ import com.greglaun.lector.android.room.LectorDatabase
 import com.greglaun.lector.android.room.RoomCacheEntryClassifier
 import com.greglaun.lector.android.room.RoomCourseSource
 import com.greglaun.lector.android.room.RoomSavedArticleCache
+import com.greglaun.lector.android.webview.WikiWebViewClient
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
@@ -36,11 +34,11 @@ import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsPresenter
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
 
 class MainActivity : AppCompatActivity(), MainContract.View {
     val TAG: String = MainActivity::class.java.simpleName
-    private lateinit var webView : WebView
+    private lateinit var webView: WebView
+    private lateinit var downloaderWebView: WebView
 
     private lateinit var readingListRecyclerView: RecyclerView
     private lateinit var readingListViewAdapter: RecyclerView.Adapter<*>
@@ -92,14 +90,36 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
+                createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
+
         webView = findViewById(R.id.webview) as WebView
-        webView.setWebViewClient(WikiWebViewClient())
+        webView.webViewClient = WikiWebViewClient(mainPresenter, {
+            val intent = Intent(Intent.ACTION_VIEW, it.url)
+            startActivity(intent)
+            false
+        },{
+            expandCollapsableElements()
+            // todo(javascript): How to avoid having to do this for slow-loading pages?
+            GlobalScope.launch {
+                Thread.sleep(1000)
+                runOnUiThread {
+                    expandCollapsableElements()
+                }
+                it?.let {
+                    mainPresenter.onPageDownloadFinished(it)
+                }
+            }
+        })
+
+        downloaderWebView = findViewById(R.id.downloader_webview) as WebView
+        mainPresenter.downloadCompleter = AndroidDownloadCompleter(
+                AndroidInternetChecker(this),
+                WebviewDownloadTool(downloaderWebView, mainPresenter, this))
 
         readingListViewManager = LinearLayoutManager(this)
         courseListViewManager = LinearLayoutManager(this)
 
-        mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
-                createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
         sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
         sharedPreferenceListener?.setFromPreferences(this)
 
@@ -168,6 +188,24 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
+
+        mainPresenter.downloadCompleter = mainPresenter.downloadCompleter
+
+        webView.webViewClient = WikiWebViewClient(mainPresenter, {
+            val intent = Intent(Intent.ACTION_VIEW, it.url)
+            startActivity(intent)
+            false
+        },{
+            expandCollapsableElements()
+            // todo(javascript): How to avoid having to do this for slow-loading pages?
+            GlobalScope.launch {
+                Thread.sleep(1000)
+                runOnUiThread {
+                    expandCollapsableElements()
+                }
+            }
+        })
+
         sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
@@ -387,62 +425,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    inner class WikiWebViewClient : WebViewClient() {
-        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            if (request.url.authority.endsWith("wikipedia.org")) {
-                mainPresenter.onUrlChanged(request.url.toString())
-                return true
-            }
-            if (request.url.authority.endsWith("wikimedia.org")) {
-                return false
-            }
-            val intent = Intent(Intent.ACTION_VIEW, request.url)
-            startActivity(intent)
-            return false
-        }
-
-        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-            if (request.url.authority.endsWith("wikipedia.org")) {
-                return runBlocking {
-                    val response = mainPresenter.onRequest(request.url.toString()).await()
-                    if (response == null) {
-                        null
-                    } else {
-                        okHttpToWebView(response!!)
-                    }
-                }
-            }
-            return super.shouldInterceptRequest(view, request)
-        }
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            super.onPageFinished(view, url)
-            expandCollapsableElements()
-            // todo(javascript): How to avoid having to do this for slow-loading pages?
-            GlobalScope.launch {
-                Thread.sleep(1000)
-                runOnUiThread {
-                    expandCollapsableElements()
-                }
-            }
-        }
+    override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
+        webView.evaluateJavascript(js, callback)
     }
 
     private fun expandCollapsableElements() {
         // todo (javascript): Only run on appropriate urls
         // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
-//        val js = "var blocks = document.querySelectorAll('[id^=mf-section-]');" +
-//                "if (blocks.length > 0) {" +
-//                "for (let item of blocks) {" +
-//                "item.className+=' open-block';" +
-//                "}}"
-
-            val js = "var blocks = document.getElementsByTagName('h2');" +
-                    "if (blocks.length > 0) {" +
-                    "for (let item of blocks) {" +
-                    "item.className+=' open-block';" +
-                    "if (!!item.previousSibling) { item.previousSibling.className+=' open-block';}" +
-                    "}}"
-                webView.evaluateJavascript(js, null)
+        val js = "var blocks = document.getElementsByTagName('h2');" +
+                "if (blocks.length > 0) {" +
+                "for (let item of blocks) {" +
+                "item.className+=' open-block';" +
+                "if (!!item.previousSibling) { item.previousSibling.className+=' open-block';}" +
+                "}}"
+        mainPresenter.evaluateJavascript(js, null)
     }
 }

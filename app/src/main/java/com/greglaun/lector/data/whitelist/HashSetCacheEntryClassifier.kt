@@ -75,4 +75,12 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         // Do nothing for now
         return CompletableDeferred(Unit)
     }
+
+    override fun getUnfinished(): Deferred<List<String>> {
+        return CompletableDeferred(listOf())
+    }
+
+    override fun markFinished(element: String): Deferred<Unit> {
+        return CompletableDeferred(Unit)
+    }
 }

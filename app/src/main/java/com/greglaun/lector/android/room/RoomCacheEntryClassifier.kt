@@ -79,4 +79,20 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
             db.articleContextDao().updatePosition(currentRequestContext, position)
         }
     }
+
+    override fun getUnfinished(): Deferred<List<String>> {
+        return GlobalScope.async {
+            val unfinished = mutableListOf<String>()
+            db.articleContextDao().getAllUnfinished().map {
+                unfinished.add(it.contextString)
+            }
+            unfinished
+        }
+    }
+
+    override fun markFinished(element: String): Deferred<Unit> {
+        return GlobalScope.async {
+            db.articleContextDao().markFinished(element)
+        }
+    }
 }

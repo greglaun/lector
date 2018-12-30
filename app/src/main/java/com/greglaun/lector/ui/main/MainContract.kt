@@ -4,6 +4,7 @@ import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseSource
+import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
 import com.greglaun.lector.ui.speak.ArticleState
@@ -25,9 +26,13 @@ interface MainContract {
         fun onReadingListChanged()
         fun onCoursesChanged()
         fun displayCourses()
+        fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
     }
 
     interface Presenter : LectorPresenter<View> {
+        // todo(immutability): Find solution to ugly circular dependency
+        var downloadCompleter: DownloadCompleter?
+
         val readingList: MutableList<ArticleContext>
         val courseList: MutableList<CourseContext>
         fun onPlayButtonPressed()
@@ -47,5 +52,7 @@ interface MainContract {
         fun courseDetailsRequested(courseContext: CourseContext)
         fun setHandsomeBritish(shouldBeBritish: Boolean)
         fun setSpeechRate(speechRate: Float)
+        fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
+        fun onPageDownloadFinished(urlString: String)
     }
 }

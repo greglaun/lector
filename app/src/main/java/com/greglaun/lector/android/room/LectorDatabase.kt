@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = arrayOf(RoomArticleContext::class, CachedResponse::class,
-        RoomCourseContext::class, CourseArticleJoin::class), version = 2)
+        RoomCourseContext::class, CourseArticleJoin::class), version = 3)
 abstract class LectorDatabase : RoomDatabase() {
 
     abstract fun articleContextDao(): ArticleContextDao

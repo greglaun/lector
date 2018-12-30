@@ -39,6 +39,7 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
             val callback = callbacks.get(utteranceId)
             if (callback != null) {
                 callback(utteranceId)
+                callbacks.remove(utteranceId)
             }
         }
     }
@@ -74,6 +75,6 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
     }
 
     override fun setSpeechRate(speechRate: Float) {
-        androidTts.setSpeechRate(speechRate)
+        androidTts.setSpeechRate(speechRate/100.0f)
     }
 }

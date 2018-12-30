@@ -48,4 +48,9 @@ interface ArticleContextDao {
     @Query("UPDATE RoomArticleContext SET position = :position WHERE contextString = :contextString")
     fun updatePosition(contextString: String, position: String)
 
+    @Query("SELECT * from RoomArticleContext WHERE `download_complete` = 0 AND `temporary` = 0")
+    fun getAllUnfinished(): List<RoomArticleContext>
+
+    @Query("UPDATE RoomArticleContext SET `download_complete` = 1 WHERE contextString = :contextString")
+    fun markFinished(contextString: String)
 }
