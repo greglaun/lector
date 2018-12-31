@@ -28,9 +28,13 @@ android {
         test.java.srcDirs += 'src/test/integration/kotlin'
     }
     buildTypes {
+        debug {
+            resValue "string", "base_url", System.env.LECTOR_BASE_URL ?: lectorUrl
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            resValue "string", "base_url", System.env.LECTOR_BASE_URL ?: lectorUrl
         }
     }
 }
