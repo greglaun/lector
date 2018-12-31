@@ -21,7 +21,8 @@ class WebviewDownloadTool(val webView: WebView, mainPresenter: MainContract.Pres
             it?.let {
                 urlToContext(it).let {
                     if (downloadCallbacks.containsKey(it)) {
-                        Thread.sleep(1000) // Wait for download to actually finish
+                        // todo: Find better solution to allow download to finish
+                        Thread.sleep(1000) // Wait for download to actually finish. A hack.
                         downloadCallbacks.get(it)?.invoke()
                         downloadCallbacks.remove(it)
                     }
