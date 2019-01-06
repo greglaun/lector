@@ -1,5 +1,7 @@
 package com.greglaun.lector.ui.main
 
+import com.greglaun.lector.android.room.RoomCourseSource
+import com.greglaun.lector.data.cache.BasicArticleContext
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.ui.speak.TTSContract
 import org.junit.After
@@ -14,6 +16,7 @@ class MainPresenterTest {
     lateinit var mockView: MainContract.View
     lateinit var mockTts: TTSContract.Presenter
     lateinit var responseSource: ResponseSourceImpl
+    lateinit var courseSource: RoomCourseSource
     val testDir = File("testDir")
 
     @Before
@@ -21,7 +24,9 @@ class MainPresenterTest {
         mockView = mock(MainContract.View::class.java)
         mockTts = mock(TTSContract.Presenter::class.java)
         responseSource = mock(ResponseSourceImpl::class.java)
-        mainPresenter = MainPresenter(mockView, mockTts, responseSource)
+        courseSource = mock(RoomCourseSource::class.java)
+
+        mainPresenter = MainPresenter(mockView, mockTts, responseSource, courseSource)
     }
 
     @After
@@ -53,7 +58,7 @@ class MainPresenterTest {
 
     @Test
     fun deleteArticle() {
-        mainPresenter.deleteRequested("test")
+        mainPresenter.deleteRequested(BasicArticleContext.fromString("test"))
         verify(responseSource, times(1)).delete("test")
     }
 }
