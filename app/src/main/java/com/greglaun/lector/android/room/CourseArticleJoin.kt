@@ -19,6 +19,7 @@ import androidx.room.Index
                     parentColumns = ["id"],
                     childColumns = ["article_id"])
         ])
+
 data class CourseArticleJoin(
         @ColumnInfo(name = "course_id") val courseId: Long,
         @ColumnInfo(name = "article_id") val articleId: Long

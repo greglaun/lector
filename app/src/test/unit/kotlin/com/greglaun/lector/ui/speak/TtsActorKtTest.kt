@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -20,7 +21,8 @@ class TtsActorKtTest {
     @Before
     fun setUp() {
         stateMachine.startMachine(ttsClient, mock(TtsStateListener::class.java))
-        `when`(articleStateSource.getArticle(urlString)).thenReturn(articleState)
+        `when`(articleStateSource.getArticle(urlString)).thenReturn(
+                CompletableDeferred(articleState))
     }
 
     @Test
@@ -43,7 +45,6 @@ class TtsActorKtTest {
         runBlocking {
             stateMachine.changeStateReady().await()
             assertTrue(SpeakerState.READY == stateMachine.getState().await())
-            stateMachine.changeStateStopSpeaking().await()
             assertTrue(SpeakerState.NOT_READY == stateMachine.getState().await())
         }
     }

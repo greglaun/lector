@@ -11,7 +11,7 @@
         app:key="tts_speed"
         app:title="Speech speed"
         app:defaultValue="100"
-        android:max="250"/>
+        android:max="350"/>
 
     <!--<Preference-->
         <!--app:key="feedback"-->
