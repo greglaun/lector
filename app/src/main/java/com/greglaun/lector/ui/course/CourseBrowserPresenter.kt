@@ -1,11 +1,15 @@
 package com.greglaun.lector.ui.course
 
+import com.greglaun.lector.data.course.CourseDetails
 import com.greglaun.lector.data.course.CourseDownloader
+import com.greglaun.lector.data.course.CourseMetadata
+import com.greglaun.lector.data.course.CourseSource
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 
 class CourseBrowserPresenter(val view: CourseBrowserContract.View,
-                             val courseDownloader: CourseDownloader)
+                             val courseDownloader: CourseDownloader,
+                             val courseSource: CourseSource)
     : CourseBrowserContract.Presenter {
 
     override fun onAttach() {}
@@ -24,13 +28,25 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
         }
     }
 
-    override fun onCourseDetailSelected(courseName: String) {
+    override fun onCourseDetailSelected(courseMetadata: CourseMetadata) {
         GlobalScope.launch {
-            courseDownloader.downloadCourseMetadata()
+            courseDownloader.fetchCourseDetails(courseMetadata).await()?.also {
+                view.showCourseDetails(it)
+            }
         }
     }
 
-    override fun onCourseSaved(courseName: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onCourseSaved(courseDetails: CourseDetails) {
+        courseSource.addCourseDetails(courseDetails)
+    }
+
+    override fun onCoursesSaved(courseMetadata: List<CourseMetadata>) {
+        GlobalScope.launch {
+            courseMetadata.forEach {
+                courseDownloader.fetchCourseDetails(it).await()?.also {
+                    courseSource.addCourseDetails(it)
+                }
+            }
+        }
     }
 }

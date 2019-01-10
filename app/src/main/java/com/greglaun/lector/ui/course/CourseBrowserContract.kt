@@ -13,7 +13,8 @@ interface CourseBrowserContract {
 
     interface Presenter : LectorPresenter<View> {
         fun beginCourseDownload()
-        fun onCourseDetailSelected(courseName: String)
-        fun onCourseSaved(courseName: String)
+        fun onCourseDetailSelected(courseMetadata: CourseMetadata)
+        fun onCourseSaved(courseDetails: CourseDetails)
+        fun onCoursesSaved(courseMetadata: List<CourseMetadata>)
     }
 }

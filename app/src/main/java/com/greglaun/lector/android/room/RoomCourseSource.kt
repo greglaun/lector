@@ -2,6 +2,7 @@ package com.greglaun.lector.android.room
 
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.course.CourseContext
+import com.greglaun.lector.data.course.CourseDetails
 import com.greglaun.lector.data.course.CourseSource
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
@@ -51,6 +52,15 @@ class RoomCourseSource(var db: LectorDatabase) : CourseSource {
                 newId
             } else {
                 existingEntry.id!!
+            }
+        }
+    }
+
+    override fun addCourseDetails(courseDetails: CourseDetails): Deferred<Unit> {
+        return GlobalScope.async {
+            add(RoomCourseContext(null, courseDetails.name)).await()
+            courseDetails.articleNames.forEach {
+                addArticleForSource(courseDetails.name, it)
             }
         }
     }
