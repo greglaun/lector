@@ -16,11 +16,11 @@ class CourseDownloaderImpl(val baseUrl: String, lruCacheDir: File):
     private val client = OkHttpConnectionFactory.createClient(lruCacheDir)
 
 
-    override fun downloadAllCourseNames(): Deferred<List<String>?> {
+    override fun downloadCourseMetadata(): Deferred<List<CourseMetadata>?> {
         return GlobalScope.async fetch@{
             val responseString = downloadCourseInfo()
             if (responseString != null) {
-                 extractCourseNames(responseString!!)
+                 extractCourseMetadata(responseString!!)
              } else {
                 null
             }
@@ -53,5 +53,13 @@ class CourseDownloaderImpl(val baseUrl: String, lruCacheDir: File):
         }
         // Everything fits into memory at this stage of things
         return response.peekBody(TEN_GB).string()
+    }
+
+    override fun fetchCourseDetails(courseMetadata: CourseMetadata): Deferred<CourseDetails?> {
+        return GlobalScope.async {
+            fetchCourseDetails(listOf(courseMetadata.name)).await()?.let {
+                it[courseMetadata.name]
+            }
+        }
     }
 }

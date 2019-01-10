@@ -33,7 +33,6 @@ class CourseListAdapter(val courseList: MutableList<CourseContext>,
         }
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = courseList.size
 }
 
