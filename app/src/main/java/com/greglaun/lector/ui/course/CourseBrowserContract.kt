@@ -12,6 +12,7 @@ interface CourseBrowserContract {
     }
 
     interface Presenter : LectorPresenter<View> {
+        val courseMetadatalist: List<CourseMetadata>
         fun beginCourseDownload()
         fun onCourseDetailSelected(courseMetadata: CourseMetadata)
         fun onCourseSaved(courseDetails: CourseDetails)

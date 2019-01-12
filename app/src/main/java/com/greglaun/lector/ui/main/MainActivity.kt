@@ -150,9 +150,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun createResponseSource(): ResponseSource {
         if (RESPONSE_SOURCE_INSTANCE == null) {
-            val db = LectorDatabase.getInstance(this)
+            val db = LectorDatabase.getInstance(applicationContext)
             val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db!!)
-            RESPONSE_SOURCE_INSTANCE = ResponseSourceImpl.createResponseSource(RoomSavedArticleCache(db), cacheEntryClassifier,
+            RESPONSE_SOURCE_INSTANCE = ResponseSourceImpl.createResponseSource(
+                    RoomSavedArticleCache(db),
+                    cacheEntryClassifier,
                     getCacheDir())
         }
         return RESPONSE_SOURCE_INSTANCE!!

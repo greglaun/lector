@@ -12,6 +12,8 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
                              val courseSource: CourseSource)
     : CourseBrowserContract.Presenter {
 
+    override val courseMetadatalist = mutableListOf<CourseMetadata>()
+
     override fun onAttach() {}
 
     override fun onDetach() {}

@@ -6,13 +6,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.greglaun.lector.R
-import com.greglaun.lector.data.course.CourseContext
+import com.greglaun.lector.data.course.CourseMetadata
 
 
-
-class courseBrowserAdapter(val courseBrowser: MutableList<CourseContext>,
-                           private val onItemClicked: (CourseContext) -> Unit,
-                           private val onItemLongClicked: (CourseContext) -> Unit) :
+class courseBrowserAdapter(val courseBrowser: MutableList<CourseMetadata>,
+                           private val onItemClicked: (CourseMetadata) -> Unit) :
         RecyclerView.Adapter<courseBrowserAdapter.courseBrowserViewHolder>() {
 
     class courseBrowserViewHolder(val textView: TextView, val imageView: ImageView)
@@ -27,13 +25,9 @@ class courseBrowserAdapter(val courseBrowser: MutableList<CourseContext>,
     }
 
     override fun onBindViewHolder(holder: courseBrowserViewHolder, position: Int) {
-        holder.textView.text = courseBrowser[position].courseName
+        holder.textView.text = courseBrowser[position].name
         holder.textView.setOnClickListener {
             onItemClicked.invoke(courseBrowser[position])
-        }
-        holder.textView.setOnLongClickListener {
-            onItemLongClicked.invoke(courseBrowser[position])
-            true
         }
         // Note: For now we are not loading image 01/08/2019
     }
