@@ -11,8 +11,8 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
                              val courseDownloader: CourseDownloader,
                              val courseSource: CourseSource)
     : CourseBrowserContract.Presenter {
-
     override val courseMetadatalist = mutableListOf<CourseMetadata>()
+    var currentDetails: CourseDetails? = null
 
     override fun onAttach() {}
 
@@ -25,28 +25,41 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
     override fun beginCourseDownload() {
         GlobalScope.launch {
             courseDownloader.downloadCourseMetadata().await()?.also {
+                courseMetadatalist.clear()
+                courseMetadatalist.addAll(it)
+                view.onCourseListChanged()
                 view.showCourses(it)
             }
+        }
+    }
+
+    override fun onSaveDetailsPressed() {
+        currentDetails?.let {
+            onCourseSaved(it)
         }
     }
 
     override fun onCourseDetailSelected(courseMetadata: CourseMetadata) {
         GlobalScope.launch {
             courseDownloader.fetchCourseDetails(courseMetadata).await()?.also {
+                currentDetails = it
                 view.showCourseDetails(it)
             }
         }
     }
 
-    override fun onCourseSaved(courseDetails: CourseDetails) {
-        courseSource.addCourseDetails(courseDetails)
+    private fun onCourseSaved(courseDetails: CourseDetails) {
+        GlobalScope.launch {
+            courseSource.addCourseDetails(courseDetails).await()
+            view.showToast("Course " + courseDetails.name + " added.")
+        }
     }
 
     override fun onCoursesSaved(courseMetadata: List<CourseMetadata>) {
         GlobalScope.launch {
             courseMetadata.forEach {
                 courseDownloader.fetchCourseDetails(it).await()?.also {
-                    courseSource.addCourseDetails(it)
+                    courseSource.addCourseDetails(it).await()
                 }
             }
         }

@@ -29,6 +29,7 @@ import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
+import com.greglaun.lector.ui.course.CourseBrowserActivity
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsPresenter
@@ -302,7 +303,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 mainPresenter.onDisplayReadingList()
                 return true
             }
-            R.id.action_courses -> {
+            R.id.action_browse_courses -> {
+                startActivity(Intent(this, CourseBrowserActivity::class.java))
+                return true
+            }
+            R.id.action_my_courses -> {
                 mainPresenter.onDisplayCourses()
                 return true
             }

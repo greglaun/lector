@@ -8,7 +8,7 @@ import java.io.File
 
 class CourseDownloaderImplTest {
     val testDir = File("testDir")
-    val courseDownloader = CourseDownloaderImpl(BuildConfig.BASE_URL, testDir)
+    val courseDownloader = CourseDownloaderImpl(BuildConfig.BASE_URL_LOCAL, testDir)
 
     @Test
     fun downloadAllCourseNames() {

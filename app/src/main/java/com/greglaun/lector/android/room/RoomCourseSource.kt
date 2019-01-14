@@ -1,6 +1,7 @@
 package com.greglaun.lector.android.room
 
 import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseDetails
 import com.greglaun.lector.data.course.CourseSource
@@ -23,7 +24,13 @@ class RoomCourseSource(var db: LectorDatabase) : CourseSource {
 
     override fun addArticleForSource(courseName: String, articleName: String): Deferred<Unit> {
         return GlobalScope.async {
-            val articleContext = db.articleContextDao().get(articleName)
+            var articleContext: ArticleContext? = db.articleContextDao().get(articleName)
+            if (articleContext == null) {
+                val articleId = db.articleContextDao().insert(
+                        RoomArticleContext(null, articleName, "", false))
+                articleContext =
+                        RoomArticleContext(articleId, articleName, "", false)
+            }
             val courseContext = db.courseContextDao().get(courseName)
             val courseArticleJoin = CourseArticleJoin(courseContext.id!!,
                     articleContext.id!!)
@@ -60,7 +67,7 @@ class RoomCourseSource(var db: LectorDatabase) : CourseSource {
         return GlobalScope.async {
             add(RoomCourseContext(null, courseDetails.name)).await()
             courseDetails.articleNames.forEach {
-                addArticleForSource(courseDetails.name, it)
+                addArticleForSource(courseDetails.name, urlToContext(it))
             }
         }
     }

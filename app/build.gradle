@@ -29,8 +29,8 @@ android {
     }
     buildTypes {
         debug {
-//            resValue "string", "base_url", System.env.LECTOR_BASE_URL ?: lectorUrl
             buildConfigField "String", "BASE_URL", System.env.LECTOR_BASE_URL ?: "\"$lectorUrl\""
+            buildConfigField "String", "BASE_URL_LOCAL", System.env.LECTOR_BASE_URL_LOCAL ?: "\"$lectorUrlLocal\""
         }
         release {
             minifyEnabled false
