@@ -26,25 +26,29 @@
         android:title="@string/action_forward"
         app:showAsAction="always"/>
 
-
     <item
         android:id="@+id/action_save"
         android:title="@string/save"
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_courses"
+        android:id="@+id/action_settings"
+        android:title="@string/settings"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_browse_courses"
+        android:title="@string/browse_courses"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_my_courses"
         android:title="@string/courses"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_reading_list"
         android:title="@string/reading_list"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_settings"
-        android:title="@string/settings"
         app:showAsAction="never"/>
 
 </menu>

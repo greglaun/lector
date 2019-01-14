@@ -11,15 +11,15 @@ fun extractCourseMap(jsonString: String): List<Map<String, Object>> {
     return courseMap
 }
 
-fun extractCourseNames(jsonString: String): List<String> {
+fun extractCourseMetadata(jsonString: String): List<CourseMetadata> {
     val courseMap = extractCourseMap(jsonString)
-    val courseNames = mutableListOf<String>()
+    val metaData = mutableListOf<CourseMetadata>()
     courseMap.forEach{
         if (it.containsKey("name")) {
-            courseNames.add(it.get("name") as String)
+            metaData.add(CourseMetadata(name = it.get("name") as String))
         }
     }
-    return courseNames
+    return metaData
 }
 
 fun toCourseDetailsMap(jsonMap: List<Map<String, Object>>): Map<String, CourseDetails> {

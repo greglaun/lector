@@ -46,16 +46,16 @@ class MainPresenter(val view : MainContract.View,
         downloadScheduler?.stopDownloads()
     }
 
+    override fun getLectorView(): MainContract.View? {
+        return view
+    }
+
     override fun responseSource(): ResponseSource {
         return responseSource
     }
 
     override fun courseSource(): CourseSource {
         return courseSource
-    }
-
-    override fun getLectorView(): MainContract.View? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onUtteranceStarted(articleState: ArticleState) {

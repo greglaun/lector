@@ -8,12 +8,12 @@ import java.io.File
 
 class CourseDownloaderImplTest {
     val testDir = File("testDir")
-    val courseDownloader = CourseDownloaderImpl(BuildConfig.BASE_URL, testDir)
+    val courseDownloader = CourseDownloaderImpl(BuildConfig.BASE_URL_LOCAL, testDir)
 
     @Test
     fun downloadAllCourseNames() {
         runBlocking {
-            val result = courseDownloader.downloadAllCourseNames().await()
+            val result = courseDownloader.downloadCourseMetadata().await()
             assertTrue(result!!.contains("Ice Cream"))
             assertTrue(result!!.contains("Furry Friends"))
         }

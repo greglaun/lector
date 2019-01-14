@@ -17,7 +17,7 @@ interface CourseArticleJoinDao {
     fun getArticlesWithCourseId(courseId: Long): List<RoomArticleContext>
 
     @Insert
-    fun insert(join: CourseArticleJoin)
+    fun insert(join: CourseArticleJoin): Long
 
     @Query("""
            SELECT * from coursearticlejoin WHERE course_id = :courseId
