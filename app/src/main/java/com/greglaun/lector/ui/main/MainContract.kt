@@ -29,7 +29,7 @@ interface MainContract {
         fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
     }
 
-     interface Presenter : LectorPresenter<View> {
+    interface Presenter : LectorPresenter<View> {
         // todo(immutability): Find solution to ugly circular dependency re: downloadCompleter
         var downloadCompleter: DownloadCompleter?
         val readingList: MutableList<ArticleContext>
@@ -39,7 +39,7 @@ interface MainContract {
         fun stopSpeakingAndEnablePlayButton()
         fun saveArticle()
         fun deleteRequested(articleContext: ArticleContext)
-        fun onUrlChanged(url : String)
+        fun onUrlChanged(url : String): Deferred<Unit>
         fun onRequest(url : String) : Deferred<Response?>
         fun onDisplayReadingList()
         fun onRewindOne()
@@ -51,8 +51,12 @@ interface MainContract {
         fun deleteRequested(courseContext: CourseContext)
         fun courseDetailsRequested(courseContext: CourseContext)
         fun setHandsomeBritish(shouldBeBritish: Boolean)
-        fun setSpeechRate(speechRate: Float)
         fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
         fun onPageDownloadFinished(urlString: String)
+
+        // Preferences
+        fun setSpeechRate(speechRate: Float)
+        fun setAutoPlay(autoPlay: Boolean)
+        fun setAutoDelete(autoDelete: Boolean)
     }
 }

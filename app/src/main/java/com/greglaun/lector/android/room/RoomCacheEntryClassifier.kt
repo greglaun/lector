@@ -33,8 +33,11 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
     override fun update(from: String, to: String): Deferred<Unit> {
         return GlobalScope.async {
             val articleContext = db.articleContextDao().get(from)
-            articleContext.contextString = to
-            db.articleContextDao().updateArticleContext(articleContext)
+            articleContext?.let {
+                articleContext.contextString = to
+                db.articleContextDao().updateArticleContext(articleContext)
+            }
+            Unit
         }
     }
 
@@ -68,7 +71,7 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         }
     }
 
-    override fun getArticleContext(context: String): Deferred<ArticleContext> {
+    override fun getArticleContext(context: String): Deferred<ArticleContext?> {
         return GlobalScope.async {
             db.articleContextDao().get(context)
         }
@@ -93,6 +96,13 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
     override fun markFinished(element: String): Deferred<Unit> {
         return GlobalScope.async {
             db.articleContextDao().markFinished(element)
+        }
+    }
+
+    override fun getNextArticle(context: String): Deferred<ArticleContext?> {
+        return GlobalScope.async {
+            val oldArticle = db.articleContextDao().get(context) ?: return@async null
+            db.articleContextDao().getNextLargest(oldArticle.id!!)
         }
     }
 }

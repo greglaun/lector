@@ -20,17 +20,19 @@ class MainPresenter(val view : MainContract.View,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener {
-
     override var downloadCompleter: DownloadCompleter? = null
-
     private var currentRequestContext = "MAIN_PAGE"
     private val contextThread = newSingleThreadContext("ContextThread")
-
     private var downloadScheduler: DownloadCompletionScheduler? = null
 
     // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
     override val courseList = mutableListOf<CourseContext>()
+
+    // Preferences
+    // todo(state): Find a better solution to preferences that doesn't depend on Android libs
+    private var autoPlay = true
+    private var autoDelete = true
 
     override fun onAttach() {
         ttsPresenter.onStart(this)
@@ -38,7 +40,6 @@ class MainPresenter(val view : MainContract.View,
             downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
             downloadScheduler?.startDownloads()
         }
-
     }
 
     override fun onDetach() {
@@ -66,6 +67,23 @@ class MainPresenter(val view : MainContract.View,
         view.unhighlightAllText()
     }
 
+    override fun onArticleFinished(articleState: ArticleState) {
+        GlobalScope.launch {
+            if (autoDelete) {
+                launch {
+                    responseSource.delete(articleState.title)
+                }
+            }
+            if (autoPlay) {
+                val nextArticle = responseSource.getNextArticle(articleState.title).await()
+                nextArticle?.let {
+                    onUrlChanged(contextToUrl(it.contextString)).await()
+                    onPlayButtonPressed()
+                }
+            }
+        }
+    }
+
     override fun onSpeechStopped() {
         view.enablePlayButton()
     }
@@ -82,17 +100,22 @@ class MainPresenter(val view : MainContract.View,
         view.enablePlayButton()
     }
 
-    override fun onUrlChanged(urlString: String) {
-        computeCurrentContext(urlString)
-        view.loadUrl(urlString)
-        stopSpeakingAndEnablePlayButton()
-        GlobalScope.launch {
-            var position = POSITION_BEGINNING
-            if (responseSource.contains(urlToContext(urlString)).await()) {
-                position = responseSource.getArticleContext(urlToContext(urlString))
-                        .await().position
+    override fun onUrlChanged(urlString: String): Deferred<Unit> {
+        return GlobalScope.async {
+            computeCurrentContext(urlString)
+            view.loadUrl(urlString)
+            stopSpeakingAndEnablePlayButton()
+            launch {
+                var position = POSITION_BEGINNING
+                if (responseSource.contains(urlToContext(urlString)).await()) {
+                    responseSource.getArticleContext(urlToContext(urlString))
+                            .await()?.let{
+                                position = it.position
+                            }
+                }
+                ttsPresenter.onUrlChanged(urlString, position)
             }
-            ttsPresenter.onUrlChanged(urlString, position)
+            Unit
         }
     }
 
@@ -100,7 +123,6 @@ class MainPresenter(val view : MainContract.View,
         onUrlChanged(contextToUrl(articleContext.contextString))
         view.unhideWebView()
     }
-
 
     private fun computeCurrentContext(urlString: String) {
         // todo(caching, REST): Replace this ugliness
@@ -209,13 +231,6 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onDisplayCourses() {
         GlobalScope.launch{
-            // BEGIN DELETE
-            val myCourse = CourseDescription("Fruit",
-                    listOf("https://en.wikipedia.org/wiki/Apple",
-                            "https://en.wikipedia.org/wiki/Pear"))
-            addCourse(myCourse)
-            // END DELETE
-
             courseList.clear()
             courseList.addAll(courseSource.getCourses().await())
             view.onCoursesChanged()
@@ -270,5 +285,13 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPageDownloadFinished(urlString: String) {
         responseSource.markFinished(urlToContext(urlString))
+    }
+
+    override fun setAutoPlay(autoPlayIn: Boolean) {
+        autoPlay = autoPlayIn
+    }
+
+    override fun setAutoDelete(autoDeleteIn: Boolean) {
+        autoDelete = autoDeleteIn
     }
 }
