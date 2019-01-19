@@ -105,17 +105,14 @@ class MainPresenter(val view : MainContract.View,
             computeCurrentContext(urlString)
             view.loadUrl(urlString)
             stopSpeakingAndEnablePlayButton()
-            launch {
-                var position = POSITION_BEGINNING
-                if (responseSource.contains(urlToContext(urlString)).await()) {
-                    responseSource.getArticleContext(urlToContext(urlString))
-                            .await()?.let{
-                                position = it.position
-                            }
-                }
-                ttsPresenter.onUrlChanged(urlString, position)
+            var position = POSITION_BEGINNING
+            if (responseSource.contains(urlToContext(urlString)).await()) {
+                responseSource.getArticleContext(urlToContext(urlString))
+                        .await()?.let{
+                            position = it.position
+                        }
             }
-            Unit
+            ttsPresenter.onUrlChanged(urlString, position)
         }
     }
 

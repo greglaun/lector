@@ -48,10 +48,10 @@ class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter):
         val speechRate = sharedPreferences.getInt("tts_speed", 100)
         mainPresenter.setSpeechRate(speechRate.toFloat())
 
-        val autoPlay = sharedPreferences.getBoolean("tts_speed", AUTOPLAY_DEFAULT)
+        val autoPlay = sharedPreferences.getBoolean("auto_play", AUTOPLAY_DEFAULT)
         mainPresenter.setAutoPlay(autoPlay)
 
-        val autoDelete = sharedPreferences.getBoolean("tts_speed", AUTODELETE_DEFAULT)
+        val autoDelete = sharedPreferences.getBoolean("auto_delete", AUTODELETE_DEFAULT)
         mainPresenter.setAutoDelete(autoDelete)
     }
 }

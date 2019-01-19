@@ -85,6 +85,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                                 articleState = articleState!!.next()!! // Advance again after completion
                             } else {
                                 state = SpeakerState.NOT_READY
+                                ttsStateListener.onSpeechStopped()
                                 ttsStateListener.onArticleFinished(articleState!!)
                             }
                             msg.speakerState.complete(state)

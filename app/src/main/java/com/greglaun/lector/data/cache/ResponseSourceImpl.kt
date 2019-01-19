@@ -21,7 +21,6 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
                     NetworkCache(
                             OkHttpConnectionFactory.createClient(lruCacheDir))), cacheEntryClassifier)
         }
-
     }
 
     override fun contains(element: String): Deferred<Boolean> {
