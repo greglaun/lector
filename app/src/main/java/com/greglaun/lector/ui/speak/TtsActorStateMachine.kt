@@ -3,7 +3,7 @@ package com.greglaun.lector.ui.speak
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 
-class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStateMachine {
+class TtsActorStateMachine : TtsStateMachine {
     private var ACTOR_LOOP: SendChannel<TtsMsg>? = null
     private val actorClient = newSingleThreadContext("ActorClient")
     var onPositionUpdate: ((String) -> Unit)? = null
@@ -16,22 +16,14 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
     }
 
     override fun stopMachine() {
-
         ACTOR_LOOP?.close()
     }
 
-    override fun changeStateUpdateArticle(urlString: String,
-                                          position: String)
-            : Deferred<Unit> {
-        return CoroutineScope(actorClient).async {
-            val articleState = articleStateSource.getArticle(urlString).await()
-            // todo(error_handling): Return Deferred<Boolean>?
-            if (articleState != null) {
-                ACTOR_LOOP?.send(UpdateArticleState(articleState, position))
-            }
-            Unit
-        }
+    override suspend fun changeStateUpdateArticle(articleState: ArticleState)
+            : Unit {
+        ACTOR_LOOP?.send(UpdateArticleState(articleState))
     }
+
 
     override fun changeStateReady(): Deferred<Unit> {
         return CoroutineScope(actorClient).async {
@@ -108,11 +100,9 @@ class TtsActorStateMachine(val articleStateSource: ArticleStateSource) : TtsStat
         }
     }
 
-    override fun actionChangeUrl(urlString: String, position: String): Deferred<Unit> {
-        return CoroutineScope(actorClient).async {
-            actionStopSpeaking()
-            changeStateUpdateArticle(urlString, position).await()
-        }
+    override suspend fun actionChangeUrl(articleState: ArticleState) {
+        actionStopSpeaking()
+        changeStateUpdateArticle(articleState)
     }
 
     override fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {

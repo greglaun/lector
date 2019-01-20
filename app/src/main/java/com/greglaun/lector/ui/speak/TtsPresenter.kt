@@ -30,8 +30,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         tts.stopImmediately()
     }
 
-    override fun onUrlChanged(urlString: String, postition: String) {
-        stateMachine?.actionChangeUrl(urlString, position = postition)
+    override suspend fun onUrlChanged(articleState: ArticleState) {
+        stateMachine?.actionChangeUrl(articleState)
     }
 
     override fun stopSpeaking() {

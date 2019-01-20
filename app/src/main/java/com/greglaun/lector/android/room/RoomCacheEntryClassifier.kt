@@ -102,6 +102,9 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
     override fun getNextArticle(context: String): Deferred<ArticleContext?> {
         return GlobalScope.async {
             val oldArticle = db.articleContextDao().get(context) ?: return@async null
+            if (oldArticle.temporary) {
+                return@async null
+            }
             db.articleContextDao().getNextLargest(oldArticle.id!!)
         }
     }

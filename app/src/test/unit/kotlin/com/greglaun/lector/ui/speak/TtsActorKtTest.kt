@@ -52,7 +52,7 @@ class TtsActorKtTest {
     @Test
     fun updateArticleSuccess() {
         runBlocking {
-            stateMachine.changeStateUpdateArticle(urlString).await()
+            stateMachine.changeStateUpdateArticleDeprecated(urlString).await()
             assertTrue(SpeakerState.READY == stateMachine.getState().await())
         }
     }
@@ -65,7 +65,7 @@ class TtsActorKtTest {
         }
 
         runBlocking {
-            stateMachine.changeStateUpdateArticle(urlString).await()
+            stateMachine.changeStateUpdateArticleDeprecated(urlString).await()
             stateMachine.changeStateReady().await()
             stateMachine.changeStateStartSpeaking().await()
             val state1 = stateMachine.actionSpeakOne().await() // 1
@@ -78,7 +78,7 @@ class TtsActorKtTest {
     @Test
     fun stopSpeaking() {
         runBlocking {
-            stateMachine.changeStateUpdateArticle(urlString).await()
+            stateMachine.changeStateUpdateArticleDeprecated(urlString).await()
             stateMachine.changeStateReady().await()
             stateMachine.changeStateStartSpeaking().await()
             stateMachine.actionStopSpeaking().await()

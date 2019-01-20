@@ -16,14 +16,19 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
     var position: String = POSITION_BEGINNING
     for (msg in channel) {
         when (msg) {
+//            is UpdateArticleStateDeprecated -> {
+//                state = SpeakerState.NOT_READY
+//                articleState = msg.articleState
+//                if (articleState != null && articleState.current_index != null &&
+//                        articleState.hasNext() && msg.position != POSITION_BEGINNING) {
+//                    state = SpeakerState.SCRUBBING
+//                    articleState = fastForward(articleState, msg.position)
+//                }
+//                state = SpeakerState.READY
+//            }
             is UpdateArticleState -> {
                 state = SpeakerState.NOT_READY
                 articleState = msg.articleState
-                if (articleState != null && articleState.current_index != null &&
-                        articleState.hasNext() && msg.position != POSITION_BEGINNING) {
-                    state = SpeakerState.SCRUBBING
-                    articleState = fastForward(articleState, msg.position)
-                }
                 state = SpeakerState.READY
             }
             is MarkReady -> state = SpeakerState.READY
@@ -99,20 +104,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
     }
 })
 
-fun fastForward(inState: ArticleState, position: String): ArticleState {
-    var returnArticle = inState
-    if (position == utteranceId(returnArticle.current()!!)) {
-        return returnArticle
-    }
-    while (returnArticle.hasNext() && position != utteranceId(returnArticle!!.current()!!)) {
-        returnArticle = returnArticle.next()!!
-    }
-    if (position != utteranceId(returnArticle.current()!!)) {
-        return inState
-    }
-    return returnArticle
-}
-
 enum class SpeakerState {
     NOT_READY,
     READY,
@@ -128,7 +119,11 @@ class GetSpeakerState(val response: CompletableDeferred<SpeakerState>): TtsMsg()
 object StartSpeaking: TtsMsg()
 class SpeakOne(val speakerState: CompletableDeferred<SpeakerState>) : TtsMsg()
 object StopSpeaking : TtsMsg()
-class UpdateArticleState(val articleState: ArticleState, val position: String): TtsMsg()
+
+@Deprecated("Soon to be removed")
+class UpdateArticleStateDeprecated(val articleState: ArticleState, val position: String): TtsMsg()
+class UpdateArticleState(val articleState: ArticleState): TtsMsg()
+
 class ForwardOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
 class BackOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
 class GetPosition(val position: CompletableDeferred<String>): TtsMsg()

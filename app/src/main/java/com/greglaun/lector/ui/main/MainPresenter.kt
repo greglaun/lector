@@ -7,9 +7,7 @@ import com.greglaun.lector.data.course.CourseDescription
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
-import com.greglaun.lector.ui.speak.ArticleState
-import com.greglaun.lector.ui.speak.TTSContract
-import com.greglaun.lector.ui.speak.TtsStateListener
+import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.experimental.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -24,6 +22,7 @@ class MainPresenter(val view : MainContract.View,
     private var currentRequestContext = "MAIN_PAGE"
     private val contextThread = newSingleThreadContext("ContextThread")
     private var downloadScheduler: DownloadCompletionScheduler? = null
+    private var articleStateSource: ArticleStateSource? = null
 
     // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
@@ -40,6 +39,7 @@ class MainPresenter(val view : MainContract.View,
             downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
             downloadScheduler?.startDownloads()
         }
+        articleStateSource = JSoupArticleStateSource(responseSource!!)
     }
 
     override fun onDetach() {
@@ -69,11 +69,6 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onArticleFinished(articleState: ArticleState) {
         GlobalScope.launch {
-            if (autoDelete) {
-                launch {
-                    responseSource.delete(articleState.title)
-                }
-            }
             if (autoPlay) {
                 val nextArticle = responseSource.getNextArticle(articleState.title).await()
                 nextArticle?.let {
@@ -81,6 +76,11 @@ class MainPresenter(val view : MainContract.View,
                     onPlayButtonPressed()
                 }
             }
+//            if (autoDelete) {
+//                launch {
+//                    responseSource.delete(articleState.title)
+//                }
+//            }
         }
     }
 
@@ -112,7 +112,11 @@ class MainPresenter(val view : MainContract.View,
                             position = it.position
                         }
             }
-            ttsPresenter.onUrlChanged(urlString, position)
+            val articleState = articleStateSource?.getArticle(urlString)
+            articleState?.let {
+                ttsPresenter.onUrlChanged(fastForward(it, position))
+            }
+            Unit
         }
     }
 
