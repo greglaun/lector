@@ -108,4 +108,11 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
             db.articleContextDao().getNextLargest(oldArticle.id!!)
         }
     }
+
+    override fun renameArticleContext(previousName: String, newName: String): Deferred<Unit> {
+        return GlobalScope.async {
+            db.articleContextDao().rename(previousName, newName)
+            Unit
+        }
+    }
 }

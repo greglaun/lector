@@ -76,11 +76,11 @@ class MainPresenter(val view : MainContract.View,
                     onPlayButtonPressed()
                 }
             }
-//            if (autoDelete) {
-//                launch {
-//                    responseSource.delete(articleState.title)
-//                }
-//            }
+            if (autoDelete) {
+                launch {
+                    responseSource.delete(articleState.title)
+                }
+            }
         }
     }
 
@@ -115,6 +115,15 @@ class MainPresenter(val view : MainContract.View,
             val articleState = articleStateSource?.getArticle(urlString)
             articleState?.let {
                 ttsPresenter.onUrlChanged(fastForward(it, position))
+                if (articleState.title != currentRequestContext) {
+                    val previousTitle = currentRequestContext
+                    synchronized(currentRequestContext) {
+                        currentRequestContext = articleState.title
+                    }
+                    launch {
+                        responseSource.renameArticleContext(previousTitle, articleState.title)
+                    }
+                }
             }
             Unit
         }

@@ -98,4 +98,8 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
     override fun getNextArticle(context: String): Deferred<ArticleContext?> {
         return cacheEntryClassifier.getNextArticle(context)
     }
+
+    override fun renameArticleContext(previousName: String, newName: String): Deferred<Unit> {
+        return cacheEntryClassifier.renameArticleContext(previousName, newName)
+    }
 }

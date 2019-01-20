@@ -18,6 +18,9 @@ interface ArticleContextDao {
     @Query("SELECT * FROM roomarticlecontext WHERE id > :oldId AND `temporary` = 0 ORDER BY id LIMIT 1")
     fun getNextLargest(oldId: Long): RoomArticleContext?
 
+    @Query("UPDATE RoomArticleContext SET contextString = :newName WHERE contextString = :oldName")
+    fun rename(oldName: String, newName: String)
+
     @Query("DELETE from RoomArticleContext WHERE contextString = :contextString")
     fun delete(contextString: String)
 
