@@ -15,6 +15,8 @@ interface CacheEntryClassifier<T>: UnfinishedDownloadSource {
     fun markTemporary(element: T): Deferred<Unit>
     fun markPermanent(element: T): Deferred<Unit>
     fun isTemporary(element: T): Deferred<Boolean>
-    fun getArticleContext(context: String): Deferred<ArticleContext>
+    fun getArticleContext(context: String): Deferred<ArticleContext?>
     fun updatePosition(currentRequestContext: T, position: T): Deferred<Unit>
+    fun getNextArticle(context: String): Deferred<ArticleContext?>
+    fun renameArticleContext(previousName: String, newName: String): Deferred<Unit>
 }

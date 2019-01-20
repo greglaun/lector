@@ -1,6 +1,5 @@
 package com.greglaun.lector.ui.speak
 
-import com.greglaun.lector.data.cache.POSITION_BEGINNING
 import kotlinx.coroutines.experimental.Deferred
 
 interface TtsStateMachine {
@@ -10,14 +9,13 @@ interface TtsStateMachine {
     fun getState(): Deferred<SpeakerState>
 
     fun changeStateReady(): Deferred<Unit>
-    fun changeStateUpdateArticle(urlString: String, position: String = POSITION_BEGINNING)
-            : Deferred<Unit>
+    suspend fun changeStateUpdateArticle(articleState: ArticleState)
     fun changeStateStartSpeaking(): Deferred<Unit>
 
     fun actionSpeakOne(): Deferred<SpeakerState>
     fun actionStopSpeaking(): Deferred<Unit?>
     fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit>
-    fun actionChangeUrl(urlString: String, position: String = POSITION_BEGINNING): Deferred<Unit>
+    suspend fun actionChangeUrl(articleState: ArticleState)
     fun actionGetPosition(): Deferred<String>
 
     fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit>

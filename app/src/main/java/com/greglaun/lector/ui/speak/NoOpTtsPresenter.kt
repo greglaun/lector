@@ -13,11 +13,11 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun onUrlChanged(urlString: String, position: String) {
+    override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
         // Do nothing
     }
 
-    override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
+    override suspend fun onUrlChanged(articleState: ArticleState) {
         // Do nothing
     }
 

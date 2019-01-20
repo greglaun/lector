@@ -83,4 +83,17 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
     override fun markFinished(element: String): Deferred<Unit> {
         return CompletableDeferred(Unit)
     }
+
+    override fun getNextArticle(context: String): Deferred<ArticleContext?> {
+        return CompletableDeferred(null)
+    }
+
+    override fun renameArticleContext(previousName: String, newName: String): Deferred<Unit> {
+        val oldEntry = hashMap.get(previousName)
+        oldEntry?.let{
+            hashMap.remove(previousName)
+            hashMap.put(newName, oldEntry)
+        }
+        return CompletableDeferred(Unit)
+    }
 }

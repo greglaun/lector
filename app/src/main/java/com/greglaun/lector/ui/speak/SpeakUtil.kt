@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.data.cache.utteranceId
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -36,4 +37,18 @@ fun jsoupStateFromHtml(html: String): ArticleState {
 
 fun cleanUtterance(text: String): String {
     return displayStyleRegex.replace(text, "")
+}
+
+fun fastForward(inState: ArticleState, position: String): ArticleState {
+    var returnArticle = inState
+    if (position == utteranceId(returnArticle.current()!!)) {
+        return returnArticle
+    }
+    while (returnArticle.hasNext() && position != utteranceId(returnArticle!!.current()!!)) {
+        returnArticle = returnArticle.next()!!
+    }
+    if (position != utteranceId(returnArticle.current()!!)) {
+        return inState
+    }
+    return returnArticle
 }

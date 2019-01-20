@@ -30,12 +30,16 @@ class BindableTtsService : Service(), TtsStateMachine {
         return delegateStateMachine!!.changeStateReady()
     }
 
-    override fun changeStateUpdateArticle(urlString: String, position: String): Deferred<Unit> {
-        return delegateStateMachine!!.changeStateUpdateArticle(urlString, position)
-    }
-
     override fun changeStateStartSpeaking(): Deferred<Unit> {
         return delegateStateMachine!!.changeStateStartSpeaking()
+    }
+
+    override suspend fun changeStateUpdateArticle(articleState: ArticleState) {
+        return delegateStateMachine!!.changeStateUpdateArticle(articleState)
+    }
+
+    override suspend fun actionChangeUrl(articleState: ArticleState) {
+        return delegateStateMachine!!.actionChangeUrl(articleState)
     }
 
     override fun actionSpeakOne(): Deferred<SpeakerState> {
@@ -48,10 +52,6 @@ class BindableTtsService : Service(), TtsStateMachine {
 
     override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
         return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
-    }
-
-    override fun actionChangeUrl(urlString: String, position: String): Deferred<Unit> {
-        return delegateStateMachine!!.actionChangeUrl(urlString, position)
     }
 
     override fun actionGetPosition(): Deferred<String> {
@@ -76,7 +76,7 @@ class BindableTtsService : Service(), TtsStateMachine {
             if (responseSource == null) {
                 throw RuntimeException("Must have a valid responseSource.")
             }
-            delegateStateMachine = TtsActorStateMachine(JSoupArticleStateSource(responseSource!!))
+            delegateStateMachine = TtsActorStateMachine()
             return this@BindableTtsService
         }
     }

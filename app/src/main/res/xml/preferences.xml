@@ -2,7 +2,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
     <SwitchPreferenceCompat
         app:key="british_voice"
         app:title="British Voice"/>
@@ -13,8 +12,14 @@
         app:defaultValue="100"
         android:max="350"/>
 
-    <!--<Preference-->
-        <!--app:key="feedback"-->
-        <!--app:title="Send feedback"-->
-        <!--app:summary="Report technical issues or suggest new features"/>-->
+    <SwitchPreferenceCompat
+        app:key="auto_play"
+        app:title="Auto Play"
+        android:defaultValue="true"/>
+
+    <SwitchPreferenceCompat
+        app:key="auto_delete"
+        app:title="Auto Delete"
+        android:defaultValue="true"/>
+
 </androidx.preference.PreferenceScreen>
