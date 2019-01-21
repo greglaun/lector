@@ -16,7 +16,7 @@ interface MainContract {
         fun loadUrl(urlString : String)
         fun enablePlayButton()
         fun enablePauseButton()
-        fun displayReadingList()
+        fun displayReadingList(title: String? = null)
         fun highlightText(articleState: ArticleState,
                           onDone: ((ArticleState, String) -> Unit)? = null)
         fun unhighlightAllText()
@@ -32,8 +32,11 @@ interface MainContract {
     interface Presenter : LectorPresenter<View> {
         // todo(immutability): Find solution to ugly circular dependency re: downloadCompleter
         var downloadCompleter: DownloadCompleter?
+
         val readingList: MutableList<ArticleContext>
         val courseList: MutableList<CourseContext>
+
+        val LECTOR_UNIVERSE: String
 
         fun onPlayButtonPressed()
         fun stopSpeakingAndEnablePlayButton()
@@ -58,5 +61,6 @@ interface MainContract {
         fun setSpeechRate(speechRate: Float)
         fun setAutoPlay(autoPlay: Boolean)
         fun setAutoDelete(autoDelete: Boolean)
+        fun playAllPressed(title: String)
     }
 }

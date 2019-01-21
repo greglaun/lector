@@ -22,10 +22,10 @@ fun extractCourseMetadata(jsonString: String): List<CourseMetadata> {
     return metaData
 }
 
-fun toCourseDetailsMap(jsonMap: List<Map<String, Object>>): Map<String, CourseDetails> {
-    val detailsMap = mutableMapOf<String, CourseDetails>()
+fun toCourseDetailsMap(jsonMap: List<Map<String, Object>>): Map<String, ThinCourseDetails> {
+    val detailsMap = mutableMapOf<String, ThinCourseDetails>()
     jsonMap.forEach {
-        detailsMap.put(it.get("name") as String, CourseDetails(it.get("name")  as String,
+        detailsMap.put(it.get("name") as String, ThinCourseDetails(it.get("name")  as String,
                 splitArticles(it.get("articles") as String)))
     }
     return detailsMap

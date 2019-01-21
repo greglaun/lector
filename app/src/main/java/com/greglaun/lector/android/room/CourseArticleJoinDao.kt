@@ -16,6 +16,17 @@ interface CourseArticleJoinDao {
         """)
     fun getArticlesWithCourseId(courseId: Long): List<RoomArticleContext>
 
+    @Query("""
+           SELECT course_position from coursearticlejoin WHERE course_id = :courseId ORDER BY
+           course_position DESC LIMIT 1""")
+    fun getMaxOccupiedPosition(courseId: Long): Long?
+
+    @Query("""
+           SELECT course_position from coursearticlejoin WHERE course_id = :courseId ORDER BY
+           course_position LIMIT 1""")
+    fun getLeastOccupiedPosition(courseId: Long): Long?
+
+
     @Insert
     fun insert(join: CourseArticleJoin): Long
 
@@ -23,5 +34,12 @@ interface CourseArticleJoinDao {
            SELECT * from coursearticlejoin WHERE course_id = :courseId
            AND article_id = :articleId""")
     fun get(courseId: Long, articleId: Long): CourseArticleJoin
+
+    @Query("""
+        SELECT * FROM roomarticlecontext INNER JOIN coursearticlejoin ON
+        roomarticlecontext.id = coursearticlejoin.article_id WHERE
+        coursearticlejoin.course_id = :courseId AND roomarticlecontext.id > :previousArticleId
+        """)
+    fun getNextInCourse(courseId: Long, previousArticleId: Long): RoomArticleContext
 
 }

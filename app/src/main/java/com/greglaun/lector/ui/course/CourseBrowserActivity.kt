@@ -16,9 +16,9 @@ import com.greglaun.lector.R
 import com.greglaun.lector.android.room.LectorDatabase
 import com.greglaun.lector.android.room.RoomCourseSource
 import com.greglaun.lector.data.cache.urlToContext
-import com.greglaun.lector.data.course.CourseDetails
 import com.greglaun.lector.data.course.CourseDownloaderImpl
 import com.greglaun.lector.data.course.CourseMetadata
+import com.greglaun.lector.data.course.ThinCourseDetails
 
 class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
     private lateinit var courseBrowserRecyclerView: RecyclerView
@@ -80,7 +80,7 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
         }
     }
 
-    override fun showCourseDetails(courseDetails: CourseDetails) {
+    override fun showCourseDetails(courseDetails: ThinCourseDetails) {
         val detailName = findViewById<TextView>(R.id.details_name)
         detailName.setText(courseDetails.name)
         val listView = findViewById<ListView>(R.id.article_list)

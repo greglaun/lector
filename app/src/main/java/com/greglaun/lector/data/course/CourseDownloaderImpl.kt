@@ -28,7 +28,7 @@ class CourseDownloaderImpl(val baseUrl: String, lruCacheDir: File):
     }
 
     override fun fetchCourseDetails(courseNames: List<String>):
-            Deferred<Map<String, CourseDetails>?> {
+            Deferred<Map<String, ThinCourseDetails>?> {
         return GlobalScope.async fetch@{
             val responseString = downloadCourseInfo()
             if (responseString != null) {
@@ -55,7 +55,7 @@ class CourseDownloaderImpl(val baseUrl: String, lruCacheDir: File):
         return response.peekBody(TEN_GB).string()
     }
 
-    override fun fetchCourseDetails(courseMetadata: CourseMetadata): Deferred<CourseDetails?> {
+    override fun fetchCourseDetails(courseMetadata: CourseMetadata): Deferred<ThinCourseDetails?> {
         return GlobalScope.async {
             fetchCourseDetails(listOf(courseMetadata.name)).await()?.let {
                 it[courseMetadata.name]

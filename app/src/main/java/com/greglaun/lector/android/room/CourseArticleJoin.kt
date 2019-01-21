@@ -22,5 +22,7 @@ import androidx.room.Index
 
 data class CourseArticleJoin(
         @ColumnInfo(name = "course_id") val courseId: Long,
-        @ColumnInfo(name = "article_id") val articleId: Long
+        @ColumnInfo(name = "article_id") val articleId: Long,
+        // Order article appears in course
+        @ColumnInfo(name = "course_position") val coursePosition: Long?
 )

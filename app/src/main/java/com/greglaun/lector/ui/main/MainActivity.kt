@@ -10,9 +10,12 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +47,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var readingListRecyclerView: RecyclerView
     private lateinit var readingListViewAdapter: RecyclerView.Adapter<*>
     private lateinit var readingListViewManager: RecyclerView.LayoutManager
+
+    private lateinit var readingListView: LinearLayout
 
     private lateinit var courseListRecyclerView: RecyclerView
     private lateinit var courseListViewAdapter: RecyclerView.Adapter<*>
@@ -93,6 +98,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
                 createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
+
+        readingListView = findViewById(R.id.ll_reading_list)
 
         webView = findViewById(R.id.webview) as WebView
         webView.webViewClient = WikiWebViewClient(mainPresenter, {
@@ -262,17 +269,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun unHideReadingListView() {
         webView.visibility = GONE
         courseListRecyclerView.visibility = GONE
-        readingListRecyclerView.visibility = VISIBLE
+        readingListView.visibility = VISIBLE
     }
 
     override fun unHideCourseListView() {
         webView.visibility = GONE
-        readingListRecyclerView.visibility = GONE
+        readingListView.visibility = GONE
         courseListRecyclerView.visibility = VISIBLE
     }
 
     override fun unhideWebView() {
-        readingListRecyclerView.visibility = GONE
+        readingListView.visibility = GONE
         courseListRecyclerView.visibility = GONE
         webView.visibility = VISIBLE
     }
@@ -420,9 +427,25 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun displayReadingList() {
+    override fun displayReadingList(title: String?) {
         runOnUiThread {
+            title?.let {
+                val titleView =findViewById<TextView>(R.id.reading_list_title)
+                titleView.text = title
+            }
             unHideReadingListView()
+        }
+    }
+
+    fun onPlayAllPressed(view: View) {
+        runOnUiThread {
+            var title = mainPresenter.LECTOR_UNIVERSE
+            val viewText = findViewById<TextView>(R.id.reading_list_title).text
+            if (viewText != null) {
+                title = viewText.toString()
+            }
+            unhideWebView()
+            mainPresenter.playAllPressed(title)
         }
     }
 
