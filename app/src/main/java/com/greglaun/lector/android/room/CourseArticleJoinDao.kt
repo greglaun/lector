@@ -12,7 +12,8 @@ interface CourseArticleJoinDao {
     @Query("""
         SELECT * FROM roomarticlecontext INNER JOIN coursearticlejoin ON
         roomarticlecontext.id = coursearticlejoin.article_id WHERE
-        coursearticlejoin.course_id = :courseId
+        coursearticlejoin.course_id = :courseId AND `temporary` = 0
+        ORDER BY position
         """)
     fun getArticlesWithCourseId(courseId: Long): List<RoomArticleContext>
 
