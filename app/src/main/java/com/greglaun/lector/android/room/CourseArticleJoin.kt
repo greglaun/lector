@@ -3,6 +3,7 @@ package com.greglaun.lector.android.room
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.ForeignKey.CASCADE
 import androidx.room.Index
 
 
@@ -17,10 +18,13 @@ import androidx.room.Index
                     childColumns = ["course_id"]),
             ForeignKey(entity = RoomArticleContext::class,
                     parentColumns = ["id"],
-                    childColumns = ["article_id"])
+                    childColumns = ["article_id"],
+                    onDelete = CASCADE)
         ])
 
 data class CourseArticleJoin(
         @ColumnInfo(name = "course_id") val courseId: Long,
-        @ColumnInfo(name = "article_id") val articleId: Long
+        @ColumnInfo(name = "article_id") val articleId: Long,
+        // Order article appears in course
+        @ColumnInfo(name = "course_position") val coursePosition: Long?
 )

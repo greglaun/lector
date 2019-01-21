@@ -105,7 +105,7 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
             if (oldArticle.temporary) {
                 return@async null
             }
-            db.articleContextDao().getNextLargest(oldArticle.id!!)
+            db.articleContextDao().getNextLargestInUniverse(oldArticle.id!!)
         }
     }
 

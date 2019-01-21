@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.net.URLDecoder
+import java.net.URLEncoder
 import java.security.MessageDigest
 
 fun urlToContext(urlString : String) : String {
@@ -16,7 +17,8 @@ fun urlToContext(urlString : String) : String {
 }
 
 fun contextToUrl(contextString: String) =
-        "https://en.m.wikipedia.org/wiki/" + contextString
+        "https://en.m.wikipedia.org/wiki/" + URLEncoder.encode(
+                contextString.replace(" ", "_"), "UTF-8")
 
 
 fun utteranceId(text : String) : String{

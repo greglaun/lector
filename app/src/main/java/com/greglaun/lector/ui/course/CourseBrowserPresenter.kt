@@ -1,6 +1,6 @@
 package com.greglaun.lector.ui.course
 
-import com.greglaun.lector.data.course.CourseDetails
+import com.greglaun.lector.data.course.ThinCourseDetails
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.CourseSource
@@ -12,7 +12,7 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
                              val courseSource: CourseSource)
     : CourseBrowserContract.Presenter {
     override val courseMetadatalist = mutableListOf<CourseMetadata>()
-    var currentDetails: CourseDetails? = null
+    var currentDetails: ThinCourseDetails? = null
 
     override fun onAttach() {}
 
@@ -48,7 +48,7 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
         }
     }
 
-    private fun onCourseSaved(courseDetails: CourseDetails) {
+    private fun onCourseSaved(courseDetails: ThinCourseDetails) {
         GlobalScope.launch {
             courseSource.addCourseDetails(courseDetails).await()
             view.showToast("Course " + courseDetails.name + " added.")

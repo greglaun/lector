@@ -9,5 +9,7 @@ interface CourseSource {
     fun delete(courseName: String): Deferred<Unit>
     fun add(courseContext: CourseContext): Deferred<Long>
     fun addArticleForSource(courseName: String, articleName: String): Deferred<Unit>
-    fun addCourseDetails(courseDetails: CourseDetails): Deferred<Unit>
+    fun addCourseDetails(courseDetails: ThinCourseDetails): Deferred<Unit>
+    suspend fun getNextInCourse(courseName: String, articleName: String):
+            ArticleContext?
 }

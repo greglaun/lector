@@ -1,9 +1,7 @@
 package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.data.cache.*
-import com.greglaun.lector.data.course.ConcreteCourseContext
 import com.greglaun.lector.data.course.CourseContext
-import com.greglaun.lector.data.course.CourseDescription
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
@@ -18,11 +16,17 @@ class MainPresenter(val view : MainContract.View,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener {
-    override var downloadCompleter: DownloadCompleter? = null
+    override val LECTOR_UNIVERSE = ""
+
+    // Mutable state
     private var currentRequestContext = "MAIN_PAGE"
+    private var currentCourse = LECTOR_UNIVERSE // Be default, the "course" is everything
+
+    override var downloadCompleter: DownloadCompleter? = null
     private val contextThread = newSingleThreadContext("ContextThread")
     private var downloadScheduler: DownloadCompletionScheduler? = null
     private var articleStateSource: ArticleStateSource? = null
+
 
     // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
@@ -70,7 +74,12 @@ class MainPresenter(val view : MainContract.View,
     override fun onArticleFinished(articleState: ArticleState) {
         GlobalScope.launch {
             if (autoPlay) {
-                val nextArticle = responseSource.getNextArticle(articleState.title).await()
+                var nextArticle: ArticleContext? = null
+                if (currentCourse == LECTOR_UNIVERSE) {
+                    nextArticle = responseSource.getNextArticle(articleState.title).await()
+                } else {
+                    nextArticle = courseSource.getNextInCourse(currentCourse, articleState.title)
+                }
                 nextArticle?.let {
                     onUrlChanged(contextToUrl(it.contextString)).await()
                     onPlayButtonPressed()
@@ -193,8 +202,10 @@ class MainPresenter(val view : MainContract.View,
     override fun courseDetailsRequested(courseContext: CourseContext) {
         GlobalScope.launch {
             courseContext.id?.apply {
+                currentCourse = courseContext.courseName
                 val articlesForCourse = courseSource.getArticlesForCourse(this).await()
-                displayArticleList(articlesForCourse)
+                displayArticleList(articlesForCourse,
+                        courseContext.courseName)
             }
         }
     }
@@ -232,11 +243,11 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    private fun displayArticleList(articleList: List<ArticleContext>) {
+    private fun displayArticleList(articleList: List<ArticleContext>, title: String? = null) {
         readingList.clear()
         readingList.addAll(articleList)
         view.onReadingListChanged()
-        view.displayReadingList()
+        view.displayReadingList(title)
     }
 
     override fun onDisplayCourses() {
@@ -248,20 +259,20 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    fun addCourse(courseDescription: CourseDescription) {
-        runBlocking {
-            val courseId = courseSource.add(ConcreteCourseContext(null,
-                    courseDescription.courseName,
-                    0)).await()
-            courseDescription.articleUrls.map {
-                async {
-                    responseSource.add(urlToContext(it)).await()
-                    courseSource.addArticleForSource(courseDescription.courseName,
-                            urlToContext(it)).await()
-                }
-            }.forEach {it.await() }
-        }
-    }
+//    fun addCourse(courseDescription: CourseDescription) {
+//        runBlocking {
+//            val courseId = courseSource.add(ConcreteCourseContext(null,
+//                    courseDescription.courseName,
+//                    0)).await()
+//            courseDescription.articleUrls.map {
+//                async {
+//                    responseSource.add(urlToContext(it)).await()
+//                    courseSource.addArticleForSource(courseDescription.courseName,
+//                            urlToContext(it)).await()
+//                }
+//            }.forEach {it.await() }
+//        }
+//    }
 
     override fun onRewindOne() {
         ttsPresenter.reverseOne {it ->
@@ -295,6 +306,17 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPageDownloadFinished(urlString: String) {
         responseSource.markFinished(urlToContext(urlString))
+    }
+
+    override fun playAllPressed(title: String) {
+        // todo: we are going to have to handle the notion of autoplay being temporarily enabled,
+        // todo: or else change the language from "play all" to "start playing" or something else
+        if (readingList != null && readingList.size >0 ) {
+            GlobalScope.launch {
+                onUrlChanged(contextToUrl(readingList[0].contextString)).await()
+                onPlayButtonPressed()
+            }
+        }
     }
 
     override fun setAutoPlay(autoPlayIn: Boolean) {
