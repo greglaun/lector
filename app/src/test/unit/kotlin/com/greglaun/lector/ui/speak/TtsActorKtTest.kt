@@ -10,9 +10,8 @@ import org.mockito.Mockito.mock
 class TtsActorKtTest {
     val ttsClient = FakeTtsActorClient()
     val stateMachine = TtsActorStateMachine()
-
-    val paragraphs = listOf("some", "paragraphs")
-    val articleState = ArticleState("MyTitle",  paragraphs)
+    val articleState = ArticleState("MyTitle", listOf("some", "paragraphs")
+    )
 
     @Before
     fun setUp() {

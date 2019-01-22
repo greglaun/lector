@@ -123,7 +123,7 @@ class MainPresenter(val view : MainContract.View,
             }
             val articleState = articleStateSource?.getArticle(urlString)
             articleState?.let {
-                ttsPresenter.onUrlChanged(fastForward(it, position))
+                ttsPresenter.onArticleChanged(fastForward(it, position))
                 if (articleState.title != currentRequestContext) {
                     val previousTitle = currentRequestContext
                     synchronized(currentRequestContext) {
