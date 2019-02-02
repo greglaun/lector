@@ -14,6 +14,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -257,8 +258,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun onBackPressed() {
-        if (webView.visibility != VISIBLE) {
-          unhideWebView()
+        if (readingListRecyclerView.visibility == VISIBLE) {
+            val title = findViewById<EditText>(R.id.reading_list_title).text.toString()
+            if (title != mainPresenter.ALL_ARTICLES) {
+                unHideCourseListView()
+            } else if (webView.visibility != VISIBLE) {
+                unhideWebView()
+            }
         } else if (webView.canGoBack()) {
             webView.goBack()
         } else {

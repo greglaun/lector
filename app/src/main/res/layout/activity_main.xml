@@ -32,16 +32,16 @@
             android:layout_gravity="center"
             android:textStyle="bold"
             android:text="All Articles"/>
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_reading_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/play_all"
             android:layout_gravity="center"
             android:onClick="onPlayAllPressed"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_reading_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

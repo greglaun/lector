@@ -17,6 +17,7 @@ class MainPresenter(val view : MainContract.View,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener {
     override val LECTOR_UNIVERSE = ""
+    override val ALL_ARTICLES = "All Articles"
 
     // Mutable state
     private var currentRequestContext = "MAIN_PAGE"
@@ -239,7 +240,7 @@ class MainPresenter(val view : MainContract.View,
     override fun onDisplayReadingList() {
         GlobalScope.launch{
             val articleList = responseSource.getAllPermanent().await()
-            displayArticleList(articleList)
+            displayArticleList(articleList, ALL_ARTICLES)
         }
     }
 
