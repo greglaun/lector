@@ -14,9 +14,8 @@ class CourseDownloaderImplTest {
     fun downloadAllCourseNames() {
         runBlocking {
             val result = courseDownloader.downloadCourseMetadata().await()
-            assertTrue(false)
-//            assertTrue(result!!.contains("Ice Cream"))
-//            assertTrue(result!!.contains("Furry Friends"))
+            assertTrue(result!!.contains(CourseMetadata("Ice Cream")))
+            assertTrue(result!!.contains(CourseMetadata("Furry Friends")))
         }
     }
 
