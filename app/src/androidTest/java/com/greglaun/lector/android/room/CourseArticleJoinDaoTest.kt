@@ -45,7 +45,6 @@ class CourseArticleJoinDaoTest {
         assertTrue(false)
     }
 
-
     @Test
     fun insert() {
         assertTrue(false)
@@ -60,5 +59,4 @@ class CourseArticleJoinDaoTest {
     fun getNextInCourse() {
         assertTrue(false)
     }
-
 }
