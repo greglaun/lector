@@ -44,7 +44,7 @@ class MainPresenter(val view : MainContract.View,
             downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
             downloadScheduler?.startDownloads()
         }
-        articleStateSource = JSoupArticleStateSource(responseSource!!)
+        articleStateSource = JSoupArticleStateSource(responseSource)
     }
 
     override fun onDetach() {
