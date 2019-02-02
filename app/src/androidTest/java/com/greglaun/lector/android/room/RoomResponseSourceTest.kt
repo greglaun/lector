@@ -1,7 +1,7 @@
 package com.greglaun.lector.android.room
 
-import android.arch.persistence.room.Room
 import android.content.Context
+import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.SavedArticleCache

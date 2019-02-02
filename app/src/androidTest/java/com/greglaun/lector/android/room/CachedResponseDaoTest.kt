@@ -1,8 +1,8 @@
 package com.greglaun.lector.android.room
 
-import android.arch.persistence.room.Room
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
+import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.hamcrest.CoreMatchers.equalTo
@@ -47,7 +47,7 @@ class CachedResponseDaoTest {
     @Test
     fun insertForeignKeyPresent() {
         articleContextDao.insert(RoomArticleContext(null, "Banana"))
-        val bananaId = articleContextDao.get("Banana").id
+        val bananaId = articleContextDao.get("Banana")!!.id
         cachedResponse = CachedResponse(1, urlHash, serialResponse,
                 bananaId!!)
         cachedResponseDao.insert(cachedResponse!!)
@@ -58,7 +58,7 @@ class CachedResponseDaoTest {
     @Test
     fun insertListForeignKeyPresent() {
         articleContextDao.insert(RoomArticleContext(null, "Banana"))
-        val bananaId = articleContextDao.get("Banana").id
+        val bananaId = articleContextDao.get("Banana")!!.id
         cachedResponse = CachedResponse(1, urlHash, serialResponse,
                 bananaId!!)
         val responses = ArrayList<CachedResponse>()

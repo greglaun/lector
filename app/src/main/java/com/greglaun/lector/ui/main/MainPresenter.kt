@@ -17,6 +17,7 @@ class MainPresenter(val view : MainContract.View,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener {
     override val LECTOR_UNIVERSE = ""
+    override val ALL_ARTICLES = "All Articles"
 
     // Mutable state
     private var currentRequestContext = "MAIN_PAGE"
@@ -106,7 +107,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun stopSpeakingAndEnablePlayButton() {
         ttsPresenter.stopSpeaking()
-        view.enablePlayButton()
+       view.enablePlayButton()
     }
 
     override fun onUrlChanged(urlString: String): Deferred<Unit> {
@@ -121,16 +122,15 @@ class MainPresenter(val view : MainContract.View,
                             position = it.position
                         }
             }
-            val articleState = articleStateSource?.getArticle(urlString)
-            articleState?.let {
-                ttsPresenter.onUrlChanged(fastForward(it, position))
-                if (articleState.title != currentRequestContext) {
+            articleStateSource?.getArticle(urlString)?.let {
+                ttsPresenter.onArticleChanged(fastForward(it, position))
+                if (it.title != currentRequestContext) {
                     val previousTitle = currentRequestContext
                     synchronized(currentRequestContext) {
-                        currentRequestContext = articleState.title
+                        currentRequestContext = it.title
                     }
                     launch {
-                        responseSource.renameArticleContext(previousTitle, articleState.title)
+                        responseSource.renameArticleContext(previousTitle, it.title)
                     }
                 }
             }
@@ -175,8 +175,8 @@ class MainPresenter(val view : MainContract.View,
                 }
                 computedContext = currentRequestContext
             }
-            if (!responseSource.contains(computedContext).await()) {
-                responseSource.add(computedContext)
+            if (!this@MainPresenter.responseSource.contains(computedContext).await()) {
+                responseSource.add(computedContext).await()
             }
         }
     }
@@ -239,7 +239,7 @@ class MainPresenter(val view : MainContract.View,
     override fun onDisplayReadingList() {
         GlobalScope.launch{
             val articleList = responseSource.getAllPermanent().await()
-            displayArticleList(articleList)
+            displayArticleList(articleList, ALL_ARTICLES)
         }
     }
 

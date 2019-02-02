@@ -17,7 +17,7 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override suspend fun onUrlChanged(articleState: ArticleState) {
+    override suspend fun onArticleChanged(articleState: ArticleState) {
         // Do nothing
     }
 

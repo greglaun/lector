@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
@@ -8,12 +9,12 @@ class TtsPresenterTest {
     var ttsPresenter: TtsPresenter? = null
     var stateMachine: TtsStateMachine? = null
     var audioView: TTSContract.AudioView? = null
+    val articleState = ArticleState("MyTitle", listOf("some", "paragraphs"))
 
     @Before
     fun setUp() {
         audioView = mock(TTSContract.AudioView::class.java)
         stateMachine = mock(TtsStateMachine::class.java)
-
         ttsPresenter = TtsPresenter(audioView!!, stateMachine!!)
     }
 
@@ -38,8 +39,10 @@ class TtsPresenterTest {
 
     @Test
     fun onUrlChanged() {
-        ttsPresenter!!.onUrlChanged("Hello")
-        verify(stateMachine, times(1))!!.actionChangeUrl("Hello")
+        runBlocking {
+            ttsPresenter!!.onArticleChanged(articleState)
+            verify(stateMachine, times(1))!!.actionChangeUrl(articleState)
+        }
     }
 
     @Test

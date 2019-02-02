@@ -1,28 +1,21 @@
 package com.greglaun.lector.ui.speak
 
-import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 
 
 class TtsActorKtTest {
     val ttsClient = FakeTtsActorClient()
-    val articleStateSource = mock(ArticleStateSource::class.java)
-    val stateMachine = TtsActorStateMachine(articleStateSource)
-
-    val urlString = "a url"
-    val paragraphs = listOf("some", "paragraphs")
-    val articleState = ArticleState("MyTitle",  paragraphs)
+    val stateMachine = TtsActorStateMachine()
+    val articleState = ArticleState("MyTitle", listOf("some", "paragraphs")
+    )
 
     @Before
     fun setUp() {
         stateMachine.startMachine(ttsClient, mock(TtsStateListener::class.java))
-        `when`(articleStateSource.getArticle(urlString)).thenReturn(
-                CompletableDeferred(articleState))
     }
 
     @Test
@@ -41,18 +34,9 @@ class TtsActorKtTest {
     }
 
     @Test
-    fun MarkNotReadySuccessful() {
-        runBlocking {
-            stateMachine.changeStateReady().await()
-            assertTrue(SpeakerState.READY == stateMachine.getState().await())
-            assertTrue(SpeakerState.NOT_READY == stateMachine.getState().await())
-        }
-    }
-
-    @Test
     fun updateArticleSuccess() {
         runBlocking {
-            stateMachine.changeStateUpdateArticleDeprecated(urlString).await()
+            stateMachine.changeStateUpdateArticle(articleState)
             assertTrue(SpeakerState.READY == stateMachine.getState().await())
         }
     }
@@ -65,7 +49,7 @@ class TtsActorKtTest {
         }
 
         runBlocking {
-            stateMachine.changeStateUpdateArticleDeprecated(urlString).await()
+            stateMachine.changeStateUpdateArticle(articleState)
             stateMachine.changeStateReady().await()
             stateMachine.changeStateStartSpeaking().await()
             val state1 = stateMachine.actionSpeakOne().await() // 1
@@ -78,7 +62,7 @@ class TtsActorKtTest {
     @Test
     fun stopSpeaking() {
         runBlocking {
-            stateMachine.changeStateUpdateArticleDeprecated(urlString).await()
+            stateMachine.changeStateUpdateArticle(articleState)
             stateMachine.changeStateReady().await()
             stateMachine.changeStateStartSpeaking().await()
             stateMachine.actionStopSpeaking().await()

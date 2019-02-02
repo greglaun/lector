@@ -1,7 +1,7 @@
 package com.greglaun.lector.android.room
 
-import android.arch.persistence.room.Room
 import android.content.Context
+import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.hamcrest.MatcherAssert.assertThat
@@ -39,7 +39,7 @@ class SimpleEntityReadWriteTest {
         val bananaContext = RoomArticleContext(null,"Banana")
         articleContextDao.insert(bananaContext)
         val retrieved = articleContextDao.get("Banana")
-        assertThat(retrieved.contextString, equalTo(bananaContext.contextString))
+        assertThat(retrieved!!.contextString, equalTo(bananaContext.contextString))
         articleContextDao.delete("Banana")
         val retrievedNull = articleContextDao.get("Banana")
         assertNull(retrievedNull)
