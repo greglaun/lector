@@ -13,7 +13,7 @@ import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
 class CourseArticleJoinDaoTest {
-    private lateinit var articleContextDao: ArticleContextDao
+    private lateinit var courseArticleJoinDao: CourseArticleJoinDao
     private var db: LectorDatabase? = null
 
     @Before
@@ -21,7 +21,7 @@ class CourseArticleJoinDaoTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
                 context, LectorDatabase::class.java).build()
-        articleContextDao = db!!.articleContextDao()
+        courseArticleJoinDao = db!!.courseArticleJoinDao()
     }
 
     @After
