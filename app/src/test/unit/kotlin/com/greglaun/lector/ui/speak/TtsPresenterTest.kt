@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.speak
 
 import kotlinx.coroutines.experimental.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
@@ -50,4 +51,40 @@ class TtsPresenterTest {
         ttsPresenter!!.stopSpeaking()
         verify(stateMachine, times(1))!!.actionStopSpeaking()
     }
+
+    @Test
+    fun speechViewSpeak() {
+        assertTrue(false)
+    }
+
+    @Test
+    fun onStart() {
+        assertTrue(false)
+    }
+
+    @Test
+    fun onArticleChanged() {
+        assertTrue(false)
+    }
+
+    @Test
+    fun advanceOne() {
+        assertTrue(false)
+    }
+
+    @Test
+    fun reverseOne() {
+        assertTrue(false)
+    }
+
+    @Test
+    fun setHandsomeBritish() {
+        assertTrue(false)
+    }
+
+    @Test
+    fun setSpeechRate() {
+        assertTrue(false)
+    }
+
 }
