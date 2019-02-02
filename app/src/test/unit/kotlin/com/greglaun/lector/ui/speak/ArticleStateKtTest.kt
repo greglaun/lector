@@ -34,4 +34,9 @@ class ArticleStateKtTest {
         assertFalse(articleState!!.hasPrevious())
         assertTrue(articleState!!.next()!!.hasPrevious())
     }
+
+    @Test
+    fun current() {
+        assertTrue(false)
+    }
 }
