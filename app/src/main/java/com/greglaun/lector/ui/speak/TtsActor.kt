@@ -16,16 +16,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
     var position: String = POSITION_BEGINNING
     for (msg in channel) {
         when (msg) {
-//            is UpdateArticleStateDeprecated -> {
-//                state = SpeakerState.NOT_READY
-//                articleState = msg.articleState
-//                if (articleState != null && articleState.current_index != null &&
-//                        articleState.hasNext() && msg.position != POSITION_BEGINNING) {
-//                    state = SpeakerState.SCRUBBING
-//                    articleState = fastForward(articleState, msg.position)
-//                }
-//                state = SpeakerState.READY
-//            }
             is UpdateArticleState -> {
                 state = SpeakerState.NOT_READY
                 articleState = msg.articleState

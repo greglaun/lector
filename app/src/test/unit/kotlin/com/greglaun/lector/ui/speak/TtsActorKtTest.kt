@@ -34,15 +34,6 @@ class TtsActorKtTest {
     }
 
     @Test
-    fun MarkNotReadySuccessful() {
-        runBlocking {
-            stateMachine.changeStateReady().await()
-            assertTrue(SpeakerState.READY == stateMachine.getState().await())
-            assertTrue(SpeakerState.NOT_READY == stateMachine.getState().await())
-        }
-    }
-
-    @Test
     fun updateArticleSuccess() {
         runBlocking {
             stateMachine.changeStateUpdateArticle(articleState)

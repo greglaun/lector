@@ -1,9 +1,10 @@
 package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.android.room.RoomCourseSource
-import com.greglaun.lector.data.cache.BasicArticleContext
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.ui.speak.TTSContract
+import kotlinx.coroutines.experimental.CompletableDeferred
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -23,6 +24,7 @@ class MainPresenterTest {
     fun setUp() {
         mockView = mock(MainContract.View::class.java)
         mockTts = mock(TTSContract.Presenter::class.java)
+
         responseSource = mock(ResponseSourceImpl::class.java)
         courseSource = mock(RoomCourseSource::class.java)
 
@@ -52,13 +54,13 @@ class MainPresenterTest {
 
     @Test
     fun onUrlChanged() {
-        mainPresenter.onUrlChanged("test")
-        verify(mockView, times(1)).loadUrl("test")
-    }
-
-    @Test
-    fun deleteArticle() {
-        mainPresenter.deleteRequested(BasicArticleContext.fromString("test"))
-        verify(responseSource, times(1)).delete("test")
+        runBlocking {
+            `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(
+                    CompletableDeferred(false))
+            `when`(responseSource.add(ArgumentMatchers.anyString())).thenReturn(
+                    CompletableDeferred())
+            mainPresenter.onUrlChanged("test").await()
+            verify(mockView, times(1)).loadUrl("test")
+        }
     }
 }

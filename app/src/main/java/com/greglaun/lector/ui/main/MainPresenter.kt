@@ -107,7 +107,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun stopSpeakingAndEnablePlayButton() {
         ttsPresenter.stopSpeaking()
-        view.enablePlayButton()
+       view.enablePlayButton()
     }
 
     override fun onUrlChanged(urlString: String): Deferred<Unit> {
@@ -122,16 +122,15 @@ class MainPresenter(val view : MainContract.View,
                             position = it.position
                         }
             }
-            val articleState = articleStateSource?.getArticle(urlString)
-            articleState?.let {
+            articleStateSource?.getArticle(urlString)?.let {
                 ttsPresenter.onArticleChanged(fastForward(it, position))
-                if (articleState.title != currentRequestContext) {
+                if (it.title != currentRequestContext) {
                     val previousTitle = currentRequestContext
                     synchronized(currentRequestContext) {
-                        currentRequestContext = articleState.title
+                        currentRequestContext = it.title
                     }
                     launch {
-                        responseSource.renameArticleContext(previousTitle, articleState.title)
+                        responseSource.renameArticleContext(previousTitle, it.title)
                     }
                 }
             }
@@ -176,8 +175,8 @@ class MainPresenter(val view : MainContract.View,
                 }
                 computedContext = currentRequestContext
             }
-            if (!responseSource.contains(computedContext).await()) {
-                responseSource.add(computedContext)
+            if (!this@MainPresenter.responseSource.contains(computedContext).await()) {
+                responseSource.add(computedContext).await()
             }
         }
     }
