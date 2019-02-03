@@ -27,7 +27,6 @@ interface CourseArticleJoinDao {
            course_position LIMIT 1""")
     fun getLeastOccupiedPosition(courseId: Long): Long?
 
-
     @Insert
     fun insert(join: CourseArticleJoin): Long
 
@@ -35,6 +34,9 @@ interface CourseArticleJoinDao {
            SELECT * from coursearticlejoin WHERE course_id = :courseId
            AND article_id = :articleId""")
     fun get(courseId: Long, articleId: Long): CourseArticleJoin
+
+    @Query("SELECT * from coursearticlejoin")
+    fun getAll(): List<CourseArticleJoin>?
 
     @Query("""
         SELECT * FROM roomarticlecontext INNER JOIN coursearticlejoin ON
