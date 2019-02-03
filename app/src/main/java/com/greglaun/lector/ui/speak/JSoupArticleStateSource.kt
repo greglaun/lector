@@ -11,6 +11,6 @@ class JSoupArticleStateSource(val responseSource: ResponseSource) : ArticleState
                 .url(urlString)
                 .build()
         val html = responseSource.getWithContext(cacheRequest, urlToContext(urlString)).await()
-        return jsoupStateFromHtml(html!!.peekBody(TEN_GB).string())
+        return articleStateFromHtml(html!!.peekBody(TEN_GB).string())
     }
 }

@@ -1,37 +1,52 @@
 package com.greglaun.lector.ui.speak
 
-import org.junit.Assert.assertTrue
+import com.greglaun.lector.data.cache.utteranceId
+import org.jsoup.Jsoup
+import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.File
 
 class SpeakUtilKtTest {
 
-    @Test
-    fun getDisplayStyleRegex() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun removeUnwanted() {
-        assertTrue(false)
+    fun String.strip(): String {
+        return this.replace("\\s+".toRegex(), " ")
     }
 
     @Test
     fun retrieveTitle() {
-        assertTrue(false)
+        assertEquals(retrieveTitle("Blue - Wikipedia"), "Blue")
     }
 
     @Test
-    fun jsoupStateFromHtml() {
-        assertTrue(false)
+    fun removeUnwanted() {
+        val parsedRawHtml = Jsoup.parse(File(
+                "./src/test/unit/kotlin/com/greglaun/lector/ui/speak/Banana_wiki.html"),
+                null,
+                "https://en.wikipedia.org")
+        val parsedCleanHtml = Jsoup.parse(File(
+                "./src/test/unit/kotlin/com/greglaun/lector/ui/speak/Banana_clean.html"),
+                null,
+                "https://en.wikipedia.org")
+        assertEquals(removeUnwanted(parsedRawHtml).toString().strip(),
+                parsedCleanHtml.toString().strip())
     }
 
     @Test
     fun cleanUtterance() {
-        assertTrue(false)
+        assertEquals(cleanUtterance("{\\displaystyle f(a)}"), "")
     }
 
     @Test
     fun fastForward() {
-        assertTrue(false)
+        val wikiPath = "./src/test/unit/kotlin/com/greglaun/lector/ui/speak/Banana_wiki.html"
+        val html = File(wikiPath).readText()
+        val articleState = articleStateFromHtml(html)
+        assertEquals(articleState.current_index, 0)
+
+        val newState = fastForward(articleState, utteranceId(articleState.next()!!.current()!!))
+        assertEquals(newState.current_index, 1)
+
+        val noOpState = fastForward(articleState, utteranceId("Bad state"))
+        assertEquals(noOpState.current_index, 0)
     }
 }
