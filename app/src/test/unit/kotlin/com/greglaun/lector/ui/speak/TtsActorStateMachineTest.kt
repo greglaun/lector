@@ -46,6 +46,7 @@ class TtsActorStateMachineTest {
             verify(mockListener, times(0)).onArticleFinished(articleState)
         }
     }
+
     @Test
     fun actionSpeakInLoop() {
         val articleState = ArticleState("Test", listOf("A", "B", "C"))
@@ -67,6 +68,8 @@ class TtsActorStateMachineTest {
             verify(mockListener, times(1)).onUtteranceEnded(cState)
 
             verify(mockListener, times(1)).onArticleFinished(cState)
+
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.NOT_READY)
         }
     }
 
@@ -104,6 +107,19 @@ class TtsActorStateMachineTest {
             stateMachine.stopAdvanceOneAndResume {}
             assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
             assertEquals(stateMachine.getArticleState().await(), articleState.next())
+        }
+    }
+
+    @Test
+    fun stopSpeaking() {
+        val articleState = ArticleState("Test", listOf("A", "B", "C"))
+        stateMachine.startMachine(fakeClient, mockListener)
+
+        runBlocking {
+            stateMachine.updateArticle(articleState)
+            stateMachine.actionSpeakOne().await()
+            stateMachine.actionStopSpeaking().await()
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
         }
     }
 }
