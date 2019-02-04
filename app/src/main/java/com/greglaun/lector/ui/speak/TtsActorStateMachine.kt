@@ -102,7 +102,6 @@ class TtsActorStateMachine : TtsStateMachine {
             val newArticleState = CompletableDeferred<ArticleState>()
             ACTOR_LOOP?.send(ForwardOne(newArticleState = newArticleState))
             onDone(newArticleState.await())
-//            changeStateReady().await()
             if (oldSpeakingState.await() == SpeakerState.SPEAKING) {
                 actionSpeakInLoop { onPositionUpdate }.await()
             }
@@ -115,7 +114,6 @@ class TtsActorStateMachine : TtsStateMachine {
             val newArticleState = CompletableDeferred<ArticleState>()
             ACTOR_LOOP?.send(BackOne(newArticleState = newArticleState))
             onDone(newArticleState.await())
-//            changeStateReady().await()
             if (oldSpeakingState.await() == SpeakerState.SPEAKING) {
                 actionSpeakInLoop { onPositionUpdate }.await()
             }
