@@ -1,7 +1,6 @@
 package com.greglaun.lector.ui.speak
 
 import kotlinx.coroutines.experimental.runBlocking
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
@@ -17,6 +16,15 @@ class TtsPresenterTest {
         audioView = mock(TTSContract.AudioView::class.java)
         stateMachine = mock(TtsStateMachine::class.java)
         ttsPresenter = TtsPresenter(audioView!!, stateMachine!!)
+    }
+
+    @Test
+    fun onStart() {
+        val stateListener = mock(TtsStateListener::class.java)
+        ttsPresenter!!.onStart(stateListener)
+        verify(stateMachine, times(1))!!.startMachine(
+                ttsPresenter!!,
+                stateListener)
     }
 
     @Test
@@ -53,38 +61,26 @@ class TtsPresenterTest {
     }
 
     @Test
-    fun speechViewSpeak() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun onStart() {
-        assertTrue(false)
-    }
-
-    @Test
     fun onArticleChanged() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun advanceOne() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun reverseOne() {
-        assertTrue(false)
+        val articleState = ArticleState("Test", listOf("A", "B"))
+        runBlocking {
+            ttsPresenter!!.onArticleChanged(articleState)
+            verify(stateMachine, times(1))!!.updateArticle(articleState)
+        }
     }
 
     @Test
     fun setHandsomeBritish() {
-        assertTrue(false)
+        ttsPresenter!!.setHandsomeBritish(true)
+        verify(audioView, times(1))!!.setHandsomeBritish(true)
+
+        ttsPresenter!!.setHandsomeBritish(false)
+        verify(audioView, times(1))!!.setHandsomeBritish(false)
     }
 
     @Test
     fun setSpeechRate() {
-        assertTrue(false)
+        ttsPresenter!!.setSpeechRate(12f)
+        verify(audioView, times(1))!!.setSpeechRate(12f)
     }
-
 }
