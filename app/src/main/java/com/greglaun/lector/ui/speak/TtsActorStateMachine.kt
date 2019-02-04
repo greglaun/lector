@@ -40,7 +40,6 @@ class TtsActorStateMachine : TtsStateMachine {
 
     // Speaking state
 
-    // todo(testing): Properly test this loop
     override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
         this.onPositionUpdate = onPositionUpdate
         SPEECH_LOOP =  CoroutineScope(actorClient).launch {
