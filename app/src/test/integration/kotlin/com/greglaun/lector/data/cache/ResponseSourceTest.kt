@@ -1,7 +1,7 @@
 package com.greglaun.lector.data.cache
 
-import com.greglaun.lector.data.whitelist.HashSetCacheEntryClassifier
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
+import com.greglaun.lector.data.whitelist.HashSetCacheEntryClassifier
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Request
 import okhttp3.Response
@@ -22,7 +22,9 @@ class ResponseSourceTest {
     @Before
     fun setUp() {
         val cacheEntryClassifier: CacheEntryClassifier<String> = HashSetCacheEntryClassifier()
-        responseSource = ResponseSourceImpl.createResponseSource(savedArticleCache, cacheEntryClassifier, testDir)
+        responseSource = ResponseSourceImpl.createResponseSource(savedArticleCache,
+                cacheEntryClassifier,
+                testDir)
     }
 
     @After
