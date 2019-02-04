@@ -37,6 +37,6 @@ class ArticleStateKtTest {
 
     @Test
     fun current() {
-        assertTrue(false)
+        assertEquals(articleState!!.current(), "one")
     }
 }
