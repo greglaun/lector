@@ -1,72 +1,109 @@
 package com.greglaun.lector.ui.speak
 
-import org.junit.Assert.assertTrue
+import kotlinx.coroutines.experimental.runBlocking
+import org.junit.Assert.*
 import org.junit.Test
+import org.mockito.Mockito.*
 
 class TtsActorStateMachineTest {
+    val stateMachine = TtsActorStateMachine()
+    val fakeClient = FakeTtsActorClient()
+    val mockListener = mock(TtsStateListener::class.java)
 
     @Test
-    fun startMachine() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun stopMachine() {
-        assertTrue(false)
+    fun startAndStopMachine() {
+        stateMachine.startMachine(fakeClient, mockListener)
+        assertFalse(stateMachine.ACTOR_LOOP!!.isClosedForSend)
+        stateMachine.stopMachine()
+        assertTrue(stateMachine.ACTOR_LOOP!!.isClosedForSend)
     }
 
     @Test
     fun changeStateUpdateArticle() {
-        assertTrue(false)
-    }
+        val articleState = ArticleState("Test", listOf("A", "B", "C"))
+        stateMachine.startMachine(fakeClient, mockListener)
+        runBlocking {
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.NOT_READY)
+            stateMachine.updateArticle(articleState)
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState)
 
-    @Test
-    fun changeStateReady() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun changeStateStartSpeaking() {
-        assertTrue(false)
-    }
-
-    @Test
-    fun actionSpeakInLoop() {
-        assertTrue(false)
+            stateMachine.updateArticle(articleState.next()!!)
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState.next())
+        }
     }
 
     @Test
     fun actionSpeakOne() {
-        assertTrue(false)
+        val articleState = ArticleState("Test", listOf("A", "B", "C"))
+        stateMachine.startMachine(fakeClient, mockListener)
+        runBlocking {
+            stateMachine.updateArticle(articleState)
+            stateMachine.actionSpeakOne().await()
+            verify(mockListener, times(1)).onUtteranceStarted(articleState)
+            verify(mockListener, times(1)).onUtteranceEnded(articleState)
+            verify(mockListener, times(0)).onArticleFinished(articleState)
+        }
+    }
+    @Test
+    fun actionSpeakInLoop() {
+        val articleState = ArticleState("Test", listOf("A", "B", "C"))
+        stateMachine.startMachine(fakeClient, mockListener)
+        runBlocking {
+            stateMachine.updateArticle(articleState)
+            stateMachine.actionSpeakInLoop {}.await()
+            stateMachine.SPEECH_LOOP!!.join()
+
+            verify(mockListener, times(1)).onUtteranceStarted(articleState)
+            verify(mockListener, times(1)).onUtteranceEnded(articleState)
+
+            val bState = articleState.next()!!
+            verify(mockListener, times(1)).onUtteranceStarted(bState)
+            verify(mockListener, times(1)).onUtteranceEnded(bState)
+
+            val cState = bState.next()!!
+            verify(mockListener, times(1)).onUtteranceStarted(cState)
+            verify(mockListener, times(1)).onUtteranceEnded(cState)
+
+            verify(mockListener, times(1)).onArticleFinished(cState)
+        }
     }
 
     @Test
-    fun getState() {
-        assertTrue(false)
-    }
+    fun transport() {
+        val articleState = ArticleState("Test", listOf("A", "B"))
+        stateMachine.startMachine(fakeClient, mockListener)
+        runBlocking {
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.NOT_READY)
+            stateMachine.updateArticle(articleState)
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState)
 
-    @Test
-    fun actionGetPosition() {
-        assertTrue(false)
-    }
+            // Attempting to seek past beginning of utterance list
+            stateMachine.stopReverseOneAndResume {}
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState)
 
-    @Test
-    fun actionStopSpeaking() {
-        assertTrue(false)
-    }
+            // Now on B
+            stateMachine.stopAdvanceOneAndResume {}
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState.next())
 
-    @Test
-    fun actionChangeUrl() {
-        assertTrue(false)
-    }
+            // Now on A
+            stateMachine.stopReverseOneAndResume {}
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState)
 
-    @Test
-    fun stopAdvanceOneAndResume() {
-        assertTrue(false)
-    }
+            // Now on B again
+            stateMachine.stopAdvanceOneAndResume {}
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState.next())
 
-    @Test
-    fun stopReverseOneAndResume() {
-        assertTrue(false)
+            // Attempting to seek past end of utterance list
+            stateMachine.stopAdvanceOneAndResume {}
+            assertEquals(stateMachine.getSpeakerState().await(), SpeakerState.READY)
+            assertEquals(stateMachine.getArticleState().await(), articleState.next())
+        }
     }
 }

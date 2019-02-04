@@ -38,6 +38,7 @@ interface CourseArticleJoinDao {
     @Query("SELECT * from coursearticlejoin")
     fun getAll(): List<CourseArticleJoin>?
 
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
     @Query("""
         SELECT * FROM roomarticlecontext INNER JOIN coursearticlejoin ON
         roomarticlecontext.id = coursearticlejoin.article_id WHERE

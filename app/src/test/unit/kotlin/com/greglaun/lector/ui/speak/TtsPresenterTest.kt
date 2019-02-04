@@ -42,7 +42,7 @@ class TtsPresenterTest {
     fun onUrlChanged() {
         runBlocking {
             ttsPresenter!!.onArticleChanged(articleState)
-            verify(stateMachine, times(1))!!.actionChangeUrl(articleState)
+            verify(stateMachine, times(1))!!.updateArticle(articleState)
         }
     }
 

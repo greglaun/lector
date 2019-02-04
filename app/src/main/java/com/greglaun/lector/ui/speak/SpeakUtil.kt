@@ -32,7 +32,7 @@ fun articleStateFromHtml(html: String): ArticleState {
     val paragraphs = doc!!.select("p").map { it ->
         it.text()!!
     }
-    return ArticleState(title, paragraphs.filter { it != "" })
+    return ArticleState(title, paragraphs)
 }
 
 fun cleanUtterance(text: String): String {

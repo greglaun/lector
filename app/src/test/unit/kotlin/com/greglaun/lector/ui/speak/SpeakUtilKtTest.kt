@@ -19,6 +19,7 @@ class SpeakUtilKtTest {
 
     @Test
     fun removeUnwanted() {
+        // Warning: This is essentially a change-detecting test. But it is useful for now.
         val parsedRawHtml = Jsoup.parse(File(
                 "./src/test/unit/kotlin/com/greglaun/lector/ui/speak/Banana_wiki.html"),
                 null,

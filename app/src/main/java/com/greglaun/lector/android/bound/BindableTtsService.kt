@@ -22,24 +22,12 @@ class BindableTtsService : Service(), TtsStateMachine {
         delegateStateMachine!!.stopMachine()
     }
 
-    override fun getState(): Deferred<SpeakerState> {
-        return delegateStateMachine!!.getState()
+    override fun getSpeakerState(): Deferred<SpeakerState> {
+        return delegateStateMachine!!.getSpeakerState()
     }
 
-    override fun changeStateReady(): Deferred<Unit> {
-        return delegateStateMachine!!.changeStateReady()
-    }
-
-    override fun changeStateStartSpeaking(): Deferred<Unit> {
-        return delegateStateMachine!!.changeStateStartSpeaking()
-    }
-
-    override suspend fun changeStateUpdateArticle(articleState: ArticleState) {
-        return delegateStateMachine!!.changeStateUpdateArticle(articleState)
-    }
-
-    override suspend fun actionChangeUrl(articleState: ArticleState) {
-        return delegateStateMachine!!.actionChangeUrl(articleState)
+    override suspend fun updateArticle(articleState: ArticleState) {
+        return delegateStateMachine!!.updateArticle(articleState)
     }
 
     override fun actionSpeakOne(): Deferred<SpeakerState> {
@@ -54,8 +42,8 @@ class BindableTtsService : Service(), TtsStateMachine {
         return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
     }
 
-    override fun actionGetPosition(): Deferred<String> {
-        return delegateStateMachine!!.actionGetPosition()
+    override fun getArticleState(): Deferred<ArticleState> {
+        return delegateStateMachine!!.getArticleState()
     }
 
     override fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {

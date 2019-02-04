@@ -6,17 +6,13 @@ interface TtsStateMachine {
     fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener)
     fun stopMachine()
 
-    fun getState(): Deferred<SpeakerState>
+    suspend fun updateArticle(articleState: ArticleState)
 
-    fun changeStateReady(): Deferred<Unit>
-    suspend fun changeStateUpdateArticle(articleState: ArticleState)
-    fun changeStateStartSpeaking(): Deferred<Unit>
-
+    fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit>
+    fun getSpeakerState(): Deferred<SpeakerState>
     fun actionSpeakOne(): Deferred<SpeakerState>
     fun actionStopSpeaking(): Deferred<Unit?>
-    fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit>
-    suspend fun actionChangeUrl(articleState: ArticleState)
-    fun actionGetPosition(): Deferred<String>
+    fun getArticleState(): Deferred<ArticleState>
 
     fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit>
     fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit>

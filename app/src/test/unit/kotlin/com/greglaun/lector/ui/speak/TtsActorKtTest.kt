@@ -21,23 +21,15 @@ class TtsActorKtTest {
     @Test
     fun initialStateNotReady() {
         runBlocking {
-            assertTrue(SpeakerState.NOT_READY == stateMachine.getState().await())
-        }
-    }
-
-    @Test
-    fun MarkReadySuccessful() {
-        runBlocking {
-            stateMachine.changeStateReady().await()
-            assertTrue(SpeakerState.READY == stateMachine.getState().await())
+            assertTrue(SpeakerState.NOT_READY == stateMachine.getSpeakerState().await())
         }
     }
 
     @Test
     fun updateArticleSuccess() {
         runBlocking {
-            stateMachine.changeStateUpdateArticle(articleState)
-            assertTrue(SpeakerState.READY == stateMachine.getState().await())
+            stateMachine.updateArticle(articleState)
+            assertTrue(SpeakerState.READY == stateMachine.getSpeakerState().await())
         }
     }
 
@@ -49,9 +41,9 @@ class TtsActorKtTest {
         }
 
         runBlocking {
-            stateMachine.changeStateUpdateArticle(articleState)
-            stateMachine.changeStateReady().await()
-            stateMachine.changeStateStartSpeaking().await()
+            stateMachine.updateArticle(articleState)
+//            stateMachine.changeStateReady().await()
+//            stateMachine.changeStateStartSpeaking().await()
             val state1 = stateMachine.actionSpeakOne().await() // 1
             assertTrue(SpeakerState.SPEAKING == state1)
             val state2 = stateMachine.actionSpeakOne().await() // 2
@@ -62,9 +54,9 @@ class TtsActorKtTest {
     @Test
     fun stopSpeaking() {
         runBlocking {
-            stateMachine.changeStateUpdateArticle(articleState)
-            stateMachine.changeStateReady().await()
-            stateMachine.changeStateStartSpeaking().await()
+            stateMachine.updateArticle(articleState)
+//            stateMachine.changeStateReady().await()
+//            stateMachine.changeStateStartSpeaking().await()
             stateMachine.actionStopSpeaking().await()
             val state1 = stateMachine.actionSpeakOne().await() // 1
             assertTrue(SpeakerState.READY == state1)
