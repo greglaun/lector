@@ -1,7 +1,8 @@
 package com.greglaun.lector.data.cache
 
 class BasicArticleContext(override val id: Long?, override val contextString: String,
-                          override val position: String, override val temporary: Boolean)
+                          override val position: String, override val temporary: Boolean = true,
+                          override val downloadComplete: Boolean = false)
     : ArticleContext {
     companion object {
         fun fromString(contextString: String): BasicArticleContext {
@@ -30,6 +31,22 @@ class BasicArticleContext(override val id: Long?, override val contextString: St
         result = 31 * result + temporary.hashCode()
         return result
     }
-
-
 }
+
+fun BasicArticleContext.updatePosition(position: String): BasicArticleContext {
+    return BasicArticleContext(this.id, this.contextString, position, this.temporary)
+}
+
+fun BasicArticleContext.makeTemporary(): BasicArticleContext {
+    return BasicArticleContext(this.id, this.contextString, position, true)
+}
+
+fun BasicArticleContext.makePermanent(): BasicArticleContext {
+    return BasicArticleContext(this.id, this.contextString, position, false)
+}
+
+fun BasicArticleContext.markDownloadComplete(): BasicArticleContext {
+    return BasicArticleContext(this.id, this.contextString, position, false,
+            true)
+}
+

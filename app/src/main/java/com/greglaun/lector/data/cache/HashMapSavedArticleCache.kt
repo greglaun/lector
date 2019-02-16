@@ -18,6 +18,9 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
         if (!hashCache.containsKey(key)) {
             return CompletableDeferred(value = null)
         }
+        if (!hashCache.get(key)!!.second.contains(keyContext)) {
+            return CompletableDeferred(value = null)
+        }
         return CompletableDeferred(hashCache.get(key)!!.first.toResponse())
 
     }

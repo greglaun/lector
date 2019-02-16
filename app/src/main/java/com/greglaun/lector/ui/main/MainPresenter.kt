@@ -130,7 +130,7 @@ class MainPresenter(val view : MainContract.View,
                         currentRequestContext = it.title
                     }
                     launch {
-                        responseSource.renameArticleContext(previousTitle, it.title)
+                        responseSource.update(previousTitle, it.title)
                     }
                 }
             }

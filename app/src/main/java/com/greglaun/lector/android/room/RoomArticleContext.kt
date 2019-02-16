@@ -11,5 +11,5 @@ data class RoomArticleContext(@PrimaryKey(autoGenerate = true) override var id: 
                               override var contextString: String,
                               override var position: String = POSITION_BEGINNING,  // position uses md5 hash
                               override var temporary: Boolean = true,
-                              var download_complete: Boolean = false): ArticleContext
+                              override var downloadComplete: Boolean = false): ArticleContext
 

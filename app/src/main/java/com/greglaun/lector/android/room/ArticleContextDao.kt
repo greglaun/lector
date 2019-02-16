@@ -18,9 +18,6 @@ interface ArticleContextDao {
     @Query("SELECT * FROM roomarticlecontext WHERE id > :oldId AND `temporary` = 0 ORDER BY id LIMIT 1")
     fun getNextLargestInUniverse(oldId: Long): RoomArticleContext?
 
-    @Query("UPDATE RoomArticleContext SET contextString = :newName WHERE contextString = :oldName")
-    fun rename(oldName: String, newName: String)
-
     @Query("DELETE from RoomArticleContext WHERE contextString = :contextString")
     fun delete(contextString: String)
 
@@ -54,9 +51,9 @@ interface ArticleContextDao {
     @Query("UPDATE RoomArticleContext SET position = :position WHERE contextString = :contextString")
     fun updatePosition(contextString: String, position: String)
 
-    @Query("SELECT * from RoomArticleContext WHERE `download_complete` = 0 AND `temporary` = 0")
+    @Query("SELECT * from RoomArticleContext WHERE `downloadComplete` = 0 AND `temporary` = 0")
     fun getAllUnfinished(): List<RoomArticleContext>
 
-    @Query("UPDATE RoomArticleContext SET `download_complete` = 1 WHERE contextString = :contextString")
+    @Query("UPDATE RoomArticleContext SET `downloadComplete` = 1 WHERE contextString = :contextString")
     fun markFinished(contextString: String)
 }
