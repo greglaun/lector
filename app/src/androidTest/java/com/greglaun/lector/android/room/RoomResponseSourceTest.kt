@@ -81,7 +81,7 @@ class RoomResponseSourceTest {
         runBlocking {
             responseSource!!.add("Dog")
             assertTrue(responseSource!!.contains("Dog"))
-            responseSource!!.delete("Dog").await()
+            responseSource!!.delete("Dog")
             assertFalse(responseSource!!.contains("Dog"))
         }
     }

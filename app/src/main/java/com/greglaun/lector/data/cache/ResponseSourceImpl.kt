@@ -39,7 +39,7 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.add(element)
     }
 
-    override fun delete(element: String): Deferred<Unit> {
+    override suspend fun delete(element: String) {
         return cacheEntryClassifier.delete(element)
     }
 

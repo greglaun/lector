@@ -8,7 +8,7 @@ interface CacheEntryClassifier<T>: UnfinishedDownloadSource {
     // todo(cleanup): Move ArticleContext functions to another interface? Or re-architect?
     suspend fun contains(element : T): Boolean
     suspend fun add(element: T): Long
-    fun delete(element: T): Deferred<Unit>
+    suspend fun delete(element: T)
     fun update(from: T, to: T): Deferred<Unit>
     fun getAllTemporary(): Deferred<List<ArticleContext>>
     fun getAllPermanent(): Deferred<List<ArticleContext>>

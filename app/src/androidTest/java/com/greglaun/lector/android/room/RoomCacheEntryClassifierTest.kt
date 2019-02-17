@@ -45,7 +45,7 @@ class RoomCacheEntryClassifierTest {
     fun delete() {
         runBlocking {
             whitelist!!.add("Radish")
-            whitelist!!.delete("Radish").await()
+            whitelist!!.delete("Radish")
             assertFalse(whitelist!!.contains("Radish"))
         }
     }

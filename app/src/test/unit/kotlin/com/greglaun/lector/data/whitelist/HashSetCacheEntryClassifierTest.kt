@@ -29,7 +29,7 @@ class HashSetCacheEntryClassifierTest {
     fun delete() {
         runBlocking {
             classifier.add(testString)
-            classifier.delete(testString).await()
+            classifier.delete(testString)
             assertFalse(classifier.contains(testString))
         }
     }

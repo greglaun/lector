@@ -17,9 +17,8 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         return 1L
     }
 
-    override fun delete(element: String): Deferred<Unit> {
+    override suspend fun delete(element: String) {
         hashMap.remove(element)
-        return CompletableDeferred(Unit)
     }
 
     override fun update(from: String, to: String): Deferred<Unit> {

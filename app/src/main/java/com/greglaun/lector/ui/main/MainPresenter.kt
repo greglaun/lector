@@ -82,7 +82,9 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun autoDeleteCurrent(articleState: ArticleState) {
-        responseSource.delete(articleState.title)
+        GlobalScope.launch {
+            responseSource.delete(articleState.title)
+        }
     }
 
     private suspend fun autoPlayNext(articleState: ArticleState) {
@@ -213,7 +215,7 @@ class MainPresenter(val view : MainContract.View,
                 onConfirmed = {
                     if(it) {
                         GlobalScope.launch {
-                            responseSource.delete(articleContext.contextString).await()
+                            responseSource.delete(articleContext.contextString)
                             readingList.remove(articleContext)
                             view.onReadingListChanged()
                         }
