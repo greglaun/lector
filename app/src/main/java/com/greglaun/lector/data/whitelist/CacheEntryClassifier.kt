@@ -9,7 +9,7 @@ interface CacheEntryClassifier<T>: UnfinishedDownloadSource {
     suspend fun contains(element : T): Boolean
     suspend fun add(element: T): Long
     suspend fun delete(element: T)
-    fun update(from: T, to: T): Deferred<Unit>
+    suspend fun update(from: T, to: T)
     fun getAllTemporary(): Deferred<List<ArticleContext>>
     fun getAllPermanent(): Deferred<List<ArticleContext>>
     fun markTemporary(element: T): Deferred<Unit>

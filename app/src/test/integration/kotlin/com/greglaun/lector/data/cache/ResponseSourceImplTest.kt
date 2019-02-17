@@ -100,7 +100,7 @@ class ResponseSourceImplTest {
         runBlocking {
             responseSource!!.add("Dog")
             assertTrue(responseSource!!.contains("Dog"))
-            responseSource!!.update("Dog", "Potato").await()
+            responseSource!!.update("Dog", "Potato")
             assertFalse(responseSource!!.contains("Dog"))
             assertTrue(responseSource!!.contains("Potato"))
         }

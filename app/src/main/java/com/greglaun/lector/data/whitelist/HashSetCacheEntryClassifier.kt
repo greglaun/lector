@@ -21,12 +21,11 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         hashMap.remove(element)
     }
 
-    override fun update(from: String, to: String): Deferred<Unit> {
+    override suspend fun update(from: String, to: String) {
         if (hashMap.contains(from)) {
             hashMap.remove(from)
             hashMap.put(to, BasicArticleContext.fromString(to))
         }
-        return CompletableDeferred(Unit)
     }
 
     override fun getAllTemporary(): Deferred<List<ArticleContext>> {

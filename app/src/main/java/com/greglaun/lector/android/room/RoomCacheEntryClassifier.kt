@@ -24,14 +24,11 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         return db.articleContextDao().delete(element)
     }
 
-    override fun update(from: String, to: String): Deferred<Unit> {
-        return GlobalScope.async {
-            val articleContext = db.articleContextDao().get(from)
-            articleContext?.let {
-                articleContext.contextString = to
-                db.articleContextDao().updateArticleContext(articleContext)
-            }
-            Unit
+    override suspend fun update(from: String, to: String) {
+        val articleContext = db.articleContextDao().get(from)
+        articleContext?.let {
+            articleContext.contextString = to
+            db.articleContextDao().updateArticleContext(articleContext)
         }
     }
 

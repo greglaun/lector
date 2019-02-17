@@ -3,8 +3,6 @@ package com.greglaun.lector.data.cache
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
@@ -51,10 +49,8 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return articleCache.setWithContext(key, value, keyContext)
     }
 
-    override fun update(from: String, to: String): Deferred<Unit> {
-       return GlobalScope.async {
-            cacheEntryClassifier.update(from, to).await()
-        }
+    override suspend fun update(from: String, to: String) {
+        cacheEntryClassifier.update(from, to)
     }
 
     override fun markTemporary(keyContext: String): Deferred<Unit> {
