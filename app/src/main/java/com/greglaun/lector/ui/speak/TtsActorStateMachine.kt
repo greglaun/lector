@@ -24,8 +24,7 @@ class TtsActorStateMachine : TtsStateMachine {
 
     // Article State
 
-    override suspend fun updateArticle(articleState: ArticleState)
-            : Unit {
+    override suspend fun updateArticle(articleState: ArticleState) {
         actionStopSpeaking()
         ACTOR_LOOP?.send(UpdateArticleState(articleState))
     }
