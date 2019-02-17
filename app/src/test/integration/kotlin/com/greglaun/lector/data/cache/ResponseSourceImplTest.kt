@@ -55,9 +55,9 @@ class ResponseSourceImplTest {
     @Test
     fun contains() {
         runBlocking {
-            assertFalse(responseSource!!.contains("Dog").await())
+            assertFalse(responseSource!!.contains("Dog"))
             responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
+            assertTrue(responseSource!!.contains("Dog"))
         }
     }
 
@@ -65,9 +65,9 @@ class ResponseSourceImplTest {
     fun delete() {
         runBlocking {
             responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
+            assertTrue(responseSource!!.contains("Dog"))
             responseSource!!.delete("Dog").await()
-            assertFalse(responseSource!!.contains("Dog").await())
+            assertFalse(responseSource!!.contains("Dog"))
         }
     }
 
@@ -99,10 +99,10 @@ class ResponseSourceImplTest {
     fun update() {
         runBlocking {
             responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
+            assertTrue(responseSource!!.contains("Dog"))
             responseSource!!.update("Dog", "Potato").await()
-            assertFalse(responseSource!!.contains("Dog").await())
-            assertTrue(responseSource!!.contains("Potato").await())
+            assertFalse(responseSource!!.contains("Dog"))
+            assertTrue(responseSource!!.contains("Potato"))
         }
     }
 

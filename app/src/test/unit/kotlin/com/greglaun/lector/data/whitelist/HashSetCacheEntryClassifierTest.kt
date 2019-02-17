@@ -13,7 +13,7 @@ class HashSetCacheEntryClassifierTest {
     @Test
     fun notContains() {
         runBlocking {
-            assertFalse(classifier.contains(testString).await())
+            assertFalse(classifier.contains(testString))
         }
     }
 
@@ -21,7 +21,7 @@ class HashSetCacheEntryClassifierTest {
     fun contains() {
         runBlocking {
             classifier.add(testString)
-            assertTrue(classifier.contains(testString).await())
+            assertTrue(classifier.contains(testString))
         }
     }
 
@@ -30,7 +30,7 @@ class HashSetCacheEntryClassifierTest {
         runBlocking {
             classifier.add(testString).await()
             classifier.delete(testString).await()
-            assertFalse(classifier.contains(testString).await())
+            assertFalse(classifier.contains(testString))
         }
     }
 

@@ -8,8 +8,8 @@ import kotlinx.coroutines.experimental.Deferred
 class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
     val hashMap = HashMap<String, BasicArticleContext>()
 
-    override fun contains(element: String): Deferred<Boolean> {
-        return CompletableDeferred(hashMap.contains(element))
+    override suspend fun contains(element: String): Boolean {
+        return hashMap.contains(element)
     }
 
     override fun add(element : String): Deferred<Long> {

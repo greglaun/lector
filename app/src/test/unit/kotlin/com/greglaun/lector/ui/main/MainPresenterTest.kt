@@ -64,7 +64,7 @@ class MainPresenterTest {
     fun onUrlChanged() {
         runBlocking {
             `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(
-                    CompletableDeferred(false))
+                    false)
             `when`(responseSource.add(ArgumentMatchers.anyString())).thenReturn(
                     CompletableDeferred())
             mainPresenter.onUrlChanged("test")
@@ -94,12 +94,12 @@ class MainPresenterTest {
 
     @Test
     fun loadFromContext() {
-        `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(
-                CompletableDeferred(false))
         `when`(responseSource.add(ArgumentMatchers.anyString())).thenReturn(
                 CompletableDeferred(0L))
         val context = BasicArticleContext.fromString("Something")
         runBlocking {
+            `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(
+                    false)
             mainPresenter.loadFromContext(context)
         }
         verify(mockView, times(1)).loadUrl(

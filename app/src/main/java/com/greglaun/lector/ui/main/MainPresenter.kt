@@ -119,7 +119,7 @@ class MainPresenter(val view : MainContract.View,
         view.loadUrl(urlString)
         stopSpeakingAndEnablePlayButton()
         var position = POSITION_BEGINNING
-        if (responseSource.contains(urlToContext(urlString)).await()) {
+        if (responseSource.contains(urlToContext(urlString))) {
                 responseSource.getArticleContext(urlToContext(urlString))
                         .await()?.let{
                             position = it.position
@@ -176,7 +176,7 @@ class MainPresenter(val view : MainContract.View,
                 }
                 computedContext = currentRequestContext
             }
-            if (!this@MainPresenter.responseSource.contains(computedContext).await()) {
+            if (!this@MainPresenter.responseSource.contains(computedContext)) {
                 responseSource.add(computedContext).await()
             }
         }

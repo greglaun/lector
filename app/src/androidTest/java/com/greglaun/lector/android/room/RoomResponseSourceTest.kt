@@ -70,9 +70,9 @@ class RoomResponseSourceTest {
     @Test
     fun contains() {
         runBlocking {
-            assertFalse(responseSource!!.contains("Dog").await())
+            assertFalse(responseSource!!.contains("Dog"))
             responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
+            assertTrue(responseSource!!.contains("Dog"))
         }
     }
 
@@ -80,9 +80,9 @@ class RoomResponseSourceTest {
     fun delete() {
         runBlocking {
             responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
+            assertTrue(responseSource!!.contains("Dog"))
             responseSource!!.delete("Dog").await()
-            assertFalse(responseSource!!.contains("Dog").await())
+            assertFalse(responseSource!!.contains("Dog"))
         }
     }
 }
