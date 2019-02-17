@@ -225,7 +225,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun renewReadingListRecycler(mainPresenter: MainPresenter) {
         readingListViewAdapter = ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
-            mainPresenter.loadFromContext(it)
+            GlobalScope.launch {
+                mainPresenter.loadFromContext(it)
+            }
         }, { it: ArticleContext ->
             mainPresenter.deleteRequested(it)
         }
@@ -240,7 +242,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun renewCourseListRecycler(mainPresenter: MainPresenter) {
         courseListViewAdapter = CourseListAdapter(mainPresenter.courseList, { it: CourseContext ->
-            mainPresenter.courseDetailsRequested(it)
+            GlobalScope.launch {
+                mainPresenter.courseDetailsRequested(it)
+            }
         }, { it: CourseContext ->
             mainPresenter.deleteRequested(it)
         }
@@ -309,11 +313,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_save -> {
-                mainPresenter.saveArticle()
+                GlobalScope.launch {
+                    mainPresenter.saveArticle()
+                }
                 return true
             }
             R.id.action_reading_list -> {
-                mainPresenter.onDisplayReadingList()
+                GlobalScope.launch {
+                    mainPresenter.onDisplayReadingList()
+                }
                 return true
             }
             R.id.action_browse_courses -> {
@@ -321,7 +329,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_my_courses -> {
-                mainPresenter.onDisplayCourses()
+                GlobalScope.launch {
+                    mainPresenter.onDisplayCourses()
+                }
                 return true
             }
             R.id.action_forward -> {

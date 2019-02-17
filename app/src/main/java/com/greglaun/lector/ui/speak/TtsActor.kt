@@ -77,7 +77,9 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                             } else {
                                 state = SpeakerState.NOT_READY
                                 ttsStateListener.onSpeechStopped()
-                                ttsStateListener.onArticleFinished(articleState!!)
+                                GlobalScope.launch {
+                                    ttsStateListener.onArticleFinished(articleState!!)
+                                }
                             }
                             msg.speakerState.complete(state)
                         }
