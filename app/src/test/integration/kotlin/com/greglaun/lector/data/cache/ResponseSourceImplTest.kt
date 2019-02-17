@@ -76,8 +76,8 @@ class ResponseSourceImplTest {
         val request = Request.Builder()
                 .url(dogUrlString)
                 .build()
-        var networkResponse : Response? = null
-        var cachedResponse : Response? = null
+        var networkResponse: Response?
+        var cachedResponse : Response?
         runBlocking {
             responseSource!!.add("Dog")
             // Response from network
@@ -109,21 +109,21 @@ class ResponseSourceImplTest {
     @Test
     fun markTemporary() {
         runBlocking {
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
             responseSource!!.add("Dog")
-            assertTrue(responseSource!!.isTemporary("Dog").await())
-            assertEquals(responseSource!!.getAllTemporary().await().size, 1)
-            assertEquals(responseSource!!.getAllPermanent().await().size, 0)
+            assertTrue(responseSource!!.isTemporary("Dog"))
+            assertEquals(responseSource!!.getAllTemporary().size, 1)
+            assertEquals(responseSource!!.getAllPermanent().size, 0)
 
-            responseSource!!.markPermanent("Dog").await()
-            assertFalse(responseSource!!.isTemporary("Dog").await())
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            assertEquals(responseSource!!.getAllPermanent().await().size, 1)
+            responseSource!!.markPermanent("Dog")
+            assertFalse(responseSource!!.isTemporary("Dog"))
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
+            assertEquals(responseSource!!.getAllPermanent().size, 1)
 
-            responseSource!!.markTemporary("Dog").await()
-            assertTrue(responseSource!!.isTemporary("Dog").await())
-            assertEquals(responseSource!!.getAllTemporary().await().size, 1)
-            assertEquals(responseSource!!.getAllPermanent().await().size, 0)
+            responseSource!!.markTemporary("Dog")
+            assertTrue(responseSource!!.isTemporary("Dog"))
+            assertEquals(responseSource!!.getAllTemporary().size, 1)
+            assertEquals(responseSource!!.getAllPermanent().size, 0)
         }
     }
 
@@ -135,7 +135,7 @@ class ResponseSourceImplTest {
         var networkResponse : Response? = null
 
         runBlocking {
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
             responseSource!!.add("Dog")
             networkResponse = responseSource!!.getWithContext(request, "Dog").await()
             assertNotNull(networkResponse)
@@ -158,7 +158,7 @@ class ResponseSourceImplTest {
         var networkResponse: Response? = null
 
         runBlocking {
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
             responseSource!!.add("Dog")
             responseSource!!.markPermanent("Dog")
             networkResponse = responseSource!!.getWithContext(request, "Dog").await()
@@ -179,10 +179,10 @@ class ResponseSourceImplTest {
         runBlocking {
             responseSource!!.add("Dog")
             assertEquals(
-                    responseSource!!.getArticleContext("Dog").await()!!.position, "")
-            responseSource!!.updatePosition("Dog", "newPosition").await()
+                    responseSource!!.getArticleContext("Dog")!!.position, "")
+            responseSource!!.updatePosition("Dog", "newPosition")
             assertEquals(
-                    responseSource!!.getArticleContext("Dog").await()!!.position,
+                    responseSource!!.getArticleContext("Dog")!!.position,
                     "newPosition")
 
         }

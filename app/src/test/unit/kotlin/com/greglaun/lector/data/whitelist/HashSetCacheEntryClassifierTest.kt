@@ -43,8 +43,8 @@ class HashSetCacheEntryClassifierTest {
             classifier.markPermanent("apple")
             classifier.markPermanent("sauce")
             classifier.markTemporary("sauce")
-            val temporary = classifier.getAllTemporary().await()
-            val permanent = classifier.getAllPermanent().await()
+            val temporary = classifier.getAllTemporary()
+            val permanent = classifier.getAllPermanent()
             assertTrue(permanent.size == 1)
             assertTrue(permanent.contains(
                     BasicArticleContext(1L, "apple", "", false)))

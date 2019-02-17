@@ -32,46 +32,32 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         }
     }
 
-    override fun getAllTemporary(): Deferred<List<ArticleContext>> {
-        return GlobalScope.async {
-            db.articleContextDao().getAllTemporary()
-        }
+    override suspend fun getAllTemporary(): List<ArticleContext> {
+        return db.articleContextDao().getAllTemporary()
     }
 
-    override fun markTemporary(element: String): Deferred<Unit> {
-        return GlobalScope.async {
-            db.articleContextDao().markTemporary(element)
-        }
+    override suspend fun markTemporary(element: String) {
+        return db.articleContextDao().markTemporary(element)
     }
 
-    override fun markPermanent(element: String): Deferred<Unit> {
-        return GlobalScope.async {
-            db.articleContextDao().markPermanent(element)
-        }
+    override suspend fun markPermanent(element: String) {
+        return db.articleContextDao().markPermanent(element)
     }
 
-    override fun isTemporary(element: String): Deferred<Boolean> {
-        return GlobalScope.async {
-            db.articleContextDao().isTemporary(element)
-        }
+    override suspend fun isTemporary(element: String): Boolean {
+        return db.articleContextDao().isTemporary(element)
     }
 
-    override fun getAllPermanent(): Deferred<List<ArticleContext>> {
-        return GlobalScope.async {
-            db.articleContextDao().getAllPermanent()
-        }
+    override suspend  fun getAllPermanent(): List<ArticleContext> {
+        return db.articleContextDao().getAllPermanent()
     }
 
-    override fun getArticleContext(context: String): Deferred<ArticleContext?> {
-        return GlobalScope.async {
-            db.articleContextDao().get(context)
-        }
+    override suspend fun getArticleContext(context: String): ArticleContext? {
+        return db.articleContextDao().get(context)
     }
 
-    override fun updatePosition(currentRequestContext: String, position: String): Deferred<Unit> {
-        return GlobalScope.async {
-            db.articleContextDao().updatePosition(currentRequestContext, position)
-        }
+    override suspend fun updatePosition(currentRequestContext: String, position: String) {
+        return db.articleContextDao().updatePosition(currentRequestContext, position)
     }
 
     override fun getUnfinished(): Deferred<List<String>> {
@@ -90,13 +76,11 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         }
     }
 
-    override fun getNextArticle(context: String): Deferred<ArticleContext?> {
-        return GlobalScope.async {
-            val oldArticle = db.articleContextDao().get(context) ?: return@async null
+    override suspend fun getNextArticle(context: String): ArticleContext? {
+        val oldArticle = db.articleContextDao().get(context) ?: return null
             if (oldArticle.temporary) {
-                return@async null
+                return null
             }
-            db.articleContextDao().getNextLargestInUniverse(oldArticle.id!!)
-        }
+        return db.articleContextDao().getNextLargestInUniverse(oldArticle.id!!)
     }
 }

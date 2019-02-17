@@ -28,59 +28,56 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         }
     }
 
-    override fun getAllTemporary(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllTemporary(): List<ArticleContext> {
         val result = ArrayList<ArticleContext>()
         hashMap.forEach{
             if (it.value.temporary) {
                 result.add(it.value)
             }
         }
-        return CompletableDeferred(result.toList())
+        return result.toList()
     }
 
-    override fun markTemporary(element: String): Deferred<Unit> {
+    override suspend fun markTemporary(element: String) {
         val originalEntry = hashMap.get(element)
         originalEntry?.let {
             hashMap.put(element, originalEntry.makeTemporary())
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun markPermanent(element: String): Deferred<Unit> {
+    override suspend fun markPermanent(element: String) {
         val originalEntry = hashMap.get(element)
         originalEntry?.let {
             hashMap.put(element, originalEntry.makePermanent())
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun isTemporary(element: String): Deferred<Boolean> {
+    override suspend fun isTemporary(element: String): Boolean {
         if (hashMap.containsKey(element)) {
-            return CompletableDeferred(hashMap.get(element)!!.temporary)
+            return hashMap.get(element)!!.temporary
         }
-        return CompletableDeferred(true)
+        return true
     }
 
-    override fun getAllPermanent(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllPermanent(): List<ArticleContext> {
         val result = ArrayList<ArticleContext>()
         hashMap.forEach{
             if (!it.value.temporary) {
                 result.add(it.value)
             }
         }
-        return CompletableDeferred(result.toList())
+        return result.toList()
     }
 
-    override fun getArticleContext(context: String): Deferred<ArticleContext?> {
-        return CompletableDeferred(hashMap.get(context))
+    override suspend fun getArticleContext(context: String): ArticleContext? {
+        return hashMap.get(context)
     }
 
-    override fun updatePosition(currentRequestContext: String, position: String): Deferred<Unit> {
+    override suspend fun updatePosition(currentRequestContext: String, position: String) {
         val originalEntry = hashMap.get(currentRequestContext)
         originalEntry?.let {
             hashMap.put(currentRequestContext, originalEntry.updatePosition(position))
         }
-        return CompletableDeferred(Unit)
     }
 
     override fun getUnfinished(): Deferred<List<String>> {
@@ -101,7 +98,7 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         return CompletableDeferred(Unit)
     }
 
-    override fun getNextArticle(context: String): Deferred<ArticleContext?> {
-        return CompletableDeferred(null)
+    override suspend fun getNextArticle(context: String): ArticleContext? {
+        return null
     }
 }

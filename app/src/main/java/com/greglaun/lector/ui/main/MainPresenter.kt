@@ -90,7 +90,7 @@ class MainPresenter(val view : MainContract.View,
     private suspend fun autoPlayNext(articleState: ArticleState) {
         var nextArticle: ArticleContext? = null
         if (currentCourse == LECTOR_UNIVERSE) {
-            nextArticle = responseSource.getNextArticle(articleState.title).await()
+            nextArticle = responseSource.getNextArticle(articleState.title)
         } else {
             nextArticle = courseSource.getNextInCourse(currentCourse, articleState.title)
         }
@@ -106,7 +106,9 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPlayButtonPressed() {
         ttsPresenter.speakInLoop({
-            responseSource.updatePosition(currentRequestContext, it)
+            GlobalScope.launch {
+                responseSource.updatePosition(currentRequestContext, it)
+            }
         })
         view.enablePauseButton()
     }
@@ -122,8 +124,7 @@ class MainPresenter(val view : MainContract.View,
         stopSpeakingAndEnablePlayButton()
         var position = POSITION_BEGINNING
         if (responseSource.contains(urlToContext(urlString))) {
-                responseSource.getArticleContext(urlToContext(urlString))
-                        .await()?.let{
+                responseSource.getArticleContext(urlToContext(urlString))?.let{
                             position = it.position
                         }
         }
@@ -196,7 +197,9 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun saveArticle() {
         synchronized(currentRequestContext) {
-            responseSource.markPermanent(currentRequestContext)
+            GlobalScope.launch {
+                responseSource.markPermanent(currentRequestContext)
+            }
         }
     }
 
@@ -238,7 +241,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onDisplayReadingList() {
         responseSource.getAllPermanent()?.let {
-            displayArticleList(it.await(), ALL_ARTICLES)
+            displayArticleList(it, ALL_ARTICLES)
         }
     }
 
@@ -257,21 +260,6 @@ class MainPresenter(val view : MainContract.View,
         view.onCoursesChanged()
         view.displayCourses()
     }
-
-//    fun addCourse(courseDescription: CourseDescription) {
-//        runBlocking {
-//            val courseId = courseSource.add(ConcreteCourseContext(null,
-//                    courseDescription.courseName,
-//                    0)).await()
-//            courseDescription.articleUrls.map {
-//                async {
-//                    responseSource.add(urlToContext(it)).await()
-//                    courseSource.addArticleForSource(courseDescription.courseName,
-//                            urlToContext(it)).await()
-//                }
-//            }.forEach {it.await() }
-//        }
-//    }
 
     override fun onRewindOne() {
         ttsPresenter.reverseOne {it ->

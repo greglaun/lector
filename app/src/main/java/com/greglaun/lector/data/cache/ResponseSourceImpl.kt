@@ -53,11 +53,11 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         cacheEntryClassifier.update(from, to)
     }
 
-    override fun markTemporary(keyContext: String): Deferred<Unit> {
+    override suspend fun markTemporary(keyContext: String) {
         return cacheEntryClassifier.markTemporary(keyContext)
     }
 
-    override fun markPermanent(keyContext: String): Deferred<Unit> {
+    override suspend fun markPermanent(keyContext: String) {
         return cacheEntryClassifier.markPermanent(keyContext)
     }
 
@@ -73,23 +73,23 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return articleCache.garbageCollectTemporary(classifier)
     }
 
-    override fun getAllTemporary(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllTemporary(): List<ArticleContext> {
         return cacheEntryClassifier.getAllTemporary()
     }
 
-    override fun isTemporary(element: String): Deferred<Boolean> {
+    override suspend fun isTemporary(element: String): Boolean {
         return cacheEntryClassifier.isTemporary(element)
     }
 
-    override fun getAllPermanent(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllPermanent(): List<ArticleContext> {
         return cacheEntryClassifier.getAllPermanent()
     }
 
-    override fun getArticleContext(context: String): Deferred<ArticleContext?> {
+    override suspend fun getArticleContext(context: String): ArticleContext? {
         return cacheEntryClassifier.getArticleContext(context)
     }
 
-    override fun updatePosition(context: String, position: String): Deferred<Unit> {
+    override suspend fun updatePosition(context: String, position: String) {
         return cacheEntryClassifier.updatePosition(context, position)
     }
 
@@ -101,7 +101,7 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.markFinished(element)
     }
 
-    override fun getNextArticle(context: String): Deferred<ArticleContext?> {
+    override suspend fun getNextArticle(context: String): ArticleContext? {
         return cacheEntryClassifier.getNextArticle(context)
     }
 }

@@ -60,7 +60,8 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
                 val iterator = it.value.second.iterator()
                 while (iterator.hasNext()) {
                     val it = iterator.next()
-                    if (classifier.isTemporary(it).await()) {
+                    if (classifier.isTemporary(it)
+                    ) {
                         iterator.remove()
                     }
                 }
