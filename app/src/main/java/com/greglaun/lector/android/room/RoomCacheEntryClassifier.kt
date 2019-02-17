@@ -11,14 +11,12 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
        return db.articleContextDao().get(element) != null
     }
 
-    override fun add(element: String): Deferred<Long> {
-        return GlobalScope.async {
-            val existingEntry = db.articleContextDao().get(element)
-            if (existingEntry == null) {
-                db.articleContextDao().insert(RoomArticleContext(null, contextString = element))
-            } else {
-                existingEntry.id!!
-            }
+    override suspend fun add(element: String): Long {
+        val existingEntry = db.articleContextDao().get(element)
+        if (existingEntry == null) {
+            return db.articleContextDao().insert(RoomArticleContext(null, contextString = element))
+        } else {
+            return existingEntry.id!!
         }
     }
 

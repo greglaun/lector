@@ -12,9 +12,9 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         return hashMap.contains(element)
     }
 
-    override fun add(element : String): Deferred<Long> {
+    override suspend fun add(element : String): Long {
         hashMap.put(element, BasicArticleContext.fromString(element))
-        return CompletableDeferred(1L)
+        return 1L
     }
 
     override fun delete(element: String): Deferred<Unit> {

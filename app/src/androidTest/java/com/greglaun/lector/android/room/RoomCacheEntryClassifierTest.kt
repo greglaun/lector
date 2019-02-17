@@ -36,7 +36,7 @@ class RoomCacheEntryClassifierTest {
     @Test
     fun add() {
         runBlocking {
-            whitelist!!.add("Potato").await()
+            whitelist!!.add("Potato")
             assertTrue(whitelist!!.contains("Potato"))
         }
     }
@@ -44,7 +44,7 @@ class RoomCacheEntryClassifierTest {
     @Test
     fun delete() {
         runBlocking {
-            whitelist!!.add("Radish").await()
+            whitelist!!.add("Radish")
             whitelist!!.delete("Radish").await()
             assertFalse(whitelist!!.contains("Radish"))
         }

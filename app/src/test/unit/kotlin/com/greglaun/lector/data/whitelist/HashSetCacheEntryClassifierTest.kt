@@ -28,7 +28,7 @@ class HashSetCacheEntryClassifierTest {
     @Test
     fun delete() {
         runBlocking {
-            classifier.add(testString).await()
+            classifier.add(testString)
             classifier.delete(testString).await()
             assertFalse(classifier.contains(testString))
         }
@@ -37,9 +37,9 @@ class HashSetCacheEntryClassifierTest {
     @Test
     fun temporaryAndPermanent() {
         runBlocking {
-            classifier.add("apple").await()
-            classifier.add("sauce").await()
-            classifier.add("pancakes").await()
+            classifier.add("apple")
+            classifier.add("sauce")
+            classifier.add("pancakes")
             classifier.markPermanent("apple")
             classifier.markPermanent("sauce")
             classifier.markTemporary("sauce")

@@ -43,7 +43,7 @@ class ResponseSourceImplTest {
         var networkResponse : Response? = null
         var cachedResponse : Response? = null
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             // Response from network
             networkResponse = responseSource!!.getWithContext(request, "Dog").await()
             // Response is in cache now
@@ -56,7 +56,7 @@ class ResponseSourceImplTest {
     fun contains() {
         runBlocking {
             assertFalse(responseSource!!.contains("Dog"))
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertTrue(responseSource!!.contains("Dog"))
         }
     }
@@ -64,7 +64,7 @@ class ResponseSourceImplTest {
     @Test
     fun delete() {
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertTrue(responseSource!!.contains("Dog"))
             responseSource!!.delete("Dog").await()
             assertFalse(responseSource!!.contains("Dog"))
@@ -79,7 +79,7 @@ class ResponseSourceImplTest {
         var networkResponse : Response? = null
         var cachedResponse : Response? = null
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             // Response from network
             networkResponse = responseSource!!.getWithContext(request, "Dog").await()
             testNetworkCache.disableNetwork = true
@@ -98,7 +98,7 @@ class ResponseSourceImplTest {
     @Test
     fun update() {
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertTrue(responseSource!!.contains("Dog"))
             responseSource!!.update("Dog", "Potato").await()
             assertFalse(responseSource!!.contains("Dog"))
@@ -110,7 +110,7 @@ class ResponseSourceImplTest {
     fun markTemporary() {
         runBlocking {
             assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertTrue(responseSource!!.isTemporary("Dog").await())
             assertEquals(responseSource!!.getAllTemporary().await().size, 1)
             assertEquals(responseSource!!.getAllPermanent().await().size, 0)
@@ -136,7 +136,7 @@ class ResponseSourceImplTest {
 
         runBlocking {
             assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             networkResponse = responseSource!!.getWithContext(request, "Dog").await()
             assertNotNull(networkResponse)
 
@@ -159,7 +159,7 @@ class ResponseSourceImplTest {
 
         runBlocking {
             assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             responseSource!!.markPermanent("Dog")
             networkResponse = responseSource!!.getWithContext(request, "Dog").await()
             assertNotNull(networkResponse)
@@ -177,7 +177,7 @@ class ResponseSourceImplTest {
     @Test
     fun updatePosition() {
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertEquals(
                     responseSource!!.getArticleContext("Dog").await()!!.position, "")
             responseSource!!.updatePosition("Dog", "newPosition").await()
@@ -191,7 +191,7 @@ class ResponseSourceImplTest {
     @Test
     fun getUnfinished() {
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertEquals(responseSource!!.getUnfinished().await().size, 1)
         }
     }
@@ -199,7 +199,7 @@ class ResponseSourceImplTest {
     @Test
     fun markFinished() {
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertEquals(responseSource!!.getUnfinished().await().size, 1)
             responseSource!!.markFinished("Dog").await()
             assertEquals(responseSource!!.getUnfinished().await().size, 0)

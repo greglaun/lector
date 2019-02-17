@@ -7,7 +7,7 @@ import kotlinx.coroutines.experimental.Deferred
 interface CacheEntryClassifier<T>: UnfinishedDownloadSource {
     // todo(cleanup): Move ArticleContext functions to another interface? Or re-architect?
     suspend fun contains(element : T): Boolean
-    fun add(element: T): Deferred<Long>
+    suspend fun add(element: T): Long
     fun delete(element: T): Deferred<Unit>
     fun update(from: T, to: T): Deferred<Unit>
     fun getAllTemporary(): Deferred<List<ArticleContext>>

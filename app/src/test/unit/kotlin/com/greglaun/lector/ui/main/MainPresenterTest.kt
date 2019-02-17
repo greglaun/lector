@@ -8,7 +8,6 @@ import com.greglaun.lector.data.course.ConcreteCourseContext
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.TTSContract
-import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
 import org.junit.Test
@@ -65,8 +64,7 @@ class MainPresenterTest {
         runBlocking {
             `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(
                     false)
-            `when`(responseSource.add(ArgumentMatchers.anyString())).thenReturn(
-                    CompletableDeferred())
+            `when`(responseSource.add(ArgumentMatchers.anyString())).thenReturn(0L)
             mainPresenter.onUrlChanged("test")
             verify(mockView, times(1)).loadUrl("test")
         }
@@ -94,10 +92,9 @@ class MainPresenterTest {
 
     @Test
     fun loadFromContext() {
-        `when`(responseSource.add(ArgumentMatchers.anyString())).thenReturn(
-                CompletableDeferred(0L))
         val context = BasicArticleContext.fromString("Something")
         runBlocking {
+            `when`(responseSource.add(ArgumentMatchers.anyString())).thenReturn(0L)
             `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(
                     false)
             mainPresenter.loadFromContext(context)

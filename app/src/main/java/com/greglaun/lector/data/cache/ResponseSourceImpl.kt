@@ -35,7 +35,7 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.contains(element)
     }
 
-    override fun add(element: String): Deferred<Long> {
+    override suspend fun add(element: String): Long {
         return cacheEntryClassifier.add(element)
     }
 

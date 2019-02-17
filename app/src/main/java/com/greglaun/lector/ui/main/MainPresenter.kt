@@ -177,7 +177,7 @@ class MainPresenter(val view : MainContract.View,
                 computedContext = currentRequestContext
             }
             if (!this@MainPresenter.responseSource.contains(computedContext)) {
-                responseSource.add(computedContext).await()
+                responseSource.add(computedContext)
             }
         }
     }

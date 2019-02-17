@@ -58,7 +58,7 @@ class RoomResponseSourceTest {
         var networkResponse : Response? = null
         var cachedResponse : Response? = null
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             // Response from network
             networkResponse = responseSource!!.getWithContext(request, "Dog").await()
             // Response is in cache now
@@ -71,7 +71,7 @@ class RoomResponseSourceTest {
     fun contains() {
         runBlocking {
             assertFalse(responseSource!!.contains("Dog"))
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertTrue(responseSource!!.contains("Dog"))
         }
     }
@@ -79,7 +79,7 @@ class RoomResponseSourceTest {
     @Test
     fun delete() {
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertTrue(responseSource!!.contains("Dog"))
             responseSource!!.delete("Dog").await()
             assertFalse(responseSource!!.contains("Dog"))
