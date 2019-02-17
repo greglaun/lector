@@ -8,13 +8,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-// A "cache" that calls out to the network. This inverts the traditional approach of calling out
-// to the network and possibly (opaquely to the caller) returning a cached responses. There may
-// be no good reason to do this, so this may change in the future.
-open class NetworkCache(val httpClient : OkHttpClient)
-    : ComposableCache<Request, Response> {
+class TestingNetworkCache(httpClient: OkHttpClient) : NetworkCache(httpClient) {
+    var disableNetwork = false
 
     override fun get(key: Request): Deferred<Response?> {
+        if (disableNetwork) {
+            val response: Response? = null
+            return CompletableDeferred(response)
+        }
         return GlobalScope.async {
             try {
                 httpClient.newCall(key).execute()
@@ -23,8 +24,13 @@ open class NetworkCache(val httpClient : OkHttpClient)
             }
         }
     }
+
     override fun set(key: Request, value: Response): Deferred<Unit> {
         // Do nothing
         return CompletableDeferred(Unit)
+    }
+
+    fun disableNetwork(shouldDisable: Boolean) {
+        disableNetwork = shouldDisable
     }
 }

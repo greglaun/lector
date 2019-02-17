@@ -29,5 +29,4 @@ interface CourseContextDao {
 
     @Query("UPDATE roomcoursecontext SET position = :position WHERE courseName = :courseName")
     fun updatePosition(courseName: String, position: Int)
-
 }

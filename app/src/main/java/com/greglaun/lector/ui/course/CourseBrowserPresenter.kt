@@ -1,9 +1,9 @@
 package com.greglaun.lector.ui.course
 
-import com.greglaun.lector.data.course.ThinCourseDetails
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.CourseSource
+import com.greglaun.lector.data.course.ThinCourseDetails
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 
@@ -22,9 +22,9 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
         return view
     }
 
-    override fun beginCourseDownload() {
-        GlobalScope.launch {
-            courseDownloader.downloadCourseMetadata().await()?.also {
+    override suspend fun beginCourseDownload() {
+        courseDownloader.downloadCourseMetadata()?.let {
+            it.await()?.let {
                 courseMetadatalist.clear()
                 courseMetadatalist.addAll(it)
                 view.onCourseListChanged()
@@ -39,9 +39,9 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
         }
     }
 
-    override fun onCourseDetailSelected(courseMetadata: CourseMetadata) {
-        GlobalScope.launch {
-            courseDownloader.fetchCourseDetails(courseMetadata).await()?.also {
+    override suspend fun onCourseDetailSelected(courseMetadata: CourseMetadata) {
+        courseDownloader.fetchCourseDetails(courseMetadata)?.let {
+            it.await()?.let {
                 currentDetails = it
                 view.showCourseDetails(it)
             }
@@ -55,11 +55,11 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
         }
     }
 
-    override fun onCoursesSaved(courseMetadata: List<CourseMetadata>) {
-        GlobalScope.launch {
+    override suspend fun onCoursesSaved(courseMetadata: List<CourseMetadata>) {
             courseMetadata.forEach {
-                courseDownloader.fetchCourseDetails(it).await()?.also {
-                    courseSource.addCourseDetails(it).await()
+                courseDownloader.fetchCourseDetails(it)?.also {
+                    it.await()?.let {
+                        courseSource.addCourseDetails(it).await()
                 }
             }
         }

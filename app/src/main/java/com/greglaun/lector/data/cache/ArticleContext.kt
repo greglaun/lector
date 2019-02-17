@@ -6,4 +6,5 @@ interface ArticleContext {
     val contextString: String
     val position: String
     val temporary: Boolean
+    val downloadComplete: Boolean
 }

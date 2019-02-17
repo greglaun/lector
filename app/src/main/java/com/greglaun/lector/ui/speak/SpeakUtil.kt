@@ -19,15 +19,15 @@ fun removeUnwanted(doc: Document): Document {
     return doc
 }
 
-fun retrieveTitle(doc: Document): String {
-    return doc.title().replace(" - Wikipedia", "")
+fun retrieveTitle(docTitle: String): String {
+    return docTitle.replace(" - Wikipedia", "")
 }
 
-fun jsoupStateFromHtml(html: String): ArticleState {
+fun articleStateFromHtml(html: String): ArticleState {
     var doc = Jsoup.parse(html)
     // Remove elements from the navboxes
     doc = removeUnwanted(doc)
-    val title = retrieveTitle(doc)
+    val title = retrieveTitle(doc.title())
     // todo(html): Also get lists and block quotes
     val paragraphs = doc!!.select("p").map { it ->
         it.text()!!

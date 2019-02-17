@@ -19,6 +19,8 @@ import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseDownloaderImpl
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.ThinCourseDetails
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
 
 class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
     private lateinit var courseBrowserRecyclerView: RecyclerView
@@ -37,7 +39,9 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
         courseBrowserViewManager = GridLayoutManager(this, 2)
         courseBrowserViewAdapter = courseBrowserAdapter(courseBrowserPresenter.courseMetadatalist)
         { it: CourseMetadata ->
-            courseBrowserPresenter.onCourseDetailSelected(it)
+            GlobalScope.launch {
+                courseBrowserPresenter.onCourseDetailSelected(it)
+            }
         }
 
         courseBrowserRecyclerView = findViewById<RecyclerView>(R.id.rv_course_browse).apply {
@@ -47,7 +51,9 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
         }
         courseDetailLayout = findViewById(R.id.details_layout)
 
-        courseBrowserPresenter.beginCourseDownload()
+        GlobalScope.launch {
+            courseBrowserPresenter.beginCourseDownload()
+        }
     }
 
     override fun onBackPressed() {

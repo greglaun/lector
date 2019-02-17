@@ -41,19 +41,19 @@ interface MainContract {
 
         fun onPlayButtonPressed()
         fun stopSpeakingAndEnablePlayButton()
-        fun saveArticle()
+        suspend fun saveArticle()
         fun deleteRequested(articleContext: ArticleContext)
-        fun onUrlChanged(url : String): Deferred<Unit>
+        suspend fun onUrlChanged(url : String)
         fun onRequest(url : String) : Deferred<Response?>
-        fun onDisplayReadingList()
+        suspend fun onDisplayReadingList()
         fun onRewindOne()
         fun onForwardOne()
         fun responseSource(): ResponseSource
         fun courseSource(): CourseSource
-        fun loadFromContext(articleContext: ArticleContext)
-        fun onDisplayCourses()
+        suspend fun loadFromContext(articleContext: ArticleContext)
+        suspend fun onDisplayCourses()
         fun deleteRequested(courseContext: CourseContext)
-        fun courseDetailsRequested(courseContext: CourseContext)
+        suspend fun courseDetailsRequested(courseContext: CourseContext)
         fun setHandsomeBritish(shouldBeBritish: Boolean)
         fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
         fun onPageDownloadFinished(urlString: String)

@@ -18,5 +18,4 @@ interface CacheEntryClassifier<T>: UnfinishedDownloadSource {
     fun getArticleContext(context: String): Deferred<ArticleContext?>
     fun updatePosition(currentRequestContext: T, position: T): Deferred<Unit>
     fun getNextArticle(context: String): Deferred<ArticleContext?>
-    fun renameArticleContext(previousName: String, newName: String): Deferred<Unit>
 }

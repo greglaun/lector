@@ -19,6 +19,15 @@ class TtsPresenterTest {
     }
 
     @Test
+    fun onStart() {
+        val stateListener = mock(TtsStateListener::class.java)
+        ttsPresenter!!.onStart(stateListener)
+        verify(stateMachine, times(1))!!.startMachine(
+                ttsPresenter!!,
+                stateListener)
+    }
+
+    @Test
     fun onStop() {
         ttsPresenter!!.onStop()
         verify(stateMachine, times(1))!!.stopMachine()
@@ -41,7 +50,7 @@ class TtsPresenterTest {
     fun onUrlChanged() {
         runBlocking {
             ttsPresenter!!.onArticleChanged(articleState)
-            verify(stateMachine, times(1))!!.actionChangeUrl(articleState)
+            verify(stateMachine, times(1))!!.updateArticle(articleState)
         }
     }
 
@@ -49,5 +58,29 @@ class TtsPresenterTest {
     fun stopSpeaking() {
         ttsPresenter!!.stopSpeaking()
         verify(stateMachine, times(1))!!.actionStopSpeaking()
+    }
+
+    @Test
+    fun onArticleChanged() {
+        val articleState = ArticleState("Test", listOf("A", "B"))
+        runBlocking {
+            ttsPresenter!!.onArticleChanged(articleState)
+            verify(stateMachine, times(1))!!.updateArticle(articleState)
+        }
+    }
+
+    @Test
+    fun setHandsomeBritish() {
+        ttsPresenter!!.setHandsomeBritish(true)
+        verify(audioView, times(1))!!.setHandsomeBritish(true)
+
+        ttsPresenter!!.setHandsomeBritish(false)
+        verify(audioView, times(1))!!.setHandsomeBritish(false)
+    }
+
+    @Test
+    fun setSpeechRate() {
+        ttsPresenter!!.setSpeechRate(12f)
+        verify(audioView, times(1))!!.setSpeechRate(12f)
     }
 }

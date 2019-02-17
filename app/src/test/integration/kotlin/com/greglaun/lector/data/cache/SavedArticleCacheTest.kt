@@ -70,7 +70,7 @@ class SavedArticleCacheTest {
         runBlocking {
             // Response from network
             networkDogResponse = compositeCache.getWithContext(dogRequest, "Dog").await()
-            networkCatResponse = compositeCache.getWithContext(catRequest, "Dog").await()
+            networkCatResponse = compositeCache.getWithContext(catRequest, "Cat").await()
 
             // Response is in cache now
             cachedCatResponse = savedArticleCache.getWithContext(catRequest, "Cat").await()

@@ -44,7 +44,7 @@ class MainPresenter(val view : MainContract.View,
             downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
             downloadScheduler?.startDownloads()
         }
-        articleStateSource = JSoupArticleStateSource(responseSource!!)
+        articleStateSource = JSoupArticleStateSource(responseSource)
     }
 
     override fun onDetach() {
@@ -72,25 +72,29 @@ class MainPresenter(val view : MainContract.View,
         view.unhighlightAllText()
     }
 
-    override fun onArticleFinished(articleState: ArticleState) {
-        GlobalScope.launch {
-            if (autoPlay) {
-                var nextArticle: ArticleContext? = null
-                if (currentCourse == LECTOR_UNIVERSE) {
-                    nextArticle = responseSource.getNextArticle(articleState.title).await()
-                } else {
-                    nextArticle = courseSource.getNextInCourse(currentCourse, articleState.title)
-                }
-                nextArticle?.let {
-                    onUrlChanged(contextToUrl(it.contextString)).await()
-                    onPlayButtonPressed()
-                }
-            }
-            if (autoDelete) {
-                launch {
-                    responseSource.delete(articleState.title)
-                }
-            }
+    override suspend fun onArticleFinished(articleState: ArticleState) {
+        if (autoPlay) {
+            autoPlayNext(articleState)
+        }
+        if (autoDelete) {
+            autoDeleteCurrent(articleState)
+        }
+    }
+
+    private fun autoDeleteCurrent(articleState: ArticleState) {
+        responseSource.delete(articleState.title)
+    }
+
+    private suspend fun autoPlayNext(articleState: ArticleState) {
+        var nextArticle: ArticleContext? = null
+        if (currentCourse == LECTOR_UNIVERSE) {
+            nextArticle = responseSource.getNextArticle(articleState.title).await()
+        } else {
+            nextArticle = courseSource.getNextInCourse(currentCourse, articleState.title)
+        }
+        nextArticle?.let {
+            onUrlChanged(contextToUrl(it.contextString))
+            onPlayButtonPressed()
         }
     }
 
@@ -110,35 +114,32 @@ class MainPresenter(val view : MainContract.View,
        view.enablePlayButton()
     }
 
-    override fun onUrlChanged(urlString: String): Deferred<Unit> {
-        return GlobalScope.async {
-            computeCurrentContext(urlString)
-            view.loadUrl(urlString)
-            stopSpeakingAndEnablePlayButton()
-            var position = POSITION_BEGINNING
-            if (responseSource.contains(urlToContext(urlString)).await()) {
+    override suspend fun onUrlChanged(urlString: String) {
+        computeCurrentContext(urlString)
+        view.loadUrl(urlString)
+        stopSpeakingAndEnablePlayButton()
+        var position = POSITION_BEGINNING
+        if (responseSource.contains(urlToContext(urlString)).await()) {
                 responseSource.getArticleContext(urlToContext(urlString))
                         .await()?.let{
                             position = it.position
                         }
-            }
-            articleStateSource?.getArticle(urlString)?.let {
-                ttsPresenter.onArticleChanged(fastForward(it, position))
-                if (it.title != currentRequestContext) {
-                    val previousTitle = currentRequestContext
-                    synchronized(currentRequestContext) {
-                        currentRequestContext = it.title
-                    }
-                    launch {
-                        responseSource.renameArticleContext(previousTitle, it.title)
-                    }
+        }
+        articleStateSource?.getArticle(urlString)?.let {
+            ttsPresenter.onArticleChanged(fastForward(it, position))
+            if (it.title != currentRequestContext) {
+                val previousTitle = currentRequestContext
+                synchronized(currentRequestContext) {
+                    currentRequestContext = it.title
                 }
-            }
-            Unit
+                GlobalScope.launch {
+                    responseSource.update(previousTitle, it.title)
+                }
+                }
         }
     }
 
-    override fun loadFromContext(articleContext: ArticleContext) {
+    override suspend fun loadFromContext(articleContext: ArticleContext) {
         onUrlChanged(contextToUrl(articleContext.contextString))
         view.unhideWebView()
     }
@@ -186,27 +187,24 @@ class MainPresenter(val view : MainContract.View,
         synchronized(currentRequestContext) {
             curContext = currentRequestContext
         }
-        return  responseSource.getWithContext(Request.Builder()
+        return responseSource.getWithContext(Request.Builder()
                 .url(url)
                 .build(), curContext!!)
     }
 
-    override fun saveArticle() {
-        GlobalScope.launch {
-            synchronized(currentRequestContext) {
-                responseSource.markPermanent(currentRequestContext)
-            }
+    override suspend fun saveArticle() {
+        synchronized(currentRequestContext) {
+            responseSource.markPermanent(currentRequestContext)
         }
     }
 
-    override fun courseDetailsRequested(courseContext: CourseContext) {
-        GlobalScope.launch {
-            courseContext.id?.apply {
-                currentCourse = courseContext.courseName
-                val articlesForCourse = courseSource.getArticlesForCourse(this).await()
-                displayArticleList(articlesForCourse,
-                        courseContext.courseName)
-            }
+    override suspend fun courseDetailsRequested(courseContext: CourseContext) {
+        courseContext.id?.let {
+            currentCourse = courseContext.courseName
+                courseSource.getArticlesForCourse(it)?.let {
+                    displayArticleList(it.await(),
+                            courseContext.courseName)
+                }
         }
     }
 
@@ -236,10 +234,9 @@ class MainPresenter(val view : MainContract.View,
                 })
     }
 
-    override fun onDisplayReadingList() {
-        GlobalScope.launch{
-            val articleList = responseSource.getAllPermanent().await()
-            displayArticleList(articleList, ALL_ARTICLES)
+    override suspend fun onDisplayReadingList() {
+        responseSource.getAllPermanent()?.let {
+            displayArticleList(it.await(), ALL_ARTICLES)
         }
     }
 
@@ -250,13 +247,13 @@ class MainPresenter(val view : MainContract.View,
         view.displayReadingList(title)
     }
 
-    override fun onDisplayCourses() {
-        GlobalScope.launch{
-            courseList.clear()
-            courseList.addAll(courseSource.getCourses().await())
-            view.onCoursesChanged()
-            view.displayCourses()
+    override suspend fun onDisplayCourses() {
+        courseList.clear()
+        courseSource.getCourses()?.let {
+            courseList.addAll(it.await())
         }
+        view.onCoursesChanged()
+        view.displayCourses()
     }
 
 //    fun addCourse(courseDescription: CourseDescription) {
@@ -313,7 +310,7 @@ class MainPresenter(val view : MainContract.View,
         // todo: or else change the language from "play all" to "start playing" or something else
         if (readingList != null && readingList.size >0 ) {
             GlobalScope.launch {
-                onUrlChanged(contextToUrl(readingList[0].contextString)).await()
+                onUrlChanged(contextToUrl(readingList[0].contextString))
                 onPlayButtonPressed()
             }
         }

@@ -3,6 +3,8 @@ package com.greglaun.lector.data.cache
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
@@ -15,11 +17,17 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
     companion object {
         fun createResponseSource(savedArticleCache : SavedArticleCache<Request, Response, String>,
                                  cacheEntryClassifier: CacheEntryClassifier<String>,
-                                 lruCacheDir : File)
+                                 networkCache: NetworkCache)
                 : ResponseSourceImpl {
-            return ResponseSourceImpl(savedArticleCache.compose(
-                    NetworkCache(
-                            OkHttpConnectionFactory.createClient(lruCacheDir))), cacheEntryClassifier)
+            return ResponseSourceImpl(savedArticleCache.compose(networkCache), cacheEntryClassifier)
+
+        }
+
+        fun createResponseSource(savedArticleCache : SavedArticleCache<Request, Response, String>,
+                                 cacheEntryClassifier: CacheEntryClassifier<String>,
+                                 lruCacheDir : File): ResponseSourceImpl {
+            return createResponseSource(savedArticleCache, cacheEntryClassifier,
+                    NetworkCache(OkHttpConnectionFactory.createClient(lruCacheDir)))
         }
     }
 
@@ -44,7 +52,9 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
     }
 
     override fun update(from: String, to: String): Deferred<Unit> {
-        return cacheEntryClassifier.update(from, to)
+       return GlobalScope.async {
+            cacheEntryClassifier.update(from, to).await()
+        }
     }
 
     override fun markTemporary(keyContext: String): Deferred<Unit> {
@@ -97,9 +107,5 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
 
     override fun getNextArticle(context: String): Deferred<ArticleContext?> {
         return cacheEntryClassifier.getNextArticle(context)
-    }
-
-    override fun renameArticleContext(previousName: String, newName: String): Deferred<Unit> {
-        return cacheEntryClassifier.renameArticleContext(previousName, newName)
     }
 }
