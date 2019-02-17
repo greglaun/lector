@@ -1,13 +1,11 @@
 package com.greglaun.lector.data.cache
 
-import kotlinx.coroutines.experimental.Deferred
-
 interface SavedArticleCache<Key : Any, Value : Any, KeyContext : Any>
     : ContextAwareCache<Key, Value, KeyContext> {
 
     // Add the key contextString to the cache, so that it is available to entries that need it.
     // This is for caches that are normalized.
-    fun addContext(keyContext: KeyContext): Deferred<Unit>
+    suspend fun addContext(keyContext: KeyContext)
 
     // Garbage collect the items from the given contextString provided they are not referred to by another
     // contextString. This prevents us from deleting items that are still needed in other contexts.
@@ -18,5 +16,5 @@ interface SavedArticleCache<Key : Any, Value : Any, KeyContext : Any>
     //
     // Basic algorithm: iterate through the list. If the given contextString is the only contextString
     // associated with an item, delete that item. Otherwise remove the contextString from that item.
-    fun garbageCollectContext(keyContext : KeyContext): Deferred<Unit>
+    suspend fun garbageCollectContext(keyContext : KeyContext)
 }

@@ -45,9 +45,9 @@ class ResponseSourceImplTest {
         runBlocking {
             responseSource!!.add("Dog")
             // Response from network
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             // Response is in cache now
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            cachedResponse = savedArticleCache.getWithContext(request, "Dog")
         }
         assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
     }
@@ -81,16 +81,16 @@ class ResponseSourceImplTest {
         runBlocking {
             responseSource!!.add("Dog")
             // Response from network
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             testNetworkCache.disableNetwork = true
 
             cachedResponse = responseSource!!.articleCache.
-                    getWithContext(request!!, "Potato").await()
+                    getWithContext(request!!, "Potato")
             assertNull(cachedResponse)
 
             responseSource!!.setWithContext(request, networkResponse!!,
                     "Potato")
-            cachedResponse = responseSource!!.getWithContext(request!!, "Potato").await()
+            cachedResponse = responseSource!!.getWithContext(request!!, "Potato")
             assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
         }
     }
@@ -137,15 +137,15 @@ class ResponseSourceImplTest {
         runBlocking {
             assertEquals(responseSource!!.getAllTemporary().size, 0)
             responseSource!!.add("Dog")
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
             testNetworkCache.disableNetwork = true
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
-            responseSource!!.garbageCollectTemporary().await()
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            responseSource!!.garbageCollectTemporary()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNull(networkResponse)
         }
     }
@@ -161,15 +161,15 @@ class ResponseSourceImplTest {
             assertEquals(responseSource!!.getAllTemporary().size, 0)
             responseSource!!.add("Dog")
             responseSource!!.markPermanent("Dog")
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
             testNetworkCache.disableNetwork = true
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
-            responseSource!!.garbageCollectContext("Dog").await()
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            responseSource!!.garbageCollectContext("Dog")
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNull(networkResponse)
         }
     }
@@ -184,7 +184,6 @@ class ResponseSourceImplTest {
             assertEquals(
                     responseSource!!.getArticleContext("Dog")!!.position,
                     "newPosition")
-
         }
     }
 

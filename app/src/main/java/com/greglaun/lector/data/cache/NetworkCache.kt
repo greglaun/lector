@@ -1,9 +1,5 @@
 package com.greglaun.lector.data.cache
 
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -14,17 +10,15 @@ import okhttp3.Response
 open class NetworkCache(val httpClient : OkHttpClient)
     : ComposableCache<Request, Response> {
 
-    override fun get(key: Request): Deferred<Response?> {
-        return GlobalScope.async {
-            try {
-                httpClient.newCall(key).execute()
-            } catch (e: Exception) {
-                null
-            }
+    override suspend fun get(key: Request): Response? {
+        try {
+            return httpClient.newCall(key).execute()
+        } catch (e: Exception) {
+            return null
         }
     }
-    override fun set(key: Request, value: Response): Deferred<Unit> {
+
+    override suspend fun set(key: Request, value: Response) {
         // Do nothing
-        return CompletableDeferred(Unit)
     }
 }

@@ -8,7 +8,6 @@ import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
 import com.greglaun.lector.ui.speak.ArticleState
-import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Response
 
 interface MainContract {
@@ -44,7 +43,7 @@ interface MainContract {
         suspend fun saveArticle()
         fun deleteRequested(articleContext: ArticleContext)
         suspend fun onUrlChanged(url : String)
-        fun onRequest(url : String) : Deferred<Response?>
+        suspend fun onRequest(url : String): Response?
         suspend fun onDisplayReadingList()
         fun onRewindOne()
         fun onForwardOne()

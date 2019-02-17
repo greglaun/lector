@@ -40,16 +40,16 @@ class SavedArticleCacheTest {
 
         // Cache saved article cache should be empty
         runBlocking {
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            cachedResponse = savedArticleCache.getWithContext(request, "Dog")
         }
         assertNull(cachedResponse)
 
         runBlocking {
             // Response from network
-            networkResponse = compositeCache.getWithContext(request, "Dog").await()
+            networkResponse = compositeCache.getWithContext(request, "Dog")
 
             // Response is in cache now
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            cachedResponse = savedArticleCache.getWithContext(request, "Dog")
             assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
         }
     }
@@ -69,30 +69,30 @@ class SavedArticleCacheTest {
 
         runBlocking {
             // Response from network
-            networkDogResponse = compositeCache.getWithContext(dogRequest, "Dog").await()
-            networkCatResponse = compositeCache.getWithContext(catRequest, "Cat").await()
+            networkDogResponse = compositeCache.getWithContext(dogRequest, "Dog")
+            networkCatResponse = compositeCache.getWithContext(catRequest, "Cat")
 
             // Response is in cache now
-            cachedCatResponse = savedArticleCache.getWithContext(catRequest, "Cat").await()
-            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
+            cachedCatResponse = savedArticleCache.getWithContext(catRequest, "Cat")
+            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog")
         }
         assertTrue(networkDogResponse!!.peekBody(TEN_GB)!!.string() == cachedDogResponse!!.body()!!.string())
         assertTrue(networkCatResponse!!.body()!!.string() == cachedCatResponse!!.body()!!.string())
 
-        // Run garbage collection on a non-Dog contextString
-        savedArticleCache.garbageCollectContext("Cat")
         runBlocking {
-            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
+            // Run garbage collection on a non-Dog contextString
+            savedArticleCache.garbageCollectContext("Cat")
+            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog")
         }
         // Response should still be in cache
         assertTrue(networkDogResponse!!.body()!!.string() ==  cachedDogResponse!!.body()!!.string())
 
-        // Garbage collect Dog
-        savedArticleCache.garbageCollectContext("Dog")
-
-        // Cache saved article cache should be empty after Garbage Collection
         runBlocking {
-            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog").await()
+            // Garbage collect Dog
+            savedArticleCache.garbageCollectContext("Dog")
+
+            // Cache saved article cache should be empty after Garbage Collection
+            cachedDogResponse = savedArticleCache.getWithContext(dogRequest, "Dog")
         }
         assertNull(cachedDogResponse)
     }

@@ -60,9 +60,9 @@ class RoomResponseSourceTest {
         runBlocking {
             responseSource!!.add("Dog")
             // Response from network
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             // Response is in cache now
-            cachedResponse = savedArticleCache!!.getWithContext(request, "Dog").await()
+            cachedResponse = savedArticleCache!!.getWithContext(request, "Dog")
         }
         assertNotNull(cachedResponse)
     }

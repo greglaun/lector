@@ -41,11 +41,11 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.delete(element)
     }
 
-    override fun getWithContext(key: Request, keyContext: String): Deferred<Response?> {
+    override suspend fun getWithContext(key: Request, keyContext: String): Response? {
         return articleCache.getWithContext(key, keyContext)
     }
 
-    override fun setWithContext(key: Request, value: Response, keyContext: String): Deferred<Unit> {
+    override suspend fun setWithContext(key: Request, value: Response, keyContext: String) {
         return articleCache.setWithContext(key, value, keyContext)
     }
 
@@ -61,15 +61,15 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.markPermanent(keyContext)
     }
 
-    override fun garbageCollectTemporary(): Deferred<Unit> {
+    override suspend fun garbageCollectTemporary() {
         return articleCache.garbageCollectTemporary(cacheEntryClassifier)
     }
 
-    override fun garbageCollectContext(keyContext: String): Deferred<Unit> {
+    override suspend fun garbageCollectContext(keyContext: String) {
         return articleCache.garbageCollectContext(keyContext)
     }
 
-    override fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>): Deferred<Unit> {
+    override suspend fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>) {
         return articleCache.garbageCollectTemporary(classifier)
     }
 

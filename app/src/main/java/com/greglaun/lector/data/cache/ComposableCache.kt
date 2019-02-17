@@ -1,39 +1,30 @@
 package com.greglaun.lector.data.cache
 
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
-
 interface ComposableCache<Key : Any, Value : Any> {
-    fun get(key: Key): Deferred<Value?>
-    fun set(key: Key, value: Value): Deferred<Unit>
+    suspend fun get(key: Key): Value?
+    suspend fun set(key: Key, value: Value)
 
     // Delete only from the top wrappedCache, do not propagate deletes to other caches in the chain.
     // Returns true if the delete successfully removed an item and false otherwise
-    fun deleteFromTop(key: Key) : Deferred<Boolean> {
+    suspend fun deleteFromTop(key: Key): Boolean {
         // Assume a trivial implementation of deleteContextFromTop
-        return CompletableDeferred(false)
+        return false
     }
 
     fun compose(b: ComposableCache<Key, Value>):
             ComposableCache<Key, Value> {
         return object : ComposableCache<Key, Value> {
-            override fun get(key: Key): Deferred<Value?> {
-                return GlobalScope.async {
-                    this@ComposableCache.get(key).await() ?: let {
-                        b.get(key).await()?.apply {
-                            this@ComposableCache.set(key, this).await()
-                        }
+            override suspend fun get(key: Key): Value? {
+                return this@ComposableCache.get(key) ?: let {
+                    b.get(key)?.apply {
+                        this@ComposableCache.set(key, this)
                     }
                 }
             }
 
-            override fun set(key: Key, value: Value): Deferred<Unit> {
-                return GlobalScope.async {
+            override suspend fun set(key: Key, value: Value) {
                     listOf(this@ComposableCache.set(key, value),
-                            b.set(key, value)).forEach { it.await() }
-                }
+                            b.set(key, value)).forEach { it }
             }
         }
     }

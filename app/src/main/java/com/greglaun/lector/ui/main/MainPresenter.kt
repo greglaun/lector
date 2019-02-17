@@ -6,7 +6,10 @@ import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
 import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.CoroutineScope
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newSingleThreadContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -185,7 +188,7 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    override fun onRequest(url: String): Deferred<Response?> {
+    override suspend fun onRequest(url: String): Response? {
         var curContext: String? = null
         synchronized(currentRequestContext) {
             curContext = currentRequestContext
@@ -196,11 +199,8 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun saveArticle() {
-        synchronized(currentRequestContext) {
-            GlobalScope.launch {
-                responseSource.markPermanent(currentRequestContext)
-            }
-        }
+        val requestContextCopy = currentRequestContext
+        responseSource.markPermanent(requestContextCopy)
     }
 
     override suspend fun courseDetailsRequested(courseContext: CourseContext) {

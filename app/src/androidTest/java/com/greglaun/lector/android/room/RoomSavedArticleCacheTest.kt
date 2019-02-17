@@ -41,7 +41,7 @@ class RoomSavedArticleCacheTest {
 
         runBlocking {
             // This should not cause an error
-            cache!!.setWithContext(catRequest!!, catResponse!!, context).await()
+            cache!!.setWithContext(catRequest!!, catResponse!!, context)
         }
     }
 
@@ -53,14 +53,14 @@ class RoomSavedArticleCacheTest {
 
         runBlocking {
 
-            cache!!.addContext(context).await()
-            cache!!.setWithContext(catRequest!!, dogResponse!!, context).await()
-            cache!!.setWithContext(dogRequest!!, catResponse!!, context).await()
+            cache!!.addContext(context)
+            cache!!.setWithContext(catRequest!!, dogResponse!!, context)
+            cache!!.setWithContext(dogRequest!!, catResponse!!, context)
 
-            val result1 = cache!!.getWithContext(catRequest!!, context).await()
+            val result1 = cache!!.getWithContext(catRequest!!, context)
             assertNotNull(result1)
 
-            val result2 = cache!!.getWithContext(dogRequest!!, context).await()
+            val result2 = cache!!.getWithContext(dogRequest!!, context)
             assertNotNull(result2)
         }
     }
@@ -72,16 +72,16 @@ class RoomSavedArticleCacheTest {
         val catResponse = client.newCall(catRequest).execute()
 
         runBlocking {
-            cache!!.addContext(context).await()
-            cache!!.setWithContext(catRequest!!, dogResponse!!, context).await()
-            cache!!.setWithContext(dogRequest!!, catResponse!!, context).await()
+            cache!!.addContext(context)
+            cache!!.setWithContext(catRequest!!, dogResponse!!, context)
+            cache!!.setWithContext(dogRequest!!, catResponse!!, context)
 
             cache!!.garbageCollectContext(context)
 
-            val result1 = cache!!.getWithContext(catRequest!!, context).await()
+            val result1 = cache!!.getWithContext(catRequest!!, context)
             assertNull(result1)
 
-            val result2 = cache!!.getWithContext(dogRequest!!, context).await()
+            val result2 = cache!!.getWithContext(dogRequest!!, context)
             assertNull(result2)
         }
     }
