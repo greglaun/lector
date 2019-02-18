@@ -43,11 +43,11 @@ class ResponseSourceImplTest {
         var networkResponse : Response? = null
         var cachedResponse : Response? = null
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             // Response from network
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             // Response is in cache now
-            cachedResponse = savedArticleCache.getWithContext(request, "Dog").await()
+            cachedResponse = savedArticleCache.getWithContext(request, "Dog")
         }
         assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
     }
@@ -55,19 +55,19 @@ class ResponseSourceImplTest {
     @Test
     fun contains() {
         runBlocking {
-            assertFalse(responseSource!!.contains("Dog").await())
-            responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
+            assertFalse(responseSource!!.contains("Dog"))
+            responseSource!!.add("Dog")
+            assertTrue(responseSource!!.contains("Dog"))
         }
     }
 
     @Test
     fun delete() {
         runBlocking {
-            responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
-            responseSource!!.delete("Dog").await()
-            assertFalse(responseSource!!.contains("Dog").await())
+            responseSource!!.add("Dog")
+            assertTrue(responseSource!!.contains("Dog"))
+            responseSource!!.delete("Dog")
+            assertFalse(responseSource!!.contains("Dog"))
         }
     }
 
@@ -76,21 +76,21 @@ class ResponseSourceImplTest {
         val request = Request.Builder()
                 .url(dogUrlString)
                 .build()
-        var networkResponse : Response? = null
-        var cachedResponse : Response? = null
+        var networkResponse: Response?
+        var cachedResponse : Response?
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             // Response from network
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             testNetworkCache.disableNetwork = true
 
             cachedResponse = responseSource!!.articleCache.
-                    getWithContext(request!!, "Potato").await()
+                    getWithContext(request!!, "Potato")
             assertNull(cachedResponse)
 
             responseSource!!.setWithContext(request, networkResponse!!,
                     "Potato")
-            cachedResponse = responseSource!!.getWithContext(request!!, "Potato").await()
+            cachedResponse = responseSource!!.getWithContext(request!!, "Potato")
             assertTrue(networkResponse!!.body()!!.string() == cachedResponse!!.body()!!.string())
         }
     }
@@ -98,32 +98,32 @@ class ResponseSourceImplTest {
     @Test
     fun update() {
         runBlocking {
-            responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.contains("Dog").await())
-            responseSource!!.update("Dog", "Potato").await()
-            assertFalse(responseSource!!.contains("Dog").await())
-            assertTrue(responseSource!!.contains("Potato").await())
+            responseSource!!.add("Dog")
+            assertTrue(responseSource!!.contains("Dog"))
+            responseSource!!.update("Dog", "Potato")
+            assertFalse(responseSource!!.contains("Dog"))
+            assertTrue(responseSource!!.contains("Potato"))
         }
     }
 
     @Test
     fun markTemporary() {
         runBlocking {
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            responseSource!!.add("Dog").await()
-            assertTrue(responseSource!!.isTemporary("Dog").await())
-            assertEquals(responseSource!!.getAllTemporary().await().size, 1)
-            assertEquals(responseSource!!.getAllPermanent().await().size, 0)
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
+            responseSource!!.add("Dog")
+            assertTrue(responseSource!!.isTemporary("Dog"))
+            assertEquals(responseSource!!.getAllTemporary().size, 1)
+            assertEquals(responseSource!!.getAllPermanent().size, 0)
 
-            responseSource!!.markPermanent("Dog").await()
-            assertFalse(responseSource!!.isTemporary("Dog").await())
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            assertEquals(responseSource!!.getAllPermanent().await().size, 1)
+            responseSource!!.markPermanent("Dog")
+            assertFalse(responseSource!!.isTemporary("Dog"))
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
+            assertEquals(responseSource!!.getAllPermanent().size, 1)
 
-            responseSource!!.markTemporary("Dog").await()
-            assertTrue(responseSource!!.isTemporary("Dog").await())
-            assertEquals(responseSource!!.getAllTemporary().await().size, 1)
-            assertEquals(responseSource!!.getAllPermanent().await().size, 0)
+            responseSource!!.markTemporary("Dog")
+            assertTrue(responseSource!!.isTemporary("Dog"))
+            assertEquals(responseSource!!.getAllTemporary().size, 1)
+            assertEquals(responseSource!!.getAllPermanent().size, 0)
         }
     }
 
@@ -135,17 +135,17 @@ class ResponseSourceImplTest {
         var networkResponse : Response? = null
 
         runBlocking {
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            responseSource!!.add("Dog").await()
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
+            responseSource!!.add("Dog")
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
             testNetworkCache.disableNetwork = true
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
-            responseSource!!.garbageCollectTemporary().await()
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            responseSource!!.garbageCollectTemporary()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNull(networkResponse)
         }
     }
@@ -158,18 +158,18 @@ class ResponseSourceImplTest {
         var networkResponse: Response? = null
 
         runBlocking {
-            assertEquals(responseSource!!.getAllTemporary().await().size, 0)
-            responseSource!!.add("Dog").await()
+            assertEquals(responseSource!!.getAllTemporary().size, 0)
+            responseSource!!.add("Dog")
             responseSource!!.markPermanent("Dog")
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
             testNetworkCache.disableNetwork = true
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNotNull(networkResponse)
 
-            responseSource!!.garbageCollectContext("Dog").await()
-            networkResponse = responseSource!!.getWithContext(request, "Dog").await()
+            responseSource!!.garbageCollectContext("Dog")
+            networkResponse = responseSource!!.getWithContext(request, "Dog")
             assertNull(networkResponse)
         }
     }
@@ -177,32 +177,31 @@ class ResponseSourceImplTest {
     @Test
     fun updatePosition() {
         runBlocking {
-            responseSource!!.add("Dog").await()
+            responseSource!!.add("Dog")
             assertEquals(
-                    responseSource!!.getArticleContext("Dog").await()!!.position, "")
-            responseSource!!.updatePosition("Dog", "newPosition").await()
+                    responseSource!!.getArticleContext("Dog")!!.position, "")
+            responseSource!!.updatePosition("Dog", "newPosition")
             assertEquals(
-                    responseSource!!.getArticleContext("Dog").await()!!.position,
+                    responseSource!!.getArticleContext("Dog")!!.position,
                     "newPosition")
-
         }
     }
 
     @Test
     fun getUnfinished() {
         runBlocking {
-            responseSource!!.add("Dog").await()
-            assertEquals(responseSource!!.getUnfinished().await().size, 1)
+            responseSource!!.add("Dog")
+            assertEquals(responseSource!!.getUnfinished().size, 1)
         }
     }
 
     @Test
     fun markFinished() {
         runBlocking {
-            responseSource!!.add("Dog").await()
-            assertEquals(responseSource!!.getUnfinished().await().size, 1)
-            responseSource!!.markFinished("Dog").await()
-            assertEquals(responseSource!!.getUnfinished().await().size, 0)
+            responseSource!!.add("Dog")
+            assertEquals(responseSource!!.getUnfinished().size, 1)
+            responseSource!!.markFinished("Dog")
+            assertEquals(responseSource!!.getUnfinished().size, 0)
         }
     }
 }

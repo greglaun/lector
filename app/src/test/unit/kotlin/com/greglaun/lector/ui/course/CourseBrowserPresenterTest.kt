@@ -17,17 +17,17 @@ class CourseBrowserPresenterTest {
     fun beginCourseDownload() {
         runBlocking {
             courseBrowserPresenter.beginCourseDownload()
+            verify(mockDownloader, times(1)).downloadCourseMetadata()
         }
-        verify(mockDownloader, times(1)).downloadCourseMetadata()
     }
 
     @Test
     fun onCourseDetailSelected() {
         runBlocking {
-                courseBrowserPresenter.onCourseDetailSelected(CourseMetadata("A Course"))
-            }
+             courseBrowserPresenter.onCourseDetailSelected(CourseMetadata("A Course"))
             verify(mockDownloader, times(1)).
                     fetchCourseDetails(CourseMetadata("A Course"))
+        }
     }
 
     @Test

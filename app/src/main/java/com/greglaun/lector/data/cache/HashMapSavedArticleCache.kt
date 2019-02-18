@@ -1,10 +1,6 @@
 package com.greglaun.lector.data.cache
 
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 import okhttp3.Response
 import java.util.*
@@ -13,19 +9,18 @@ import java.util.*
 class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
     val hashCache : HashMap<Request, Pair<String, HashSet<String>>> = HashMap()
 
-    override fun getWithContext(key: Request, keyContext : String)
-            : Deferred<Response?> {
+    override suspend fun getWithContext(key: Request, keyContext : String): Response? {
         if (!hashCache.containsKey(key)) {
-            return CompletableDeferred(value = null)
+            return null
         }
         if (!hashCache.get(key)!!.second.contains(keyContext)) {
-            return CompletableDeferred(value = null)
+            return null
         }
-        return CompletableDeferred(hashCache.get(key)!!.first.toResponse())
+        return hashCache.get(key)!!.first.toResponse()
 
     }
 
-    override fun setWithContext(key: Request, value: Response, keyContext : String): Deferred<Unit> {
+    override suspend fun setWithContext(key: Request, value: Response, keyContext : String) {
         if (hashCache.containsKey(key)) {
             val cacheEntry = hashCache.get(key)!!
             cacheEntry.second.add(keyContext)
@@ -34,10 +29,9 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
             set.add(keyContext)
             hashCache.put(key, Pair(value.serialize(), set))
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun garbageCollectContext(keyContext : String): Deferred<Unit> {
+    override suspend fun garbageCollectContext(keyContext : String) {
         val iterator = hashCache.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
@@ -46,27 +40,23 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
                     iterator.remove()
                 }
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun addContext(keyContext: String): Deferred<Unit> {
+    override suspend fun addContext(keyContext: String) {
         // Do nothing
-        return CompletableDeferred(Unit)
     }
 
-    override fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>): Deferred<Unit> {
-        return GlobalScope.async {
-            hashCache.forEach {
-                val iterator = it.value.second.iterator()
-                while (iterator.hasNext()) {
-                    val it = iterator.next()
-                    if (classifier.isTemporary(it).await()) {
-                        iterator.remove()
-                    }
+    override suspend fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>) {
+        return hashCache.forEach {
+            val iterator = it.value.second.iterator()
+            while (iterator.hasNext()) {
+                val it = iterator.next()
+                if (classifier.isTemporary(it)
+                ) {
+                    iterator.remove()
                 }
             }
         }
     }
-
 }
 

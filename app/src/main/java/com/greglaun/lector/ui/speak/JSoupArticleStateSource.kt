@@ -10,7 +10,7 @@ class JSoupArticleStateSource(val responseSource: ResponseSource) : ArticleState
         val cacheRequest = Request.Builder()
                 .url(urlString)
                 .build()
-        val html = responseSource.getWithContext(cacheRequest, urlToContext(urlString)).await()
+        val html = responseSource.getWithContext(cacheRequest, urlToContext(urlString))
         return articleStateFromHtml(html!!.peekBody(TEN_GB).string())
     }
 }

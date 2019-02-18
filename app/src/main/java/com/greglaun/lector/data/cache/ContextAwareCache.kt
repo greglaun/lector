@@ -1,42 +1,36 @@
 package com.greglaun.lector.data.cache
 
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 
 interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
-    fun getWithContext(key : Key, keyContext : KeyContext) : Deferred<Value?>
-    fun setWithContext(key : Key, value : Value, keyContext : KeyContext) : Deferred<Unit>
-    fun garbageCollectContext(keyContext: String): Deferred<Unit>
-    fun garbageCollectTemporary(classifier: CacheEntryClassifier<KeyContext>): Deferred<Unit>
+    suspend fun getWithContext(key : Key, keyContext : KeyContext) : Value?
+    suspend fun setWithContext(key : Key, value : Value, keyContext : KeyContext)
+    suspend fun garbageCollectContext(keyContext: String)
+    suspend fun garbageCollectTemporary(classifier: CacheEntryClassifier<KeyContext>)
 
     fun compose(b: ContextAwareCache<Key, Value, KeyContext>)
             : ContextAwareCache<Key, Value, KeyContext> {
         return object : ContextAwareCache<Key, Value, KeyContext> {
-            override fun garbageCollectContext(keyContext: String): Deferred<Unit> {
+            override suspend fun garbageCollectContext(keyContext: String) {
                 return this@ContextAwareCache.garbageCollectContext(keyContext)
             }
 
-            override fun garbageCollectTemporary(classifier: CacheEntryClassifier<KeyContext>): Deferred<Unit> {
+            override suspend fun garbageCollectTemporary(
+                    classifier: CacheEntryClassifier<KeyContext>) {
                 return this@ContextAwareCache.garbageCollectTemporary(classifier)
             }
 
-            override fun getWithContext(key: Key, keyContext: KeyContext): Deferred<Value?> {
-                return GlobalScope.async {
-                    this@ContextAwareCache.getWithContext(key, keyContext).await() ?: let {
-                        b.getWithContext(key, keyContext).await()?.apply {
-                            this@ContextAwareCache.setWithContext(key, this, keyContext).await()
+            override suspend fun getWithContext(key: Key, keyContext: KeyContext): Value? {
+                return this@ContextAwareCache.getWithContext(key, keyContext) ?: let {
+                        b.getWithContext(key, keyContext)?.apply {
+                            this@ContextAwareCache.setWithContext(key, this, keyContext)
                         }
-                    }
                 }
             }
 
-            override fun setWithContext(key: Key, value: Value, keyContext: KeyContext): Deferred<Unit> {
-                return GlobalScope.async {
-                    listOf(this@ContextAwareCache.setWithContext(key, value, keyContext),
-                            b.setWithContext(key, value, keyContext)).forEach {it.await()}
-                }
+            override suspend fun setWithContext(key: Key, value: Value, keyContext: KeyContext) {
+                return listOf(this@ContextAwareCache.setWithContext(key, value, keyContext),
+                            b.setWithContext(key, value, keyContext)).forEach {it}
             }
         }
     }
@@ -45,30 +39,26 @@ interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
     fun compose(b: ComposableCache<Key, Value>):
             ContextAwareCache<Key, Value, KeyContext> {
         return object : ContextAwareCache<Key, Value, KeyContext> {
-            override fun garbageCollectContext(keyContext: String): Deferred<Unit> {
+            override suspend fun garbageCollectContext(keyContext: String) {
                 return this@ContextAwareCache.garbageCollectContext(keyContext)
             }
 
-            override fun garbageCollectTemporary(classifier: CacheEntryClassifier<KeyContext>): Deferred<Unit> {
+            override suspend fun garbageCollectTemporary(
+                    classifier: CacheEntryClassifier<KeyContext>) {
                 return this@ContextAwareCache.garbageCollectTemporary(classifier)
             }
 
-            override fun getWithContext(key: Key, keyContext : KeyContext): Deferred<Value?> {
-                return GlobalScope.async {
-                    this@ContextAwareCache.getWithContext(key, keyContext).await() ?: let {
-                        b.get(key).await()?.apply {
-                            this@ContextAwareCache.setWithContext(key, this, keyContext).await()
-                        }
+            override suspend fun getWithContext(key: Key, keyContext: KeyContext): Value? {
+                return this@ContextAwareCache.getWithContext(key, keyContext) ?: let {
+                    b.get(key)?.apply {
+                        this@ContextAwareCache.setWithContext(key, this, keyContext)
                     }
                 }
             }
 
-            override fun setWithContext(key: Key, value: Value, keyContext : KeyContext)
-                    : Deferred<Unit> {
-                return GlobalScope.async {
-                    listOf(this@ContextAwareCache.setWithContext(key, value, keyContext),
-                            b.set(key, value)).forEach { it.await() }
-                }
+            override suspend fun setWithContext(key: Key, value: Value, keyContext : KeyContext) {
+                return listOf(this@ContextAwareCache.setWithContext(key, value, keyContext),
+                        b.set(key, value)).forEach { it }
             }
         }
     }

@@ -2,9 +2,6 @@ package com.greglaun.lector.data.cache
 
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
@@ -31,81 +28,79 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         }
     }
 
-    override fun contains(element: String): Deferred<Boolean> {
+    override suspend fun contains(element: String): Boolean {
         return cacheEntryClassifier.contains(element)
     }
 
-    override fun add(element: String): Deferred<Long> {
+    override suspend fun add(element: String): Long {
         return cacheEntryClassifier.add(element)
     }
 
-    override fun delete(element: String): Deferred<Unit> {
+    override suspend fun delete(element: String) {
         return cacheEntryClassifier.delete(element)
     }
 
-    override fun getWithContext(key: Request, keyContext: String): Deferred<Response?> {
+    override suspend fun getWithContext(key: Request, keyContext: String): Response? {
         return articleCache.getWithContext(key, keyContext)
     }
 
-    override fun setWithContext(key: Request, value: Response, keyContext: String): Deferred<Unit> {
+    override suspend fun setWithContext(key: Request, value: Response, keyContext: String) {
         return articleCache.setWithContext(key, value, keyContext)
     }
 
-    override fun update(from: String, to: String): Deferred<Unit> {
-       return GlobalScope.async {
-            cacheEntryClassifier.update(from, to).await()
-        }
+    override suspend fun update(from: String, to: String) {
+        cacheEntryClassifier.update(from, to)
     }
 
-    override fun markTemporary(keyContext: String): Deferred<Unit> {
+    override suspend fun markTemporary(keyContext: String) {
         return cacheEntryClassifier.markTemporary(keyContext)
     }
 
-    override fun markPermanent(keyContext: String): Deferred<Unit> {
+    override suspend fun markPermanent(keyContext: String) {
         return cacheEntryClassifier.markPermanent(keyContext)
     }
 
-    override fun garbageCollectTemporary(): Deferred<Unit> {
+    override suspend fun garbageCollectTemporary() {
         return articleCache.garbageCollectTemporary(cacheEntryClassifier)
     }
 
-    override fun garbageCollectContext(keyContext: String): Deferred<Unit> {
+    override suspend fun garbageCollectContext(keyContext: String) {
         return articleCache.garbageCollectContext(keyContext)
     }
 
-    override fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>): Deferred<Unit> {
+    override suspend fun garbageCollectTemporary(classifier: CacheEntryClassifier<String>) {
         return articleCache.garbageCollectTemporary(classifier)
     }
 
-    override fun getAllTemporary(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllTemporary(): List<ArticleContext> {
         return cacheEntryClassifier.getAllTemporary()
     }
 
-    override fun isTemporary(element: String): Deferred<Boolean> {
+    override suspend fun isTemporary(element: String): Boolean {
         return cacheEntryClassifier.isTemporary(element)
     }
 
-    override fun getAllPermanent(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllPermanent(): List<ArticleContext> {
         return cacheEntryClassifier.getAllPermanent()
     }
 
-    override fun getArticleContext(context: String): Deferred<ArticleContext?> {
+    override suspend fun getArticleContext(context: String): ArticleContext? {
         return cacheEntryClassifier.getArticleContext(context)
     }
 
-    override fun updatePosition(context: String, position: String): Deferred<Unit> {
+    override suspend fun updatePosition(context: String, position: String) {
         return cacheEntryClassifier.updatePosition(context, position)
     }
 
-    override fun getUnfinished(): Deferred<List<String>> {
+    override suspend fun getUnfinished(): List<String> {
         return cacheEntryClassifier.getUnfinished()
     }
 
-    override fun markFinished(element: String): Deferred<Unit> {
+    override suspend fun markFinished(element: String) {
         return cacheEntryClassifier.markFinished(element)
     }
 
-    override fun getNextArticle(context: String): Deferred<ArticleContext?> {
+    override suspend fun getNextArticle(context: String): ArticleContext? {
         return cacheEntryClassifier.getNextArticle(context)
     }
 }

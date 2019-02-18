@@ -1,109 +1,101 @@
 package com.greglaun.lector.data.whitelist
 
 import com.greglaun.lector.data.cache.*
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
 
 // A deterministic probabilistic set for testing
 class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
     val hashMap = HashMap<String, BasicArticleContext>()
 
-    override fun contains(element: String): Deferred<Boolean> {
-        return CompletableDeferred(hashMap.contains(element))
+    override suspend fun contains(element: String): Boolean {
+        return hashMap.contains(element)
     }
 
-    override fun add(element : String): Deferred<Long> {
+    override suspend fun add(element : String): Long {
         hashMap.put(element, BasicArticleContext.fromString(element))
-        return CompletableDeferred(1L)
+        return 1L
     }
 
-    override fun delete(element: String): Deferred<Unit> {
+    override suspend fun delete(element: String) {
         hashMap.remove(element)
-        return CompletableDeferred(Unit)
     }
 
-    override fun update(from: String, to: String): Deferred<Unit> {
+    override suspend fun update(from: String, to: String) {
         if (hashMap.contains(from)) {
             hashMap.remove(from)
             hashMap.put(to, BasicArticleContext.fromString(to))
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun getAllTemporary(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllTemporary(): List<ArticleContext> {
         val result = ArrayList<ArticleContext>()
         hashMap.forEach{
             if (it.value.temporary) {
                 result.add(it.value)
             }
         }
-        return CompletableDeferred(result.toList())
+        return result.toList()
     }
 
-    override fun markTemporary(element: String): Deferred<Unit> {
+    override suspend fun markTemporary(element: String) {
         val originalEntry = hashMap.get(element)
         originalEntry?.let {
             hashMap.put(element, originalEntry.makeTemporary())
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun markPermanent(element: String): Deferred<Unit> {
+    override suspend fun markPermanent(element: String) {
         val originalEntry = hashMap.get(element)
         originalEntry?.let {
             hashMap.put(element, originalEntry.makePermanent())
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun isTemporary(element: String): Deferred<Boolean> {
+    override suspend fun isTemporary(element: String): Boolean {
         if (hashMap.containsKey(element)) {
-            return CompletableDeferred(hashMap.get(element)!!.temporary)
+            return hashMap.get(element)!!.temporary
         }
-        return CompletableDeferred(true)
+        return true
     }
 
-    override fun getAllPermanent(): Deferred<List<ArticleContext>> {
+    override suspend fun getAllPermanent(): List<ArticleContext> {
         val result = ArrayList<ArticleContext>()
         hashMap.forEach{
             if (!it.value.temporary) {
                 result.add(it.value)
             }
         }
-        return CompletableDeferred(result.toList())
+        return result.toList()
     }
 
-    override fun getArticleContext(context: String): Deferred<ArticleContext?> {
-        return CompletableDeferred(hashMap.get(context))
+    override suspend fun getArticleContext(context: String): ArticleContext? {
+        return hashMap.get(context)
     }
 
-    override fun updatePosition(currentRequestContext: String, position: String): Deferred<Unit> {
+    override suspend fun updatePosition(currentRequestContext: String, position: String) {
         val originalEntry = hashMap.get(currentRequestContext)
         originalEntry?.let {
             hashMap.put(currentRequestContext, originalEntry.updatePosition(position))
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun getUnfinished(): Deferred<List<String>> {
+    override suspend fun getUnfinished(): List<String> {
         val result = ArrayList<ArticleContext>()
         hashMap.forEach{
             if (!it.value.downloadComplete) {
                 result.add(it.value)
             }
         }
-        return CompletableDeferred(result.toList().map { it.contextString })
+        return result.toList().map { it.contextString }
     }
 
-    override fun markFinished(element: String): Deferred<Unit> {
+    override suspend fun markFinished(element: String) {
         val originalEntry = hashMap.get(element)
         originalEntry?.let {
             hashMap.put(element, originalEntry.markDownloadComplete())
         }
-        return CompletableDeferred(Unit)
     }
 
-    override fun getNextArticle(context: String): Deferred<ArticleContext?> {
-        return CompletableDeferred(null)
+    override suspend fun getNextArticle(context: String): ArticleContext? {
+        return null
     }
 }

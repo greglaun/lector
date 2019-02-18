@@ -13,7 +13,7 @@ class HashSetCacheEntryClassifierTest {
     @Test
     fun notContains() {
         runBlocking {
-            assertFalse(classifier.contains(testString).await())
+            assertFalse(classifier.contains(testString))
         }
     }
 
@@ -21,30 +21,30 @@ class HashSetCacheEntryClassifierTest {
     fun contains() {
         runBlocking {
             classifier.add(testString)
-            assertTrue(classifier.contains(testString).await())
+            assertTrue(classifier.contains(testString))
         }
     }
 
     @Test
     fun delete() {
         runBlocking {
-            classifier.add(testString).await()
-            classifier.delete(testString).await()
-            assertFalse(classifier.contains(testString).await())
+            classifier.add(testString)
+            classifier.delete(testString)
+            assertFalse(classifier.contains(testString))
         }
     }
 
     @Test
     fun temporaryAndPermanent() {
         runBlocking {
-            classifier.add("apple").await()
-            classifier.add("sauce").await()
-            classifier.add("pancakes").await()
+            classifier.add("apple")
+            classifier.add("sauce")
+            classifier.add("pancakes")
             classifier.markPermanent("apple")
             classifier.markPermanent("sauce")
             classifier.markTemporary("sauce")
-            val temporary = classifier.getAllTemporary().await()
-            val permanent = classifier.getAllPermanent().await()
+            val temporary = classifier.getAllTemporary()
+            val permanent = classifier.getAllPermanent()
             assertTrue(permanent.size == 1)
             assertTrue(permanent.contains(
                     BasicArticleContext(1L, "apple", "", false)))

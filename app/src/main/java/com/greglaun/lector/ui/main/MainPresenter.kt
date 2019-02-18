@@ -6,7 +6,10 @@ import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
 import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.CoroutineScope
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newSingleThreadContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -82,13 +85,15 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun autoDeleteCurrent(articleState: ArticleState) {
-        responseSource.delete(articleState.title)
+        GlobalScope.launch {
+            responseSource.delete(articleState.title)
+        }
     }
 
     private suspend fun autoPlayNext(articleState: ArticleState) {
         var nextArticle: ArticleContext? = null
         if (currentCourse == LECTOR_UNIVERSE) {
-            nextArticle = responseSource.getNextArticle(articleState.title).await()
+            nextArticle = responseSource.getNextArticle(articleState.title)
         } else {
             nextArticle = courseSource.getNextInCourse(currentCourse, articleState.title)
         }
@@ -104,7 +109,9 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPlayButtonPressed() {
         ttsPresenter.speakInLoop({
-            responseSource.updatePosition(currentRequestContext, it)
+            GlobalScope.launch {
+                responseSource.updatePosition(currentRequestContext, it)
+            }
         })
         view.enablePauseButton()
     }
@@ -119,9 +126,8 @@ class MainPresenter(val view : MainContract.View,
         view.loadUrl(urlString)
         stopSpeakingAndEnablePlayButton()
         var position = POSITION_BEGINNING
-        if (responseSource.contains(urlToContext(urlString)).await()) {
-                responseSource.getArticleContext(urlToContext(urlString))
-                        .await()?.let{
+        if (responseSource.contains(urlToContext(urlString))) {
+                responseSource.getArticleContext(urlToContext(urlString))?.let{
                             position = it.position
                         }
         }
@@ -176,13 +182,13 @@ class MainPresenter(val view : MainContract.View,
                 }
                 computedContext = currentRequestContext
             }
-            if (!this@MainPresenter.responseSource.contains(computedContext).await()) {
-                responseSource.add(computedContext).await()
+            if (!this@MainPresenter.responseSource.contains(computedContext)) {
+                responseSource.add(computedContext)
             }
         }
     }
 
-    override fun onRequest(url: String): Deferred<Response?> {
+    override suspend fun onRequest(url: String): Response? {
         var curContext: String? = null
         synchronized(currentRequestContext) {
             curContext = currentRequestContext
@@ -193,16 +199,15 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun saveArticle() {
-        synchronized(currentRequestContext) {
-            responseSource.markPermanent(currentRequestContext)
-        }
+        val requestContextCopy = currentRequestContext
+        responseSource.markPermanent(requestContextCopy)
     }
 
     override suspend fun courseDetailsRequested(courseContext: CourseContext) {
         courseContext.id?.let {
             currentCourse = courseContext.courseName
                 courseSource.getArticlesForCourse(it)?.let {
-                    displayArticleList(it.await(),
+                    displayArticleList(it,
                             courseContext.courseName)
                 }
         }
@@ -213,7 +218,7 @@ class MainPresenter(val view : MainContract.View,
                 onConfirmed = {
                     if(it) {
                         GlobalScope.launch {
-                            responseSource.delete(articleContext.contextString).await()
+                            responseSource.delete(articleContext.contextString)
                             readingList.remove(articleContext)
                             view.onReadingListChanged()
                         }
@@ -226,7 +231,7 @@ class MainPresenter(val view : MainContract.View,
                 onConfirmed = {
                     if(it) {
                         GlobalScope.launch {
-                            courseSource.delete(courseContext.courseName).await()
+                            courseSource.delete(courseContext.courseName)
                             courseList.remove(courseContext)
                             view.onCoursesChanged()
                         }
@@ -236,7 +241,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onDisplayReadingList() {
         responseSource.getAllPermanent()?.let {
-            displayArticleList(it.await(), ALL_ARTICLES)
+            displayArticleList(it, ALL_ARTICLES)
         }
     }
 
@@ -250,26 +255,11 @@ class MainPresenter(val view : MainContract.View,
     override suspend fun onDisplayCourses() {
         courseList.clear()
         courseSource.getCourses()?.let {
-            courseList.addAll(it.await())
+            courseList.addAll(it)
         }
         view.onCoursesChanged()
         view.displayCourses()
     }
-
-//    fun addCourse(courseDescription: CourseDescription) {
-//        runBlocking {
-//            val courseId = courseSource.add(ConcreteCourseContext(null,
-//                    courseDescription.courseName,
-//                    0)).await()
-//            courseDescription.articleUrls.map {
-//                async {
-//                    responseSource.add(urlToContext(it)).await()
-//                    courseSource.addArticleForSource(courseDescription.courseName,
-//                            urlToContext(it)).await()
-//                }
-//            }.forEach {it.await() }
-//        }
-//    }
 
     override fun onRewindOne() {
         ttsPresenter.reverseOne {it ->
@@ -301,7 +291,7 @@ class MainPresenter(val view : MainContract.View,
         view.evaluateJavascript(js, callback)
     }
 
-    override fun onPageDownloadFinished(urlString: String) {
+    override suspend fun onPageDownloadFinished(urlString: String) {
         responseSource.markFinished(urlToContext(urlString))
     }
 

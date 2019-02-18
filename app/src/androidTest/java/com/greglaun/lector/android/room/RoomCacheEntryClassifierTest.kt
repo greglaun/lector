@@ -29,24 +29,24 @@ class RoomCacheEntryClassifierTest {
     @Test
     fun contains() {
         runBlocking {
-            assertFalse(whitelist!!.contains("a test string").await())
+            assertFalse(whitelist!!.contains("a test string"))
         }
     }
 
     @Test
     fun add() {
         runBlocking {
-            whitelist!!.add("Potato").await()
-            assertTrue(whitelist!!.contains("Potato").await())
+            whitelist!!.add("Potato")
+            assertTrue(whitelist!!.contains("Potato"))
         }
     }
 
     @Test
     fun delete() {
         runBlocking {
-            whitelist!!.add("Radish").await()
-            whitelist!!.delete("Radish").await()
-            assertFalse(whitelist!!.contains("Radish").await())
+            whitelist!!.add("Radish")
+            whitelist!!.delete("Radish")
+            assertFalse(whitelist!!.contains("Radish"))
         }
     }
 

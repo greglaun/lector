@@ -1,5 +1,7 @@
 package com.greglaun.lector.data.net
 
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
@@ -14,9 +16,11 @@ class DownloadCompletionScheduler(
         fixedRateTimer = fixedRateTimer(name = "download-finish-timer",
                 initialDelay = 100, period = 15 * 1000, daemon = true) {
             runBlocking {
-                downloadCompleter.addUrlsFOrDownload(unfinishedDownloadSource.getUnfinished().await())
+                downloadCompleter.addUrlsFOrDownload(unfinishedDownloadSource.getUnfinished())
                 downloadCompleter.downloadNextUrl { it ->
-                    unfinishedDownloadSource.markFinished(it)
+                    GlobalScope.launch {
+                        unfinishedDownloadSource.markFinished(it)
+                    }
                 }
             }
         }

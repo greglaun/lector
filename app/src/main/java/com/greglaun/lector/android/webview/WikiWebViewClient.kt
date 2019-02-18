@@ -30,7 +30,7 @@ class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
         if (request.url.authority.endsWith("wikipedia.org")) {
             return runBlocking {
-                val response = mainPresenter.onRequest(request.url.toString()).await()
+                val response = mainPresenter.onRequest(request.url.toString())
                 if (response == null) {
                     null
                 } else {

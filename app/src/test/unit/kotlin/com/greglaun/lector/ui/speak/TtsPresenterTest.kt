@@ -36,8 +36,10 @@ class TtsPresenterTest {
     @Test
     fun speakInLoop() {
         ttsPresenter!!.speakInLoop(null)
-        verify(stateMachine, times(1))!!
-                .actionSpeakInLoop(null)
+        runBlocking {
+            verify(stateMachine, times(1))!!
+                    .actionSpeakInLoop(null)
+        }
     }
 
     @Test
@@ -57,7 +59,9 @@ class TtsPresenterTest {
     @Test
     fun stopSpeaking() {
         ttsPresenter!!.stopSpeaking()
-        verify(stateMachine, times(1))!!.actionStopSpeaking()
+        runBlocking {
+            verify(stateMachine, times(1))!!.actionStopSpeaking()
+        }
     }
 
     @Test
