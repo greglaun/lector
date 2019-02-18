@@ -55,7 +55,7 @@ interface MainContract {
         suspend fun courseDetailsRequested(courseContext: CourseContext)
         fun setHandsomeBritish(shouldBeBritish: Boolean)
         fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
-        fun onPageDownloadFinished(urlString: String)
+        suspend fun onPageDownloadFinished(urlString: String)
 
         // Preferences
         fun setSpeechRate(speechRate: Float)

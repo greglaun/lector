@@ -1,8 +1,6 @@
 package com.greglaun.lector.data.whitelist
 
 import com.greglaun.lector.data.cache.*
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
 
 // A deterministic probabilistic set for testing
 class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
@@ -80,22 +78,21 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         }
     }
 
-    override fun getUnfinished(): Deferred<List<String>> {
+    override suspend fun getUnfinished(): List<String> {
         val result = ArrayList<ArticleContext>()
         hashMap.forEach{
             if (!it.value.downloadComplete) {
                 result.add(it.value)
             }
         }
-        return CompletableDeferred(result.toList().map { it.contextString })
+        return result.toList().map { it.contextString }
     }
 
-    override fun markFinished(element: String): Deferred<Unit> {
+    override suspend fun markFinished(element: String) {
         val originalEntry = hashMap.get(element)
         originalEntry?.let {
             hashMap.put(element, originalEntry.markDownloadComplete())
         }
-        return CompletableDeferred(Unit)
     }
 
     override suspend fun getNextArticle(context: String): ArticleContext? {

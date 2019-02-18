@@ -24,7 +24,7 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
 
     override suspend fun beginCourseDownload() {
         courseDownloader.downloadCourseMetadata()?.let {
-            it.await()?.let {
+            it?.let {
                 courseMetadatalist.clear()
                 courseMetadatalist.addAll(it)
                 view.onCourseListChanged()
@@ -41,7 +41,7 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
 
     override suspend fun onCourseDetailSelected(courseMetadata: CourseMetadata) {
         courseDownloader.fetchCourseDetails(courseMetadata)?.let {
-            it.await()?.let {
+            it?.let {
                 currentDetails = it
                 view.showCourseDetails(it)
             }
@@ -50,7 +50,7 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
 
     private fun onCourseSaved(courseDetails: ThinCourseDetails) {
         GlobalScope.launch {
-            courseSource.addCourseDetails(courseDetails).await()
+            courseSource.addCourseDetails(courseDetails)
             view.showToast("Course " + courseDetails.name + " added.")
         }
     }
@@ -58,8 +58,8 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
     override suspend fun onCoursesSaved(courseMetadata: List<CourseMetadata>) {
             courseMetadata.forEach {
                 courseDownloader.fetchCourseDetails(it)?.also {
-                    it.await()?.let {
-                        courseSource.addCourseDetails(it).await()
+                    it?.let {
+                        courseSource.addCourseDetails(it)
                 }
             }
         }

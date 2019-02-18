@@ -6,7 +6,6 @@ import android.os.Binder
 import android.os.IBinder
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.experimental.Deferred
 
 class BindableTtsService : Service(), TtsStateMachine {
     private val binder = LocalBinder()
@@ -22,7 +21,7 @@ class BindableTtsService : Service(), TtsStateMachine {
         delegateStateMachine!!.stopMachine()
     }
 
-    override fun getSpeakerState(): Deferred<SpeakerState> {
+    override suspend fun getSpeakerState(): SpeakerState {
         return delegateStateMachine!!.getSpeakerState()
     }
 
@@ -30,27 +29,27 @@ class BindableTtsService : Service(), TtsStateMachine {
         return delegateStateMachine!!.updateArticle(articleState)
     }
 
-    override fun actionSpeakOne(): Deferred<SpeakerState> {
+    override suspend fun actionSpeakOne(): SpeakerState {
         return delegateStateMachine!!.actionSpeakOne()
     }
 
-    override fun actionStopSpeaking(): Deferred<Unit?> {
+    override suspend fun actionStopSpeaking() {
         return delegateStateMachine!!.actionStopSpeaking()
     }
 
-    override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
+    override suspend fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?) {
         return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
     }
 
-    override fun getArticleState(): Deferred<ArticleState> {
+    override suspend fun getArticleState(): ArticleState {
         return delegateStateMachine!!.getArticleState()
     }
 
-    override fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
+    override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
         return delegateStateMachine!!.stopAdvanceOneAndResume(onDone)
     }
 
-    override fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
+    override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
         return delegateStateMachine!!.stopReverseOneAndResume(onDone)
     }
 

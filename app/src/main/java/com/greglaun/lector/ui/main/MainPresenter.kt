@@ -207,7 +207,7 @@ class MainPresenter(val view : MainContract.View,
         courseContext.id?.let {
             currentCourse = courseContext.courseName
                 courseSource.getArticlesForCourse(it)?.let {
-                    displayArticleList(it.await(),
+                    displayArticleList(it,
                             courseContext.courseName)
                 }
         }
@@ -231,7 +231,7 @@ class MainPresenter(val view : MainContract.View,
                 onConfirmed = {
                     if(it) {
                         GlobalScope.launch {
-                            courseSource.delete(courseContext.courseName).await()
+                            courseSource.delete(courseContext.courseName)
                             courseList.remove(courseContext)
                             view.onCoursesChanged()
                         }
@@ -255,7 +255,7 @@ class MainPresenter(val view : MainContract.View,
     override suspend fun onDisplayCourses() {
         courseList.clear()
         courseSource.getCourses()?.let {
-            courseList.addAll(it.await())
+            courseList.addAll(it)
         }
         view.onCoursesChanged()
         view.displayCourses()
@@ -291,7 +291,7 @@ class MainPresenter(val view : MainContract.View,
         view.evaluateJavascript(js, callback)
     }
 
-    override fun onPageDownloadFinished(urlString: String) {
+    override suspend fun onPageDownloadFinished(urlString: String) {
         responseSource.markFinished(urlToContext(urlString))
     }
 

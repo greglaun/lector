@@ -13,7 +13,7 @@ class CourseDownloaderImplTest {
     @Test
     fun downloadAllCourseNames() {
         runBlocking {
-            val result = courseDownloader.downloadCourseMetadata().await()
+            val result = courseDownloader.downloadCourseMetadata()
             assertTrue(result!!.contains(CourseMetadata("Ice Cream")))
             assertTrue(result!!.contains(CourseMetadata("Furry Friends")))
         }
@@ -23,7 +23,7 @@ class CourseDownloaderImplTest {
     fun fetchCourseDetails() {
         runBlocking {
             val detailsMap = courseDownloader.fetchCourseDetails(
-                    listOf("Ice Cream", "Furry Friends")).await()
+                    listOf("Ice Cream", "Furry Friends"))
             assertTrue(detailsMap!!.keys.size > 0)
             assertTrue(detailsMap!!.containsKey("Ice Cream"))
             assertTrue(detailsMap!!.containsKey("Furry Friends"))

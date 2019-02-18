@@ -2,9 +2,6 @@ package com.greglaun.lector.android.room
 
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 
 class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<String> {
     override suspend fun contains(element: String): Boolean {
@@ -60,20 +57,16 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         return db.articleContextDao().updatePosition(currentRequestContext, position)
     }
 
-    override fun getUnfinished(): Deferred<List<String>> {
-        return GlobalScope.async {
-            val unfinished = mutableListOf<String>()
-            db.articleContextDao().getAllUnfinished().map {
-                unfinished.add(it.contextString)
-            }
-            unfinished
+    override suspend fun getUnfinished(): List<String> {
+        val unfinished = mutableListOf<String>()
+        db.articleContextDao().getAllUnfinished().map {
+            unfinished.add(it.contextString)
         }
+        return unfinished
     }
 
-    override fun markFinished(element: String): Deferred<Unit> {
-        return GlobalScope.async {
-            db.articleContextDao().markFinished(element)
-        }
+    override suspend fun markFinished(element: String) {
+        db.articleContextDao().markFinished(element)
     }
 
     override suspend fun getNextArticle(context: String): ArticleContext? {

@@ -141,8 +141,10 @@ class MainPresenterTest {
 
     @Test
     fun onPageDownloadFinished() {
-        mainPresenter.onPageDownloadFinished("A String")
-        verify(responseSource, times(1)).markFinished(
-                urlToContext("A String"))
+        runBlocking {
+            mainPresenter.onPageDownloadFinished("A String")
+            verify(responseSource, times(1)).markFinished(
+                    urlToContext("A String"))
+        }
     }
 }

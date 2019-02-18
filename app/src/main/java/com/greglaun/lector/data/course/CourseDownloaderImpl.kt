@@ -3,9 +3,6 @@ package com.greglaun.lector.data.course
 import android.util.Log
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import com.greglaun.lector.data.net.TEN_GB
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
 import okhttp3.Request
 import java.io.File
 
@@ -16,27 +13,23 @@ class CourseDownloaderImpl(val baseUrl: String, lruCacheDir: File):
     private val client = OkHttpConnectionFactory.createClient(lruCacheDir)
 
 
-    override fun downloadCourseMetadata(): Deferred<List<CourseMetadata>?> {
-        return GlobalScope.async fetch@{
-            val responseString = downloadCourseInfo()
-            if (responseString != null) {
-                 extractCourseMetadata(responseString!!)
-             } else {
-                null
-            }
+    override suspend fun downloadCourseMetadata(): List<CourseMetadata>? {
+        val responseString = downloadCourseInfo()
+        if (responseString != null) {
+            return extractCourseMetadata(responseString!!)
+        } else {
+            return null
         }
     }
 
-    override fun fetchCourseDetails(courseNames: List<String>):
-            Deferred<Map<String, ThinCourseDetails>?> {
-        return GlobalScope.async fetch@{
-            val responseString = downloadCourseInfo()
-            if (responseString != null) {
-                val detailMap = toCourseDetailsMap(extractCourseMap(responseString!!))
-                detailMap
-            } else {
-                null
-            }
+    override suspend fun fetchCourseDetails(courseNames: List<String>):
+            Map<String, ThinCourseDetails>? {
+        val responseString = downloadCourseInfo()
+        if (responseString != null) {
+            val detailMap = toCourseDetailsMap(extractCourseMap(responseString!!))
+            return  detailMap
+        } else {
+            return null
         }
     }
 
@@ -55,11 +48,10 @@ class CourseDownloaderImpl(val baseUrl: String, lruCacheDir: File):
         return response.peekBody(TEN_GB).string()
     }
 
-    override fun fetchCourseDetails(courseMetadata: CourseMetadata): Deferred<ThinCourseDetails?> {
-        return GlobalScope.async {
-            fetchCourseDetails(listOf(courseMetadata.name)).await()?.let {
-                it[courseMetadata.name]
-            }
+    override suspend fun fetchCourseDetails(courseMetadata: CourseMetadata): ThinCourseDetails? {
+        fetchCourseDetails(listOf(courseMetadata.name))?.let {
+            return it[courseMetadata.name]
         }
+        return null
     }
 }

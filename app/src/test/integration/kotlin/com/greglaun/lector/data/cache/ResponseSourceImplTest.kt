@@ -191,7 +191,7 @@ class ResponseSourceImplTest {
     fun getUnfinished() {
         runBlocking {
             responseSource!!.add("Dog")
-            assertEquals(responseSource!!.getUnfinished().await().size, 1)
+            assertEquals(responseSource!!.getUnfinished().size, 1)
         }
     }
 
@@ -199,9 +199,9 @@ class ResponseSourceImplTest {
     fun markFinished() {
         runBlocking {
             responseSource!!.add("Dog")
-            assertEquals(responseSource!!.getUnfinished().await().size, 1)
-            responseSource!!.markFinished("Dog").await()
-            assertEquals(responseSource!!.getUnfinished().await().size, 0)
+            assertEquals(responseSource!!.getUnfinished().size, 1)
+            responseSource!!.markFinished("Dog")
+            assertEquals(responseSource!!.getUnfinished().size, 0)
         }
     }
 }

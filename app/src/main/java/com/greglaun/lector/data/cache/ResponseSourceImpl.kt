@@ -2,7 +2,6 @@ package com.greglaun.lector.data.cache
 
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import kotlinx.coroutines.experimental.Deferred
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
@@ -93,11 +92,11 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.updatePosition(context, position)
     }
 
-    override fun getUnfinished(): Deferred<List<String>> {
+    override suspend fun getUnfinished(): List<String> {
         return cacheEntryClassifier.getUnfinished()
     }
 
-    override fun markFinished(element: String): Deferred<Unit> {
+    override suspend fun markFinished(element: String) {
         return cacheEntryClassifier.markFinished(element)
     }
 

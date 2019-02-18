@@ -1,5 +1,8 @@
 package com.greglaun.lector.ui.speak
 
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
+
 class TtsPresenter(private val tts: TTSContract.AudioView,
                    val stateMachine: TtsStateMachine)
     : TTSContract.Presenter, TtsActorClient {
@@ -23,7 +26,9 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
         this.onPositionUpdate = onPositionUpdate
-        stateMachine?.actionSpeakInLoop(onPositionUpdate)
+        GlobalScope.launch {
+            stateMachine?.actionSpeakInLoop(onPositionUpdate)
+        }
     }
 
     override fun stopSpeechViewImmediately() {
@@ -35,15 +40,21 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     }
 
     override fun stopSpeaking() {
-        stateMachine?.actionStopSpeaking()
+        GlobalScope.launch {
+            stateMachine?.actionStopSpeaking()
+        }
     }
 
     override fun advanceOne(onDone: (ArticleState) -> Unit) {
+        GlobalScope.launch {
             stateMachine?.stopAdvanceOneAndResume(onDone)
+        }
     }
 
     override fun reverseOne(onDone: (ArticleState) -> Unit) {
-        stateMachine?.stopReverseOneAndResume(onDone)
+        GlobalScope.launch {
+            stateMachine?.stopReverseOneAndResume(onDone)
+        }
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
@@ -54,4 +65,3 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         tts.setSpeechRate(speechRate)
     }
 }
-

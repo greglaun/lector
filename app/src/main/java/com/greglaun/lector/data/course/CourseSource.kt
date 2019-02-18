@@ -1,15 +1,13 @@
 package com.greglaun.lector.data.course
 
 import com.greglaun.lector.data.cache.ArticleContext
-import kotlinx.coroutines.experimental.Deferred
 
 interface CourseSource {
-    fun getCourses(): Deferred<List<CourseContext>>
-    fun getArticlesForCourse(courseId: Long): Deferred<List<ArticleContext>>
-    fun delete(courseName: String): Deferred<Unit>
-    fun add(courseContext: CourseContext): Deferred<Long>
-    fun addArticleForSource(courseName: String, articleName: String): Deferred<Unit>
-    fun addCourseDetails(courseDetails: ThinCourseDetails): Deferred<Unit>
-    suspend fun getNextInCourse(courseName: String, articleName: String):
-            ArticleContext?
+    suspend fun getCourses(): List<CourseContext>
+    suspend fun getArticlesForCourse(courseId: Long): List<ArticleContext>
+    suspend fun delete(courseName: String)
+    suspend fun add(courseContext: CourseContext): Long
+    suspend fun addArticleForSource(courseName: String, articleName: String)
+    suspend fun addCourseDetails(courseDetails: ThinCourseDetails)
+    suspend fun getNextInCourse(courseName: String, articleName: String): ArticleContext?
 }

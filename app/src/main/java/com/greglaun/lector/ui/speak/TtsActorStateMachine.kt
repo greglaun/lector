@@ -29,23 +29,21 @@ class TtsActorStateMachine : TtsStateMachine {
         ACTOR_LOOP?.send(UpdateArticleState(articleState))
     }
 
-    override fun getArticleState(): Deferred<ArticleState> {
-        return CoroutineScope(actorClient).async {
-            val articleStateDeferred = CompletableDeferred<ArticleState>()
-            ACTOR_LOOP?.send(GetArticleState(articleStateDeferred))
-            articleStateDeferred.await()
-        }
+    override suspend fun getArticleState(): ArticleState {
+        val articleStateDeferred = CompletableDeferred<ArticleState>()
+        ACTOR_LOOP?.send(GetArticleState(articleStateDeferred))
+        return articleStateDeferred.await()
     }
 
     // Speaking state
 
-    override fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?): Deferred<Unit> {
+    override suspend fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?) {
         this.onPositionUpdate = onPositionUpdate
         SPEECH_LOOP =  CoroutineScope(actorClient).launch {
             var readyDeferred = getSpeakerState()
             var timesDelayed = 0
-            while(readyDeferred.await() != SpeakerState.READY
-                    && readyDeferred.await() != SpeakerState.SPEAKING) {
+            while(readyDeferred != SpeakerState.READY
+                    && readyDeferred != SpeakerState.SPEAKING) {
                 // todo(concurrency): Ugly magical constants
                 if (timesDelayed >= 50) {
                     actionStopSpeaking()
@@ -58,64 +56,52 @@ class TtsActorStateMachine : TtsStateMachine {
             var stillSpeaking = true
             while(stillSpeaking) {
                 var speakingState = actionSpeakOne()
-                val articleState = getArticleState().await()
+                val articleState = getArticleState()
                 articleState.current()?.also {
                     this@TtsActorStateMachine.onPositionUpdate?.invoke(utteranceId(it))
                 }
-                stillSpeaking = speakingState.await() == SpeakerState.SPEAKING
+                stillSpeaking = speakingState == SpeakerState.SPEAKING
             }
         }
         SPEECH_LOOP?.start()
-        return CompletableDeferred(Unit)
     }
 
-    override fun actionSpeakOne(): Deferred<SpeakerState> {
-        return CoroutineScope(actorClient).async {
-            val speakingState = CompletableDeferred<SpeakerState>()
-            ACTOR_LOOP?.send(SpeakOne(speakingState))
-            speakingState.await()
-        }
+    override suspend fun actionSpeakOne(): SpeakerState {
+        val speakingState = CompletableDeferred<SpeakerState>()
+        ACTOR_LOOP?.send(SpeakOne(speakingState))
+        return speakingState.await()
     }
 
-    override fun getSpeakerState(): Deferred<SpeakerState> {
-        return CoroutineScope(actorClient).async {
-            val stateDeferred = CompletableDeferred<SpeakerState>()
-            ACTOR_LOOP?.send(GetSpeakerState(stateDeferred))
-            stateDeferred.await()
-        }
+    override suspend fun getSpeakerState(): SpeakerState {
+        val stateDeferred = CompletableDeferred<SpeakerState>()
+        ACTOR_LOOP?.send(GetSpeakerState(stateDeferred))
+        return stateDeferred.await()
     }
 
-    override fun actionStopSpeaking(): Deferred<Unit?> {
-        return CoroutineScope(actorClient).async {
-            ACTOR_LOOP?.send(StopSpeaking)
-            SPEECH_LOOP?.isActive.let { SPEECH_LOOP?.cancel() }
-            Unit
-        }
+    override suspend fun actionStopSpeaking() {
+        ACTOR_LOOP?.send(StopSpeaking)
+        SPEECH_LOOP?.isActive.let { SPEECH_LOOP?.cancel() }
     }
 
     // Transport
 
-    override fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
-        return CoroutineScope(actorClient).async {
-            val oldSpeakingState = getSpeakerState()
-            val newArticleState = CompletableDeferred<ArticleState>()
-            ACTOR_LOOP?.send(ForwardOne(newArticleState = newArticleState))
-            onDone(newArticleState.await())
-            if (oldSpeakingState.await() == SpeakerState.SPEAKING) {
-                actionSpeakInLoop { onPositionUpdate }.await()
-            }
+    override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
+        val oldSpeakingState = getSpeakerState()
+        val newArticleState = CompletableDeferred<ArticleState>()
+        ACTOR_LOOP?.send(ForwardOne(newArticleState = newArticleState))
+        onDone(newArticleState.await())
+        if (oldSpeakingState == SpeakerState.SPEAKING) {
+            actionSpeakInLoop { onPositionUpdate }
         }
     }
 
-    override fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit): Deferred<Unit> {
-        return CoroutineScope(actorClient).async {
-            val oldSpeakingState = getSpeakerState()
-            val newArticleState = CompletableDeferred<ArticleState>()
-            ACTOR_LOOP?.send(BackOne(newArticleState = newArticleState))
-            onDone(newArticleState.await())
-            if (oldSpeakingState.await() == SpeakerState.SPEAKING) {
-                actionSpeakInLoop { onPositionUpdate }.await()
-            }
+    override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
+        val oldSpeakingState = getSpeakerState()
+        val newArticleState = CompletableDeferred<ArticleState>()
+        ACTOR_LOOP?.send(BackOne(newArticleState = newArticleState))
+        onDone(newArticleState.await())
+        if (oldSpeakingState == SpeakerState.SPEAKING) {
+            actionSpeakInLoop { onPositionUpdate }
         }
     }
 }
