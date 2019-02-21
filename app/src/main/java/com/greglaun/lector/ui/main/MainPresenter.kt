@@ -5,6 +5,10 @@ import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
+import com.greglaun.lector.store.Navigation
+import com.greglaun.lector.store.State
+import com.greglaun.lector.store.StateHandler
+import com.greglaun.lector.store.Store
 import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.GlobalScope
@@ -15,10 +19,11 @@ import okhttp3.Request
 import okhttp3.Response
 
 class MainPresenter(val view : MainContract.View,
+                    val store: Store,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
-    : MainContract.Presenter, TtsStateListener {
+    : MainContract.Presenter, TtsStateListener, StateHandler {
     override val LECTOR_UNIVERSE = ""
     override val ALL_ARTICLES = "All Articles"
 
@@ -41,6 +46,8 @@ class MainPresenter(val view : MainContract.View,
     private var autoPlay = true
     private var autoDelete = true
 
+    private var isActivityRunning = false
+
     override fun onAttach() {
         ttsPresenter.onStart(this)
         downloadCompleter?.let {
@@ -48,11 +55,44 @@ class MainPresenter(val view : MainContract.View,
             downloadScheduler?.startDownloads()
         }
         articleStateSource = JSoupArticleStateSource(responseSource)
+        store.stateHandlers.add(this)
+        isActivityRunning = true
+        handleState(store.state)
     }
 
     override fun onDetach() {
         ttsPresenter.onStop()
         downloadScheduler?.stopDownloads()
+        store.stateHandlers.remove(this)
+    }
+
+    override suspend fun handle(state: State) {
+        if (isActivityRunning) {
+            handleState(state)
+        }
+    }
+
+    private fun handleState(state: State) {
+        when (state.navigation) {
+            
+            Navigation.CURRENT_ARTICLE -> {
+                handleCurrentArticle(state)
+            }
+
+            Navigation.NEW_ARTICLE -> {
+                handleNewArticle(state)
+            }
+
+            else -> throw NotImplementedError()
+        }
+    }
+
+    private fun handleCurrentArticle(state: State) {
+
+    }
+
+    private fun handleNewArticle(state: State) {
+
     }
 
     override fun getLectorView(): MainContract.View? {

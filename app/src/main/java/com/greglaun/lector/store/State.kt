@@ -8,6 +8,7 @@ private val DEFAULT_READING_LIST = "All Articles"
 
 enum class Navigation {
     CURRENT_ARTICLE,
+    NEW_ARTICLE,
     MY_READING_LIST,
     MY_COURSE_LIST,
     BROWSE_COURSES
@@ -21,5 +22,6 @@ data class CourseBrowserScreen(val availableCourses: List<CourseContext> = empty
 data class State(
         val currentArticleScreen: CurrentArticleScreen = CurrentArticleScreen(),
         val readingListScreen: ReadingListScreen = ReadingListScreen(),
-        val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen()
+        val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen(),
+        val navigation: Navigation = Navigation.CURRENT_ARTICLE
 )

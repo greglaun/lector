@@ -20,6 +20,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.greglaun.lector.AppStore
 import com.greglaun.lector.R
 import com.greglaun.lector.android.*
 import com.greglaun.lector.android.bound.BindableTtsService
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
+        mainPresenter = MainPresenter(this, AppStore, NoOpTtsPresenter(),
                 createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
 
         readingListView = findViewById(R.id.ll_reading_list)
@@ -193,7 +194,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
         val ttsStateMachine = bindableTtsService
-        mainPresenter = MainPresenter(this,
+        mainPresenter = MainPresenter(this, AppStore,
                 TtsPresenter(androidAudioView, ttsStateMachine),
                 mainPresenter.responseSource(), mainPresenter.courseSource())
         renewReadingListRecycler(mainPresenter as MainPresenter)

@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * https://github.com/CesarValiente/KUnidirectional/
  */
 
-class Store {
+abstract class Store {
     private val storeContext = newSingleThreadContext("StoreContext")
     val stateHandlers: CopyOnWriteArrayList<StateHandler> = CopyOnWriteArrayList()
     val sideEffects: CopyOnWriteArrayList<SideEffect> = CopyOnWriteArrayList()

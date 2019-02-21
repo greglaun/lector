@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.main
 
+import com.greglaun.lector.AppStore
 import com.greglaun.lector.data.cache.BasicArticleContext
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.contextToUrl
@@ -22,7 +23,7 @@ class MainPresenterTest {
     val responseSource = mock(ResponseSourceImpl::class.java)
     val courseSource = mock(CourseSource::class.java)
 
-    val mainPresenter = MainPresenter(mockView, mockTts, responseSource, courseSource)
+    val mainPresenter = MainPresenter(mockView, AppStore, mockTts, responseSource, courseSource)
 
     val testDir = File("testDir")
 
