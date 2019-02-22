@@ -3,8 +3,9 @@ package com.greglaun.lector.store
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.course.CourseContext
 
-private val DEFAULT_PAGE = "MAIN_PAGE"
-private val DEFAULT_READING_LIST = "All Articles"
+val DEFAULT_PAGE = "MAIN_PAGE"
+val DEFAULT_READING_LIST = "All Articles"
+val LECTOR_UNIVERSE = ""
 
 enum class Navigation {
     CURRENT_ARTICLE,
@@ -14,14 +15,28 @@ enum class Navigation {
     BROWSE_COURSES
 }
 
-data class CurrentArticleScreen(val currentContext: String = DEFAULT_PAGE)
+enum class Changed {
+    NONE,
+    PREFERENCE,
+}
+
+data class CurrentArticleScreen(val currentContext: String = DEFAULT_PAGE,
+                                val currentCourse: String = LECTOR_UNIVERSE)
 data class ReadingListScreen(val currentReadingList: String = DEFAULT_READING_LIST,
                              val articles: List<ArticleContext> = emptyList())
 data class CourseBrowserScreen(val availableCourses: List<CourseContext> = emptyList())
+
+data class Preferences(val autoPlay: Boolean = true,
+                       val autoDelete: Boolean = true,
+                       val isBritish: Boolean = false,
+                       val isSlow: Boolean = false,
+                       val speechRate: Float = 1f)
 
 data class State(
         val currentArticleScreen: CurrentArticleScreen = CurrentArticleScreen(),
         val readingListScreen: ReadingListScreen = ReadingListScreen(),
         val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen(),
-        val navigation: Navigation = Navigation.CURRENT_ARTICLE
+        val navigation: Navigation = Navigation.CURRENT_ARTICLE,
+        val changed: List<Changed> = listOf(Changed.NONE)
+
 )

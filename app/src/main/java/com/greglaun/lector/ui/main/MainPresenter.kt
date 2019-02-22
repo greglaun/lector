@@ -24,13 +24,6 @@ class MainPresenter(val view : MainContract.View,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener, StateHandler {
-    override val LECTOR_UNIVERSE = ""
-    override val ALL_ARTICLES = "All Articles"
-
-    // Mutable state
-    private var currentRequestContext = "MAIN_PAGE"
-    private var currentCourse = LECTOR_UNIVERSE // Be default, the "course" is everything
-
     override var downloadCompleter: DownloadCompleter? = null
     private val contextThread = newSingleThreadContext("ContextThread")
     private var downloadScheduler: DownloadCompletionScheduler? = null
@@ -74,7 +67,7 @@ class MainPresenter(val view : MainContract.View,
 
     private fun handleState(state: State) {
         when (state.navigation) {
-            
+
             Navigation.CURRENT_ARTICLE -> {
                 handleCurrentArticle(state)
             }
@@ -88,11 +81,11 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleCurrentArticle(state: State) {
-
+        throw NotImplementedError()
     }
 
     private fun handleNewArticle(state: State) {
-
+        throw NotImplementedError()
     }
 
     override fun getLectorView(): MainContract.View? {
