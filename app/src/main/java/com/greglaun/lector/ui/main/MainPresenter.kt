@@ -277,7 +277,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onDisplayReadingList() {
         responseSource.getAllPermanent()?.let {
-            displayArticleList(it, ALL_ARTICLES)
+            displayArticleList(it, store.state.currentArticleScreen.currentCourse)
         }
     }
 

@@ -23,6 +23,7 @@ enum class Changed {
     PREFERENCE,
 }
 
+// todo(cleanup): Get rid of currentContext and use only ArticleState?
 data class CurrentArticleScreen(val currentContext: String = DEFAULT_PAGE,
                                 val currentCourse: String = LECTOR_UNIVERSE,
                                 val articleState: ArticleState = ArticleState(currentContext,
@@ -47,6 +48,6 @@ data class State(
         val changed: List<Changed> = listOf(Changed.NONE)
 )
 
-fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
+fun stateUpdateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
     return State(newArticleScreen, readingListScreen, courseBrowserScreen, navigation, changed)
 }

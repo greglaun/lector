@@ -51,10 +51,3 @@ fun ArticleState.current(): String? {
     }
     return paragraphs.get(currentIndex())
 }
-
-fun ArticleState.current(): String? {
-    if (currentIndex() < 0 || currentIndex() >= paragraphs.size) {
-        return null
-    }
-    return paragraphs.get(currentIndex())
-}

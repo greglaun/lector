@@ -35,9 +35,6 @@ interface MainContract {
         val readingList: MutableList<ArticleContext>
         val courseList: MutableList<CourseContext>
 
-        val LECTOR_UNIVERSE: String
-        val ALL_ARTICLES: String
-
         fun onPlayButtonPressed()
         fun stopSpeakingAndEnablePlayButton()
         suspend fun saveArticle()
