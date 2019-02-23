@@ -34,10 +34,13 @@ import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
+import com.greglaun.lector.store.DEFAULT_READING_LIST
+import com.greglaun.lector.store.LECTOR_UNIVERSE
 import com.greglaun.lector.ui.course.CourseBrowserActivity
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsPresenter
+import com.greglaun.lector.ui.speak.currentIndex
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 
@@ -265,7 +268,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onBackPressed() {
         if (readingListRecyclerView.visibility == VISIBLE) {
             val title = findViewById<EditText>(R.id.reading_list_title).text.toString()
-            if (title != mainPresenter.ALL_ARTICLES) {
+            if (title != DEFAULT_READING_LIST) {
                 unHideCourseListView()
             } else if (webView.visibility != VISIBLE) {
                 unhideWebView()
@@ -353,7 +356,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
-        val index = articleState.currentIndex
+        val index = articleState.currentIndex()
         val highlightColor = "yellow"
         val lectorClass = "lector-active"
         val js = "var txt = document.getElementsByTagName('p');" +
@@ -456,7 +459,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     fun onPlayAllPressed(view: View) {
         runOnUiThread {
-            var title = mainPresenter.LECTOR_UNIVERSE
+            var title = LECTOR_UNIVERSE
             val viewText = findViewById<TextView>(R.id.reading_list_title).text
             if (viewText != null) {
                 title = viewText.toString()

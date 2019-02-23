@@ -2,11 +2,11 @@ package com.greglaun.lector.store
 
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.course.CourseContext
-import com.greglaun.lector.ui.speak.ArticlePosition
-import com.greglaun.lector.ui.speak.ArticleState
+import com.greglaun.lector.data.course.EmptyCourseContext
+import com.greglaun.lector.ui.speak.AbstractArticleState
+import com.greglaun.lector.ui.speak.EmptyArticleState
 import com.greglaun.lector.ui.speak.SpeakerState
 
-val DEFAULT_PAGE = "MAIN_PAGE"
 val DEFAULT_READING_LIST = "All Articles"
 val LECTOR_UNIVERSE = ""
 
@@ -24,10 +24,8 @@ enum class Changed {
 }
 
 // todo(cleanup): Get rid of currentContext and use only ArticleState?
-data class CurrentArticleScreen(val currentContext: String = DEFAULT_PAGE,
-                                val currentCourse: String = LECTOR_UNIVERSE,
-                                val articleState: ArticleState = ArticleState(currentContext,
-                                        listOf(""), ArticlePosition(0, "")),
+data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState(),
+                                val currentCourse: CourseContext = EmptyCourseContext(),
                                 val speakerState: SpeakerState = SpeakerState.NOT_READY)
 
 data class ReadingListScreen(val currentReadingList: String = DEFAULT_READING_LIST,
@@ -48,6 +46,6 @@ data class State(
         val changed: List<Changed> = listOf(Changed.NONE)
 )
 
-fun stateUpdateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
+fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
     return State(newArticleScreen, readingListScreen, courseBrowserScreen, navigation, changed)
 }

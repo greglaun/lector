@@ -2,14 +2,27 @@ package com.greglaun.lector.ui.speak
 
 import com.greglaun.lector.data.cache.utteranceId
 
+val DEFAULT_ARTICLE = "MAIN_PAGE"
+
 // todo(cleanup): Remove storage of utteranceId? It was originally here to guard against changes to
 // todo(continued): the ordering of the paragraphs. But that is probably not a concern anymore.
 data class ArticlePosition(val index: Int = 0,
                            val utteranceId: String = "")
 
-data class ArticleState(val title: String,
-                        val paragraphs: List<String> = emptyList(),
-                        val currentPosition: ArticlePosition = ArticlePosition())
+interface AbstractArticleState {
+    val title: String
+    val paragraphs: List<String>
+    val currentPosition: ArticlePosition
+}
+
+data class ArticleState(override val title: String,
+                        override val paragraphs: List<String> = emptyList(),
+                        override val currentPosition: ArticlePosition = ArticlePosition()): AbstractArticleState
+
+data class EmptyArticleState(override val title: String = DEFAULT_ARTICLE,
+                             override val paragraphs: List<String> = emptyList(),
+                             override val currentPosition: ArticlePosition =
+                                     ArticlePosition(0, "")): AbstractArticleState
 
 fun articleStatefromTitle(title: String): ArticleState {
     return ArticleState(title, emptyList(), ArticlePosition())

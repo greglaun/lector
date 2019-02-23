@@ -69,6 +69,14 @@ class MainPresenter(val view : MainContract.View,
                 handleCurrentArticle(state)
             }
 
+            Navigation.BROWSE_COURSES -> {
+                val currentCourse = state.currentArticleScreen.currentCourse
+                courseSource.getArticlesForCourse(currentCourse.title)?.let {
+                    displayArticleList(it,
+                           courseName)
+                }
+            }
+
             Navigation.NEW_ARTICLE -> {
                 handleNewArticle(state)
             }
@@ -122,7 +130,7 @@ class MainPresenter(val view : MainContract.View,
 
     private suspend fun autoPlayNext(articleState: ArticleState) {
         var nextArticle: ArticleContext? = null
-        if (store.state.currentArticleScreen.currentContext == DEFAULT_PAGE) {
+        if (store.state.currentArticleScreen.currentContext == DEFAULT_ARTICLE) {
             nextArticle = responseSource.getNextArticle(articleState.title)
         } else {
             nextArticle = courseSource.getNextInCourse(
@@ -241,11 +249,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun courseDetailsRequested(courseContext: CourseContext) {
         courseContext.id?.let {
-            currentCourse = courseContext.courseName
-            courseSource.getArticlesForCourse(it)?.let {
-                displayArticleList(it,
-                        courseContext.courseName)
-            }
+            store.dispatch(CourseDetailRequestAction(courseContext))
         }
     }
 
