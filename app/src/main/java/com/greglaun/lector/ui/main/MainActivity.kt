@@ -277,21 +277,27 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun unHideReadingListView() {
-        webView.visibility = GONE
-        courseListRecyclerView.visibility = GONE
-        readingListView.visibility = VISIBLE
+        runOnUiThread {
+            webView.visibility = GONE
+            courseListRecyclerView.visibility = GONE
+            readingListView.visibility = VISIBLE
+        }
     }
 
     override fun unHideCourseListView() {
-        webView.visibility = GONE
-        readingListView.visibility = GONE
-        courseListRecyclerView.visibility = VISIBLE
+        runOnUiThread {
+            webView.visibility = GONE
+            readingListView.visibility = GONE
+            courseListRecyclerView.visibility = VISIBLE
+        }
     }
 
     override fun unhideWebView() {
-        readingListView.visibility = GONE
-        courseListRecyclerView.visibility = GONE
-        webView.visibility = VISIBLE
+        runOnUiThread {
+            readingListView.visibility = GONE
+            courseListRecyclerView.visibility = GONE
+            webView.visibility = VISIBLE
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
