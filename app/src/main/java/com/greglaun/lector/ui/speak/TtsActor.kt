@@ -14,7 +14,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
     var state = SpeakerState.NOT_READY
     for (msg in channel) {
         when (msg) {
-            is UpdateArticleState -> {
+            is TTSUpdateArticleState -> {
                 state = SpeakerState.NOT_READY
                 articleState = msg.articleState
                 synchronized(state) {
@@ -35,8 +35,8 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                     state = previousState
                 }
             }
-            is ForwardOne -> {
-                if (articleState != null && articleState.current_index != null &&
+            is TTSForwardOne -> {
+                if (articleState != null && articleState.currentIndex() != null &&
                         articleState.hasNext()) {
                     val initialState = state
                     ttsClient.stopSpeechViewImmediately()
@@ -47,8 +47,8 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 }
                 msg.newArticleState.complete(articleState!!)
             }
-            is BackOne -> {
-                if (articleState != null && articleState.current_index != null &&
+            is TTSBackOne -> {
+                if (articleState != null && articleState.currentPosition != null &&
                         articleState.hasPrevious()) {
                     val initalState = state
                     ttsClient.stopSpeechViewImmediately()
@@ -59,7 +59,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
                 }
                 msg.newArticleState.complete(articleState!!)
             }
-            is GetArticleState -> {
+            is TTSGetArticleState -> {
                 msg.articleState.complete(articleState!!)
             }
             is SpeakOne -> {
@@ -108,8 +108,8 @@ object StopSpeaking : TtsMsg()
 
 @Deprecated("Soon to be removed")
 class UpdateArticleStateDeprecated(val articleState: ArticleState, val position: String): TtsMsg()
-class UpdateArticleState(val articleState: ArticleState): TtsMsg()
+class TTSUpdateArticleState(val articleState: ArticleState): TtsMsg()
 
-class ForwardOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
-class BackOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
-class GetArticleState(val articleState: CompletableDeferred<ArticleState>): TtsMsg()
+class TTSForwardOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
+class TTSBackOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
+class TTSGetArticleState(val articleState: CompletableDeferred<ArticleState>): TtsMsg()

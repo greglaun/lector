@@ -51,14 +51,15 @@ abstract class Store {
     }
 
     private fun reduce(action: Action, currentState: State): State {
-//        val newState = when (action) {
+        val newState = when (action) {
+            is UpdatePositionAction -> AdvanceArticlePositionReducer.reduce(action, state)
 //            is CreationAction -> CreationReducer.reduce(action, currentState)
 //            is UpdateAction -> UpdateReducer.reduce(action, currentState)
 //            is ReadAction -> ReadReducer.reduce(action, currentState)
 //            is DeleteAction -> DeleteReducer.reduce(action, currentState)
 //            is NavigationAction -> NavigationReducer.reduce(action, currentState)
 //        }
-//        return newState
+        return newState
         throw NotImplementedError()
         return currentState
     }

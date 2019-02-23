@@ -6,7 +6,7 @@ interface TtsStateMachine {
 
     suspend fun updateArticle(articleState: ArticleState)
 
-    suspend fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?)
+    suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?)
     suspend fun getSpeakerState(): SpeakerState
     suspend fun actionSpeakOne(): SpeakerState
     suspend fun actionStopSpeaking()

@@ -2,6 +2,9 @@ package com.greglaun.lector.store
 
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.course.CourseContext
+import com.greglaun.lector.ui.speak.ArticlePosition
+import com.greglaun.lector.ui.speak.ArticleState
+import com.greglaun.lector.ui.speak.SpeakerState
 
 val DEFAULT_PAGE = "MAIN_PAGE"
 val DEFAULT_READING_LIST = "All Articles"
@@ -21,7 +24,11 @@ enum class Changed {
 }
 
 data class CurrentArticleScreen(val currentContext: String = DEFAULT_PAGE,
-                                val currentCourse: String = LECTOR_UNIVERSE)
+                                val currentCourse: String = LECTOR_UNIVERSE,
+                                val articleState: ArticleState = ArticleState(currentContext,
+                                        listOf(""), ArticlePosition(0, "")),
+                                val speakerState: SpeakerState = SpeakerState.NOT_READY)
+
 data class ReadingListScreen(val currentReadingList: String = DEFAULT_READING_LIST,
                              val articles: List<ArticleContext> = emptyList())
 data class CourseBrowserScreen(val availableCourses: List<CourseContext> = emptyList())
@@ -38,5 +45,8 @@ data class State(
         val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen(),
         val navigation: Navigation = Navigation.CURRENT_ARTICLE,
         val changed: List<Changed> = listOf(Changed.NONE)
-
 )
+
+fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
+    return State(newArticleScreen, readingListScreen, courseBrowserScreen, navigation, changed)
+}
