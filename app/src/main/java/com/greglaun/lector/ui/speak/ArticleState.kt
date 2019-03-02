@@ -28,11 +28,15 @@ fun articleStatefromTitle(title: String): ArticleState {
     return ArticleState(title, emptyList(), ArticlePosition())
 }
 
-fun ArticleState.hasNext(): Boolean {
+fun AbstractArticleState.currentIndex(): Int {
+    return currentPosition.index
+}
+
+fun AbstractArticleState.hasNext(): Boolean {
     return currentIndex() >= 0 && currentIndex() < paragraphs.size - 1
 }
 
-fun ArticleState.next(): ArticleState? {
+fun AbstractArticleState.next(): ArticleState? {
     if (!hasNext()) {
         return null
     }
@@ -41,15 +45,11 @@ fun ArticleState.next(): ArticleState? {
     return ArticleState(title, paragraphs, ArticlePosition(nextIndex, nextUtteranceId))
 }
 
-fun ArticleState.currentIndex(): Int {
-    return currentPosition.index
-}
-
-fun ArticleState.hasPrevious(): Boolean {
+fun AbstractArticleState.hasPrevious(): Boolean {
     return currentIndex() > 0
 }
 
-fun ArticleState.previous(): ArticleState? {
+fun AbstractArticleState.previous(): ArticleState? {
     if (!hasPrevious()) {
         return null
     }
@@ -58,7 +58,7 @@ fun ArticleState.previous(): ArticleState? {
     return ArticleState(title, paragraphs, ArticlePosition(previousPosition, previousUtteranceId))
 }
 
-fun ArticleState.current(): String? {
+fun AbstractArticleState.current(): String? {
     if (currentIndex() < 0 || currentIndex() >= paragraphs.size) {
         return null
     }

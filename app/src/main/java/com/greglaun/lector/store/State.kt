@@ -29,8 +29,10 @@ data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyAr
                                 val speakerState: SpeakerState = SpeakerState.NOT_READY)
 
 data class ReadingListScreen(val currentReadingList: String = DEFAULT_READING_LIST,
-                             val articles: List<ArticleContext> = emptyList())
-data class CourseBrowserScreen(val availableCourses: List<CourseContext> = emptyList())
+                             val articles: Lce<List<ArticleContext>> =
+                                     Lce.Success(emptyList()))
+data class CourseBrowserScreen(val availableCourses: Lce<List<CourseContext>> =
+                                       Lce.Success(emptyList()))
 
 data class Preferences(val autoPlay: Boolean = true,
                        val autoDelete: Boolean = true,
@@ -48,4 +50,9 @@ data class State(
 
 fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
     return State(newArticleScreen, readingListScreen, courseBrowserScreen, navigation, changed)
+}
+
+fun State.updateReadingListScreen(newReadingListScreen: ReadingListScreen): State {
+    return State(currentArticleScreen, newReadingListScreen, courseBrowserScreen, navigation,
+            changed)
 }

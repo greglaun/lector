@@ -71,10 +71,12 @@ class MainPresenter(val view : MainContract.View,
 
             Navigation.BROWSE_COURSES -> {
                 val currentCourse = state.currentArticleScreen.currentCourse
-                courseSource.getArticlesForCourse(currentCourse.title)?.let {
-                    displayArticleList(it,
-                           courseName)
+                GlobalScope.launch {
+                    courseSource.getArticlesForCourse(currentCourse.id!!)?.let {
+                        displayArticleList(it,
+                                currentCourse.courseName)
                 }
+            }
             }
 
             Navigation.NEW_ARTICLE -> {
@@ -130,11 +132,11 @@ class MainPresenter(val view : MainContract.View,
 
     private suspend fun autoPlayNext(articleState: ArticleState) {
         var nextArticle: ArticleContext? = null
-        if (store.state.currentArticleScreen.currentContext == DEFAULT_ARTICLE) {
+        if (store.state.currentArticleScreen.articleState.title == DEFAULT_ARTICLE) {
             nextArticle = responseSource.getNextArticle(articleState.title)
         } else {
             nextArticle = courseSource.getNextInCourse(
-                    store.state.currentArticleScreen.currentContext, articleState.title)
+                    store.state.currentArticleScreen.articleState.title, articleState.title)
         }
         nextArticle?.let {
             onUrlChanged(contextToUrl(it.contextString))
@@ -172,8 +174,8 @@ class MainPresenter(val view : MainContract.View,
         }
         articleStateSource?.getArticle(urlString)?.let {
             ttsPresenter.onArticleChanged(fastForward(it, position))
-            if (it.title != store.state.currentArticleScreen.currentContext) {
-                val previousTitle = store.state.currentArticleScreen.currentContext
+            if (it.title != store.state.currentArticleScreen.articleState.title) {
+                val previousTitle = store.state.currentArticleScreen.articleState.title
                 store.dispatch(UpdateArticleAction(it))
                 GlobalScope.launch {
                     responseSource.update(previousTitle, it.title)
@@ -189,11 +191,11 @@ class MainPresenter(val view : MainContract.View,
 
     private fun computeCurrentContext(urlString: String) {
         // todo(caching, REST): Replace this ugliness
-        // todo(concurrency): Handle access of store.state.currentArticleScreen.currentContext from multiple threads
+        // todo(concurrency): Handle access of store.state.currentArticleScreen.articleState.title from multiple threads
         CoroutineScope(contextThread).launch {
-            var computedContext = store.state.currentArticleScreen.currentContext
-            synchronized(store.state.currentArticleScreen.currentContext) {
-                computedContext = store.state.currentArticleScreen.currentContext
+            var computedContext = store.state.currentArticleScreen.articleState.title
+            synchronized(store.state.currentArticleScreen.articleState.title) {
+                computedContext = store.state.currentArticleScreen.articleState.title
                 if (urlString.contains("index.php?search=")) {
                     if (urlString.substringAfterLast("search=") == "") {
                         return@launch
@@ -224,7 +226,7 @@ class MainPresenter(val view : MainContract.View,
                                 urlToContext(urlString))))
                     }
                 }
-                computedContext = store.state.currentArticleScreen.currentContext
+                computedContext = store.state.currentArticleScreen.articleState.title
             }
             if (!this@MainPresenter.responseSource.contains(computedContext)) {
                 responseSource.add(computedContext)
@@ -234,8 +236,8 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onRequest(url: String): Response? {
         var curContext: String? = null
-        synchronized(store.state.currentArticleScreen.currentContext) {
-            curContext = store.state.currentArticleScreen.currentContext
+        synchronized(store.state.currentArticleScreen.articleState.title) {
+            curContext = store.state.currentArticleScreen.articleState.title
         }
         return responseSource.getWithContext(Request.Builder()
                 .url(url)
@@ -243,7 +245,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun saveArticle() {
-        val requestContextCopy = store.state.currentArticleScreen.currentContext
+        val requestContextCopy = store.state.currentArticleScreen.articleState.title
         responseSource.markPermanent(requestContextCopy)
     }
 
@@ -281,7 +283,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onDisplayReadingList() {
         responseSource.getAllPermanent()?.let {
-            displayArticleList(it, store.state.currentArticleScreen.currentCourse)
+            displayArticleList(it, store.state.currentArticleScreen.currentCourse.courseName)
         }
     }
 
@@ -354,7 +356,7 @@ class MainPresenter(val view : MainContract.View,
         autoDelete = autoDeleteIn
     }
 
-    private fun updatePosition(): ArticleState {
+    private fun updatePosition(): AbstractArticleState {
         if (store.state.currentArticleScreen.articleState.hasNext()) {
             return store.state.currentArticleScreen.articleState.next()!!
         } else {

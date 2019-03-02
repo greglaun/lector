@@ -6,7 +6,7 @@ import kotlinx.coroutines.experimental.launch
 class TtsPresenter(private val tts: TTSContract.AudioView,
                    val stateMachine: TtsStateMachine)
     : TTSContract.Presenter, TtsActorClient {
-    var onPositionUpdate: ((String) -> Unit)? = null
+    var onPositionUpdate: ((AbstractArticleState) -> Unit)? = null
 
     override fun speechViewSpeak(text: String, utteranceId: String, callback: (String) -> Unit) {
         synchronized(tts) {
@@ -24,7 +24,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         stateMachine?.stopMachine()
     }
 
-    override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
+    override fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         this.onPositionUpdate = onPositionUpdate
         GlobalScope.launch {
             stateMachine?.actionSpeakInLoop(onPositionUpdate)

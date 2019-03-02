@@ -53,6 +53,7 @@ abstract class Store {
     private fun reduce(action: Action, currentState: State): State {
         val newState = when (action) {
             is UpdateArticleAction -> reduceArticleAction(action, state)
+            is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
 //            is CreationAction -> CreationReducer.reduce(action, currentState)
 //            is UpdateAction -> UpdateReducer.reduce(action, currentState)
 //            is ReadAction -> ReadReducer.reduce(action, currentState)

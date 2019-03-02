@@ -13,7 +13,7 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun speakInLoop(onPositionUpdate: ((String) -> Unit)?) {
+    override fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         // Do nothing
     }
 

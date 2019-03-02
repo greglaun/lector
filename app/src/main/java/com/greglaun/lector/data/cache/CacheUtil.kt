@@ -16,7 +16,7 @@ fun urlToContext(urlString : String) : String {
             .replace("_", " "), "UTF-8")
 }
 
-fun contextToUrl(contextString: String) =
+fun kcontextToUrl(contextString: String) =
         "https://en.m.wikipedia.org/wiki/" + URLEncoder.encode(
                 contextString.replace(" ", "_"), "UTF-8")
 
