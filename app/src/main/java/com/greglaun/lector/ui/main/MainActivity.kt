@@ -14,7 +14,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -246,7 +245,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onBackPressed() {
         if (readingListRecyclerView.visibility == VISIBLE) {
-            val title = findViewById<EditText>(R.id.reading_list_title).text.toString()
+            val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
             if (title != DEFAULT_READING_LIST) {
                 unHideCourseListView()
             } else if (webView.visibility != VISIBLE) {
@@ -260,21 +259,27 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun unHideReadingListView() {
+        runOnUiThread {
         webView.visibility = GONE
         courseListRecyclerView.visibility = GONE
         readingListView.visibility = VISIBLE
+        }
     }
 
     override fun unHideCourseListView() {
-        webView.visibility = GONE
-        readingListView.visibility = GONE
-        courseListRecyclerView.visibility = VISIBLE
+        runOnUiThread {
+            webView.visibility = GONE
+            readingListView.visibility = GONE
+            courseListRecyclerView.visibility = VISIBLE
+        }
     }
 
     override fun unhideWebView() {
-        readingListView.visibility = GONE
-        courseListRecyclerView.visibility = GONE
-        webView.visibility = VISIBLE
+        runOnUiThread {
+            readingListView.visibility = GONE
+            courseListRecyclerView.visibility = GONE
+            webView.visibility = VISIBLE
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

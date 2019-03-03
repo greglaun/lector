@@ -42,12 +42,12 @@ class SpeakUtilKtTest {
         val wikiPath = "./src/test/unit/kotlin/com/greglaun/lector/ui/speak/Banana_wiki.html"
         val html = File(wikiPath).readText()
         val articleState = articleStateFromHtml(html)
-        assertEquals(articleState.currentIndex, 0)
+        assertEquals(articleState.currentIndex(), 0)
 
         val newState = fastForward(articleState, utteranceId(articleState.next()!!.current()!!))
-        assertEquals(newState.currentIndex, 1)
+        assertEquals(newState.currentIndex(), 1)
 
         val noOpState = fastForward(articleState, utteranceId("Bad state"))
-        assertEquals(noOpState.currentIndex, 0)
+        assertEquals(noOpState.currentIndex(), 0)
     }
 }

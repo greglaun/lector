@@ -23,7 +23,6 @@ enum class Changed {
     PREFERENCE,
 }
 
-// todo(cleanup): Get rid of currentContext and use only ArticleState?
 data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState(),
                                 val currentCourse: CourseContext = EmptyCourseContext(),
                                 val speakerState: SpeakerState = SpeakerState.NOT_READY)

@@ -24,11 +24,9 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         stateMachine?.stopMachine()
     }
 
-    override fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    override suspend fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         this.onPositionUpdate = onPositionUpdate
-        GlobalScope.launch {
-            stateMachine?.actionSpeakInLoop(onPositionUpdate)
-        }
+        stateMachine?.actionSpeakInLoop(onPositionUpdate)
     }
 
     override fun stopSpeechViewImmediately() {
@@ -39,10 +37,8 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         stateMachine?.updateArticle(articleState)
     }
 
-    override fun stopSpeaking() {
-        GlobalScope.launch {
-            stateMachine?.actionStopSpeaking()
-        }
+    override suspend fun stopSpeaking() {
+        stateMachine?.actionStopSpeaking()
     }
 
     override fun advanceOne(onDone: (ArticleState) -> Unit) {

@@ -7,10 +7,7 @@ import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -74,8 +71,8 @@ class MainPresenter(val view : MainContract.View,
                     courseSource.getArticlesForCourse(currentCourse.id!!)?.let {
                         displayArticleList(it,
                                 currentCourse.courseName)
+                    }
                 }
-            }
             }
 
             Navigation.NEW_ARTICLE -> {
@@ -148,16 +145,19 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onPlayButtonPressed() {
+        GlobalScope.launch {
         ttsPresenter.speakInLoop({
             GlobalScope.launch {
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
-        })
+        })}
         view.enablePauseButton()
     }
 
     override fun stopSpeakingAndEnablePlayButton() {
-        ttsPresenter.stopSpeaking()
+        runBlocking {
+            ttsPresenter.stopSpeaking()
+        }
         view.enablePlayButton()
     }
 
@@ -316,13 +316,17 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
-        ttsPresenter.stopSpeaking()
+        runBlocking {
+            ttsPresenter.stopSpeaking()
+        }
         view.enablePlayButton()
         ttsPresenter.setHandsomeBritish(shouldBeBritish)
     }
 
     override fun setSpeechRate(speechRate: Float) {
-        ttsPresenter.stopSpeaking()
+        runBlocking {
+            ttsPresenter.stopSpeaking()
+        }
         view.enablePlayButton()
         ttsPresenter.setSpeechRate(speechRate)
     }

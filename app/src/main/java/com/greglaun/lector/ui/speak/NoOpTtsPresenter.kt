@@ -9,11 +9,11 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun stopSpeaking() {
+    override suspend fun stopSpeaking() {
         // Do nothing
     }
 
-    override fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    override suspend fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         // Do nothing
     }
 
