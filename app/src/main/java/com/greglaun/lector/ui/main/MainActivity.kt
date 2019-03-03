@@ -260,9 +260,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun unHideReadingListView() {
         runOnUiThread {
-        webView.visibility = GONE
-        courseListRecyclerView.visibility = GONE
-        readingListView.visibility = VISIBLE
+            webView.visibility = GONE
+            courseListRecyclerView.visibility = GONE
+            readingListView.visibility = VISIBLE
         }
     }
 
