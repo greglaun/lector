@@ -14,29 +14,25 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.greglaun.lector.LectorApplication
 import com.greglaun.lector.R
 import com.greglaun.lector.android.*
 import com.greglaun.lector.android.bound.BindableTtsService
-import com.greglaun.lector.android.room.LectorDatabase
-import com.greglaun.lector.android.room.RoomCacheEntryClassifier
-import com.greglaun.lector.android.room.RoomCourseSource
-import com.greglaun.lector.android.room.RoomSavedArticleCache
 import com.greglaun.lector.android.webview.WikiWebViewClient
 import com.greglaun.lector.data.cache.ArticleContext
-import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.course.CourseContext
-import com.greglaun.lector.data.whitelist.CacheEntryClassifier
+import com.greglaun.lector.store.DEFAULT_READING_LIST
+import com.greglaun.lector.store.LECTOR_UNIVERSE
 import com.greglaun.lector.ui.course.CourseBrowserActivity
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
 import com.greglaun.lector.ui.speak.TtsPresenter
+import com.greglaun.lector.ui.speak.currentIndex
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 
@@ -65,7 +61,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var bindableTtsService: BindableTtsService
     private var bindableTtsServiceIsBound: Boolean = false
 
-    private var RESPONSE_SOURCE_INSTANCE: ResponseSource? = null
     private var sharedPreferenceListener: LectorPreferenceChangeListener? = null
 
     private val bindableTtsConnection = object : ServiceConnection {
@@ -73,11 +68,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as BindableTtsService.LocalBinder
-            if (RESPONSE_SOURCE_INSTANCE != null) {
-                bindableTtsService = binder.getService(responseSource = RESPONSE_SOURCE_INSTANCE!!)
-                bindableTtsServiceIsBound = true
-                checkTts()
-            }
+            bindableTtsService = binder.getService(
+                    (application as LectorApplication).responseSource())
+            bindableTtsServiceIsBound = true
+            checkTts()
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -97,8 +91,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mainPresenter = MainPresenter(this, NoOpTtsPresenter(),
-                createResponseSource(), RoomCourseSource(LectorDatabase.getInstance(this)!!))
+        mainPresenter = MainPresenter(this, LectorApplication.AppStore, NoOpTtsPresenter(),
+                (application as LectorApplication).responseSource(),
+                (application as LectorApplication).courseSource())
 
         readingListView = findViewById(R.id.ll_reading_list)
 
@@ -156,19 +151,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         bindableTtsServiceIsBound = false
     }
 
-
-    private fun createResponseSource(): ResponseSource {
-        if (RESPONSE_SOURCE_INSTANCE == null) {
-            val db = LectorDatabase.getInstance(applicationContext)
-            val cacheEntryClassifier: CacheEntryClassifier<String> = RoomCacheEntryClassifier(db!!)
-            RESPONSE_SOURCE_INSTANCE = ResponseSourceImpl.createResponseSource(
-                    RoomSavedArticleCache(db),
-                    cacheEntryClassifier,
-                    getCacheDir())
-        }
-        return RESPONSE_SOURCE_INSTANCE!!
-    }
-
     override fun onResume() {
         super.onResume()
         mainPresenter.onAttach()
@@ -193,7 +175,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
         val ttsStateMachine = bindableTtsService
-        mainPresenter = MainPresenter(this,
+        mainPresenter = MainPresenter(this, LectorApplication.AppStore,
                 TtsPresenter(androidAudioView, ttsStateMachine),
                 mainPresenter.responseSource(), mainPresenter.courseSource())
         renewReadingListRecycler(mainPresenter as MainPresenter)
@@ -263,8 +245,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onBackPressed() {
         if (readingListRecyclerView.visibility == VISIBLE) {
-            val title = findViewById<EditText>(R.id.reading_list_title).text.toString()
-            if (title != mainPresenter.ALL_ARTICLES) {
+            val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
+            if (title != DEFAULT_READING_LIST) {
                 unHideCourseListView()
             } else if (webView.visibility != VISIBLE) {
                 unhideWebView()
@@ -358,7 +340,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
-        val index = articleState.current_index
+        val index = articleState.currentIndex()
         val highlightColor = "yellow"
         val lectorClass = "lector-active"
         val js = "var txt = document.getElementsByTagName('p');" +
@@ -461,7 +443,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     fun onPlayAllPressed(view: View) {
         runOnUiThread {
-            var title = mainPresenter.LECTOR_UNIVERSE
+            var title = LECTOR_UNIVERSE
             val viewText = findViewById<TextView>(R.id.reading_list_title).text
             if (viewText != null) {
                 title = viewText.toString()

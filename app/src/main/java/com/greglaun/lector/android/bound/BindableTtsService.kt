@@ -37,7 +37,7 @@ class BindableTtsService : Service(), TtsStateMachine {
         return delegateStateMachine!!.actionStopSpeaking()
     }
 
-    override suspend fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?) {
+    override suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?) {
         return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
     }
 

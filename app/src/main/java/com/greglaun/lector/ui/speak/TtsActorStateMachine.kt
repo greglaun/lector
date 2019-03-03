@@ -1,6 +1,5 @@
 package com.greglaun.lector.ui.speak
 
-import com.greglaun.lector.data.cache.utteranceId
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.SendChannel
 
@@ -8,7 +7,7 @@ class TtsActorStateMachine : TtsStateMachine {
     internal var ACTOR_LOOP: SendChannel<TtsMsg>? = null
     internal var SPEECH_LOOP: Job? = null
     private val actorClient = newSingleThreadContext("ActorClient")
-    private var onPositionUpdate: ((String) -> Unit)? = null
+    private var onPositionUpdate: ((ArticleState) -> Unit)? = null
 
     // Basic machine state
 
@@ -26,18 +25,18 @@ class TtsActorStateMachine : TtsStateMachine {
 
     override suspend fun updateArticle(articleState: ArticleState) {
         actionStopSpeaking()
-        ACTOR_LOOP?.send(UpdateArticleState(articleState))
+        ACTOR_LOOP?.send(TTSUpdateArticleState(articleState))
     }
 
     override suspend fun getArticleState(): ArticleState {
         val articleStateDeferred = CompletableDeferred<ArticleState>()
-        ACTOR_LOOP?.send(GetArticleState(articleStateDeferred))
+        ACTOR_LOOP?.send(TTSGetArticleState(articleStateDeferred))
         return articleStateDeferred.await()
     }
 
     // Speaking state
 
-    override suspend fun actionSpeakInLoop(onPositionUpdate: ((String) -> Unit)?) {
+    override suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?) {
         this.onPositionUpdate = onPositionUpdate
         SPEECH_LOOP =  CoroutineScope(actorClient).launch {
             var readyDeferred = getSpeakerState()
@@ -58,7 +57,7 @@ class TtsActorStateMachine : TtsStateMachine {
                 var speakingState = actionSpeakOne()
                 val articleState = getArticleState()
                 articleState.current()?.also {
-                    this@TtsActorStateMachine.onPositionUpdate?.invoke(utteranceId(it))
+                    this@TtsActorStateMachine.onPositionUpdate?.invoke(articleState)
                 }
                 stillSpeaking = speakingState == SpeakerState.SPEAKING
             }
@@ -88,7 +87,7 @@ class TtsActorStateMachine : TtsStateMachine {
     override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
         val oldSpeakingState = getSpeakerState()
         val newArticleState = CompletableDeferred<ArticleState>()
-        ACTOR_LOOP?.send(ForwardOne(newArticleState = newArticleState))
+        ACTOR_LOOP?.send(TTSForwardOne(newArticleState = newArticleState))
         onDone(newArticleState.await())
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }
@@ -98,7 +97,7 @@ class TtsActorStateMachine : TtsStateMachine {
     override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
         val oldSpeakingState = getSpeakerState()
         val newArticleState = CompletableDeferred<ArticleState>()
-        ACTOR_LOOP?.send(BackOne(newArticleState = newArticleState))
+        ACTOR_LOOP?.send(TTSBackOne(newArticleState = newArticleState))
         onDone(newArticleState.await())
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }

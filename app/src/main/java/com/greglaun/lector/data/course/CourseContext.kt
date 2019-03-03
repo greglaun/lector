@@ -5,3 +5,7 @@ interface CourseContext {
     val courseName: String
     val position: Int
 }
+
+data class EmptyCourseContext(override val id: Long? = null,
+                              override  val courseName: String = "All Articles",
+                              override val position: Int = 0): CourseContext

@@ -5,27 +5,19 @@ import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
+import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
 class MainPresenter(val view : MainContract.View,
+                    val store: Store,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
-    : MainContract.Presenter, TtsStateListener {
-    override val LECTOR_UNIVERSE = ""
-    override val ALL_ARTICLES = "All Articles"
-
-    // Mutable state
-    private var currentRequestContext = "MAIN_PAGE"
-    private var currentCourse = LECTOR_UNIVERSE // Be default, the "course" is everything
-
+    : MainContract.Presenter, TtsStateListener, StateHandler {
     override var downloadCompleter: DownloadCompleter? = null
     private val contextThread = newSingleThreadContext("ContextThread")
     private var downloadScheduler: DownloadCompletionScheduler? = null
@@ -41,6 +33,8 @@ class MainPresenter(val view : MainContract.View,
     private var autoPlay = true
     private var autoDelete = true
 
+    private var isActivityRunning = false
+
     override fun onAttach() {
         ttsPresenter.onStart(this)
         downloadCompleter?.let {
@@ -48,11 +42,53 @@ class MainPresenter(val view : MainContract.View,
             downloadScheduler?.startDownloads()
         }
         articleStateSource = JSoupArticleStateSource(responseSource)
+        store.stateHandlers.add(this)
+        isActivityRunning = true
+        handleState(store.state)
     }
 
     override fun onDetach() {
         ttsPresenter.onStop()
         downloadScheduler?.stopDownloads()
+        store.stateHandlers.remove(this)
+    }
+
+    override suspend fun handle(state: State) {
+        if (isActivityRunning) {
+            handleState(state)
+        }
+    }
+
+    private fun handleState(state: State) {
+        when (state.navigation) {
+            Navigation.CURRENT_ARTICLE -> {
+                handleCurrentArticle(state)
+            }
+
+            Navigation.BROWSE_COURSES -> {
+                val currentCourse = state.currentArticleScreen.currentCourse
+                GlobalScope.launch {
+                    courseSource.getArticlesForCourse(currentCourse.id!!)?.let {
+                        displayArticleList(it,
+                                currentCourse.courseName)
+                    }
+                }
+            }
+
+            Navigation.NEW_ARTICLE -> {
+                handleNewArticle(state)
+            }
+
+            else -> throw NotImplementedError()
+        }
+    }
+
+    private fun handleCurrentArticle(state: State) {
+        throw NotImplementedError()
+    }
+
+    private fun handleNewArticle(state: State) {
+        view.loadUrl(contextToUrl(state.currentArticleScreen.articleState.title))
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -92,10 +128,11 @@ class MainPresenter(val view : MainContract.View,
 
     private suspend fun autoPlayNext(articleState: ArticleState) {
         var nextArticle: ArticleContext? = null
-        if (currentCourse == LECTOR_UNIVERSE) {
+        if (store.state.currentArticleScreen.articleState.title == DEFAULT_ARTICLE) {
             nextArticle = responseSource.getNextArticle(articleState.title)
         } else {
-            nextArticle = courseSource.getNextInCourse(currentCourse, articleState.title)
+            nextArticle = courseSource.getNextInCourse(
+                    store.state.currentArticleScreen.articleState.title, articleState.title)
         }
         nextArticle?.let {
             onUrlChanged(contextToUrl(it.contextString))
@@ -108,40 +145,40 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onPlayButtonPressed() {
+        GlobalScope.launch {
         ttsPresenter.speakInLoop({
             GlobalScope.launch {
-                responseSource.updatePosition(currentRequestContext, it)
+                store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
-        })
+        })}
         view.enablePauseButton()
     }
 
     override fun stopSpeakingAndEnablePlayButton() {
-        ttsPresenter.stopSpeaking()
-       view.enablePlayButton()
+        runBlocking {
+            ttsPresenter.stopSpeaking()
+        }
+        view.enablePlayButton()
     }
 
     override suspend fun onUrlChanged(urlString: String) {
         computeCurrentContext(urlString)
-        view.loadUrl(urlString)
         stopSpeakingAndEnablePlayButton()
         var position = POSITION_BEGINNING
         if (responseSource.contains(urlToContext(urlString))) {
-                responseSource.getArticleContext(urlToContext(urlString))?.let{
-                            position = it.position
-                        }
+            responseSource.getArticleContext(urlToContext(urlString))?.let {
+                position = it.position
+            }
         }
         articleStateSource?.getArticle(urlString)?.let {
             ttsPresenter.onArticleChanged(fastForward(it, position))
-            if (it.title != currentRequestContext) {
-                val previousTitle = currentRequestContext
-                synchronized(currentRequestContext) {
-                    currentRequestContext = it.title
-                }
+            if (it.title != store.state.currentArticleScreen.articleState.title) {
+                val previousTitle = store.state.currentArticleScreen.articleState.title
+                store.dispatch(UpdateAction.UpdateArticleAction(it))
                 GlobalScope.launch {
                     responseSource.update(previousTitle, it.title)
                 }
-                }
+            }
         }
     }
 
@@ -152,11 +189,11 @@ class MainPresenter(val view : MainContract.View,
 
     private fun computeCurrentContext(urlString: String) {
         // todo(caching, REST): Replace this ugliness
-        // todo(concurrency): Handle access of currentRequestContext from multiple threads
+        // todo(concurrency): Handle access of store.state.currentArticleScreen.articleState.title from multiple threads
         CoroutineScope(contextThread).launch {
-            var computedContext = currentRequestContext
-            synchronized(currentRequestContext) {
-                computedContext = currentRequestContext
+            var computedContext = store.state.currentArticleScreen.articleState.title
+            synchronized(store.state.currentArticleScreen.articleState.title) {
+                computedContext = store.state.currentArticleScreen.articleState.title
                 if (urlString.contains("index.php?search=")) {
                     if (urlString.substringAfterLast("search=") == "") {
                         return@launch
@@ -171,16 +208,23 @@ class MainPresenter(val view : MainContract.View,
                     val response = client.newCall(request).execute()
                     if (response != null) {
                         if (response.isRedirect) {
-                            val url = response.networkResponse()?.headers()?.toMultimap()?.get("Location")
+                            val url = response.networkResponse()?.headers()?.toMultimap()?.
+                                    get("Location")
                             if (url != null) {
-                                currentRequestContext = urlToContext(url.get(0))
+                                GlobalScope.launch {
+                                    store.dispatch(UpdateAction.UpdateArticleAction(articleStatefromTitle(
+                                            urlToContext(url.get(0)))))
+                                }
                             }
                         }
                     }
                 } else {
-                    currentRequestContext = urlToContext(urlString)
+                    GlobalScope.launch {
+                        store.dispatch(UpdateAction.UpdateArticleAction(articleStatefromTitle(
+                                urlToContext(urlString))))
+                    }
                 }
-                computedContext = currentRequestContext
+                computedContext = store.state.currentArticleScreen.articleState.title
             }
             if (!this@MainPresenter.responseSource.contains(computedContext)) {
                 responseSource.add(computedContext)
@@ -190,8 +234,8 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onRequest(url: String): Response? {
         var curContext: String? = null
-        synchronized(currentRequestContext) {
-            curContext = currentRequestContext
+        synchronized(store.state.currentArticleScreen.articleState.title) {
+            curContext = store.state.currentArticleScreen.articleState.title
         }
         return responseSource.getWithContext(Request.Builder()
                 .url(url)
@@ -199,24 +243,20 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun saveArticle() {
-        val requestContextCopy = currentRequestContext
+        val requestContextCopy = store.state.currentArticleScreen.articleState.title
         responseSource.markPermanent(requestContextCopy)
     }
 
     override suspend fun courseDetailsRequested(courseContext: CourseContext) {
         courseContext.id?.let {
-            currentCourse = courseContext.courseName
-                courseSource.getArticlesForCourse(it)?.let {
-                    displayArticleList(it,
-                            courseContext.courseName)
-                }
+            store.dispatch(ReadAction.FetchCourseDetailsAction(courseContext))
         }
     }
 
     override fun deleteRequested(articleContext: ArticleContext) {
         view.confirmMessage("Delete article ${articleContext.contextString}?",
                 onConfirmed = {
-                    if(it) {
+                    if (it) {
                         GlobalScope.launch {
                             responseSource.delete(articleContext.contextString)
                             readingList.remove(articleContext)
@@ -229,7 +269,7 @@ class MainPresenter(val view : MainContract.View,
     override fun deleteRequested(courseContext: CourseContext) {
         view.confirmMessage("Delete course ${courseContext.courseName}?",
                 onConfirmed = {
-                    if(it) {
+                    if (it) {
                         GlobalScope.launch {
                             courseSource.delete(courseContext.courseName)
                             courseList.remove(courseContext)
@@ -241,7 +281,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onDisplayReadingList() {
         responseSource.getAllPermanent()?.let {
-            displayArticleList(it, ALL_ARTICLES)
+            displayArticleList(it, store.state.currentArticleScreen.currentCourse.courseName)
         }
     }
 
@@ -262,27 +302,31 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onRewindOne() {
-        ttsPresenter.reverseOne {it ->
+        ttsPresenter.reverseOne { it ->
             view.unhighlightAllText()
             view.highlightText(it)
         }
     }
 
     override fun onForwardOne() {
-        ttsPresenter.advanceOne {it ->
+        ttsPresenter.advanceOne { it ->
             view.unhighlightAllText()
             view.highlightText(it)
         }
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
-        ttsPresenter.stopSpeaking()
+        runBlocking {
+            ttsPresenter.stopSpeaking()
+        }
         view.enablePlayButton()
         ttsPresenter.setHandsomeBritish(shouldBeBritish)
     }
 
     override fun setSpeechRate(speechRate: Float) {
-        ttsPresenter.stopSpeaking()
+        runBlocking {
+            ttsPresenter.stopSpeaking()
+        }
         view.enablePlayButton()
         ttsPresenter.setSpeechRate(speechRate)
     }
@@ -298,7 +342,7 @@ class MainPresenter(val view : MainContract.View,
     override fun playAllPressed(title: String) {
         // todo: we are going to have to handle the notion of autoplay being temporarily enabled,
         // todo: or else change the language from "play all" to "start playing" or something else
-        if (readingList != null && readingList.size >0 ) {
+        if (readingList != null && readingList.size > 0) {
             GlobalScope.launch {
                 onUrlChanged(contextToUrl(readingList[0].contextString))
                 onPlayButtonPressed()
@@ -312,5 +356,13 @@ class MainPresenter(val view : MainContract.View,
 
     override fun setAutoDelete(autoDeleteIn: Boolean) {
         autoDelete = autoDeleteIn
+    }
+
+    private fun updatePosition(): AbstractArticleState {
+        if (store.state.currentArticleScreen.articleState.hasNext()) {
+            return store.state.currentArticleScreen.articleState.next()!!
+        } else {
+            return store.state.currentArticleScreen.articleState
+        }
     }
 }

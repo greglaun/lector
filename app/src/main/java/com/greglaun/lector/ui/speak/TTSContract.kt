@@ -10,8 +10,8 @@ interface TTSContract {
     }
 
     interface Presenter {
-        fun speakInLoop(onPositionUpdate: ((String) -> Unit)?)
-        fun stopSpeaking()
+        suspend fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
+        suspend fun stopSpeaking()
         suspend fun onArticleChanged(articleState: ArticleState)
         fun onStart(stateListener: TtsStateListener)
         fun onStop()
