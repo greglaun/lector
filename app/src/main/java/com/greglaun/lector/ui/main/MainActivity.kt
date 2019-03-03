@@ -63,29 +63,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private var sharedPreferenceListener: LectorPreferenceChangeListener? = null
 
-    private val bindableTtsConnection = object : ServiceConnection {
-
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            val binder = service as BindableTtsService.LocalBinder
-            bindableTtsService = binder.getService(
-                    (application as LectorApplication).responseSource())
-            bindableTtsServiceIsBound = true
-            checkTts()
-        }
-
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            bindableTtsServiceIsBound = false
-        }
-    }
-
-    private inner class BecomingNoisyReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
-                mainPresenter?.stopSpeakingAndEnablePlayButton()
-            }
-        }
-    }
+    /*
+     * Lifecycle
+     *
+     */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -158,6 +139,50 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
     }
 
+    override fun onBackPressed() {
+        if (readingListRecyclerView.visibility == VISIBLE) {
+            val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
+            if (title != DEFAULT_READING_LIST) {
+                unHideCourseListView()
+            } else if (webView.visibility != VISIBLE) {
+                unhideWebView()
+            }
+        } else if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            onPause()
+        }
+    }
+
+    /*
+     * Service Accounts
+     *
+     */
+
+    private val bindableTtsConnection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as BindableTtsService.LocalBinder
+            bindableTtsService = binder.getService(
+                    (application as LectorApplication).responseSource())
+            bindableTtsServiceIsBound = true
+            checkTts()
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            bindableTtsServiceIsBound = false
+        }
+    }
+
+    private inner class BecomingNoisyReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                mainPresenter?.stopSpeakingAndEnablePlayButton()
+            }
+        }
+    }
+
     fun checkTts() {
         // todo(android): Clean this up, it is horribly messy.
         var androidTts : TextToSpeech? = null
@@ -169,6 +194,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
              }
         })
     }
+
+    private fun onBadTts() {
+        Log.d(TAG, "Null Tts")
+    }
+
+    /*
+     * Presenter setup
+     */
 
     private fun onSuccessfulTts(androidTts: TextToSpeech) {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
@@ -205,6 +238,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         sharedPreferenceListener?.setFromPreferences(this)
     }
 
+    /*
+     * Recycler setup
+     */
+
     private fun renewReadingListRecycler(mainPresenter: MainPresenter) {
         readingListViewAdapter = ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
             GlobalScope.launch {
@@ -239,24 +276,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    private fun onBadTts() {
-        Log.d(TAG, "Null Tts")
-    }
-
-    override fun onBackPressed() {
-        if (readingListRecyclerView.visibility == VISIBLE) {
-            val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
-            if (title != DEFAULT_READING_LIST) {
-                unHideCourseListView()
-            } else if (webView.visibility != VISIBLE) {
-                unhideWebView()
-            }
-        } else if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            onPause()
-        }
-    }
+    /*
+     * View hiding/unhiding
+     */
 
     override fun unHideReadingListView() {
         runOnUiThread {
@@ -281,6 +303,27 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             webView.visibility = VISIBLE
         }
     }
+
+
+    override fun displayReadingList(title: String?) {
+        runOnUiThread {
+            title?.let {
+                val titleView =findViewById<TextView>(R.id.reading_list_title)
+                titleView.text = title
+            }
+            unHideReadingListView()
+        }
+    }
+
+    override fun displayCourses() {
+        runOnUiThread {
+            unHideCourseListView()
+        }
+    }
+
+    /*
+     *  Options menu
+     */
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
@@ -338,18 +381,22 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
+    /*
+     * Javascript
+     */
+
     override fun highlightText(articleState: ArticleState, onDone: ((ArticleState, String)-> Unit)?) {
         // todo(javascript): Properly handle javascript?
         val index = articleState.currentIndex()
         val highlightColor = "yellow"
         val lectorClass = "lector-active"
         val js = "var txt = document.getElementsByTagName('p');" +
-                 "txt[$index].classList.add('$lectorClass');" +
-                 "txt[$index].style.backgroundColor = '$highlightColor';" +
+                "txt[$index].classList.add('$lectorClass');" +
+                "txt[$index].style.backgroundColor = '$highlightColor';" +
                 "var windowHeight = window.innerHeight;" +
-                 "var xoff = txt[$index].offsetLeft;" +
+                "var xoff = txt[$index].offsetLeft;" +
                 "var yoff = txt[$index].offsetTop;" +
-                 "window.scrollTo(xoff, yoff - windowHeight/3);"
+                "window.scrollTo(xoff, yoff - windowHeight/3);"
         runOnUiThread {
             webView.evaluateJavascript(js) {
                 onDone?.invoke(articleState, it)
@@ -368,11 +415,36 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             webView.evaluateJavascript(js) {}
         }
     }
+
+    override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
+        webView.evaluateJavascript(js, callback)
+    }
+
+    private fun expandCollapsableElements() {
+        // todo (javascript): Only run on appropriate urls
+        // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
+        val js = "var blocks = document.getElementsByTagName('h2');" +
+                "if (blocks.length > 0) {" +
+                "for (let item of blocks) {" +
+                "item.className+=' open-block';" +
+                "if (!!item.previousSibling) { item.previousSibling.className+=' open-block';}" +
+                "}}"
+        mainPresenter.evaluateJavascript(js, null)
+    }
+
+    /*
+     * Webview
+     */
+
     override fun loadUrl(urlString: String) {
         runOnUiThread {
             webView.loadUrl(urlString)
         }
     }
+
+    /*
+     * Controlling playback
+     */
 
     override fun enablePlayButton() {
         runOnUiThread {
@@ -399,6 +471,22 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             courseListViewAdapter.notifyDataSetChanged()
         }
     }
+
+    fun onPlayAllPressed(view: View) {
+        runOnUiThread {
+            var title = LECTOR_UNIVERSE
+            val viewText = findViewById<TextView>(R.id.reading_list_title).text
+            if (viewText != null) {
+                title = viewText.toString()
+            }
+            unhideWebView()
+            mainPresenter.playAllPressed(title)
+        }
+    }
+
+    /*
+     * LectorView functions
+     */
 
     override fun confirmMessage(message: String, yesButton: String, noButton: String, onConfirmed: (Boolean) -> Unit) {
         AlertDialog.Builder(this)
@@ -429,49 +517,5 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun showMessage(resourceId: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun displayReadingList(title: String?) {
-        runOnUiThread {
-            title?.let {
-                val titleView =findViewById<TextView>(R.id.reading_list_title)
-                titleView.text = title
-            }
-            unHideReadingListView()
-        }
-    }
-
-    fun onPlayAllPressed(view: View) {
-        runOnUiThread {
-            var title = LECTOR_UNIVERSE
-            val viewText = findViewById<TextView>(R.id.reading_list_title).text
-            if (viewText != null) {
-                title = viewText.toString()
-            }
-            unhideWebView()
-            mainPresenter.playAllPressed(title)
-        }
-    }
-
-    override fun displayCourses() {
-        runOnUiThread {
-            unHideCourseListView()
-        }
-    }
-
-    override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
-        webView.evaluateJavascript(js, callback)
-    }
-
-    private fun expandCollapsableElements() {
-        // todo (javascript): Only run on appropriate urls
-        // todo (javascript): Do we need "item.previousSibling.className+=' open-block';"?
-        val js = "var blocks = document.getElementsByTagName('h2');" +
-                "if (blocks.length > 0) {" +
-                "for (let item of blocks) {" +
-                "item.className+=' open-block';" +
-                "if (!!item.previousSibling) { item.previousSibling.className+=' open-block';}" +
-                "}}"
-        mainPresenter.evaluateJavascript(js, null)
     }
 }
