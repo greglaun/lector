@@ -64,7 +64,6 @@ class MainPresenter(val view : MainContract.View,
 
     private fun handleState(state: State) {
         when (state.navigation) {
-
             Navigation.CURRENT_ARTICLE -> {
                 handleCurrentArticle(state)
             }
@@ -92,7 +91,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleNewArticle(state: State) {
-        throw NotImplementedError()
+        view.loadUrl(contextToUrl(state.currentArticleScreen.articleState.title))
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -151,7 +150,7 @@ class MainPresenter(val view : MainContract.View,
     override fun onPlayButtonPressed() {
         ttsPresenter.speakInLoop({
             GlobalScope.launch {
-                store.dispatch(UpdateArticleAction(updatePosition()))
+                store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
         })
         view.enablePauseButton()
@@ -164,7 +163,6 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onUrlChanged(urlString: String) {
         computeCurrentContext(urlString)
-        view.loadUrl(urlString)
         stopSpeakingAndEnablePlayButton()
         var position = POSITION_BEGINNING
         if (responseSource.contains(urlToContext(urlString))) {
@@ -176,7 +174,7 @@ class MainPresenter(val view : MainContract.View,
             ttsPresenter.onArticleChanged(fastForward(it, position))
             if (it.title != store.state.currentArticleScreen.articleState.title) {
                 val previousTitle = store.state.currentArticleScreen.articleState.title
-                store.dispatch(UpdateArticleAction(it))
+                store.dispatch(UpdateAction.UpdateArticleAction(it))
                 GlobalScope.launch {
                     responseSource.update(previousTitle, it.title)
                 }
@@ -214,7 +212,7 @@ class MainPresenter(val view : MainContract.View,
                                     get("Location")
                             if (url != null) {
                                 GlobalScope.launch {
-                                    store.dispatch(UpdateArticleAction(articleStatefromTitle(
+                                    store.dispatch(UpdateAction.UpdateArticleAction(articleStatefromTitle(
                                             urlToContext(url.get(0)))))
                                 }
                             }
@@ -222,7 +220,7 @@ class MainPresenter(val view : MainContract.View,
                     }
                 } else {
                     GlobalScope.launch {
-                        store.dispatch(UpdateArticleAction(articleStatefromTitle(
+                        store.dispatch(UpdateAction.UpdateArticleAction(articleStatefromTitle(
                                 urlToContext(urlString))))
                     }
                 }
@@ -251,7 +249,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun courseDetailsRequested(courseContext: CourseContext) {
         courseContext.id?.let {
-            store.dispatch(CourseDetailRequestAction(courseContext))
+            store.dispatch(ReadAction.FetchCourseDetailsAction(courseContext))
         }
     }
 

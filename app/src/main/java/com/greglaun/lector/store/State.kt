@@ -44,7 +44,7 @@ data class State(
         val currentArticleScreen: CurrentArticleScreen = CurrentArticleScreen(),
         val readingListScreen: ReadingListScreen = ReadingListScreen(),
         val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen(),
-        val navigation: Navigation = Navigation.CURRENT_ARTICLE,
+        val navigation: Navigation = Navigation.NEW_ARTICLE,
         val changed: List<Changed> = listOf(Changed.NONE)
 )
 

@@ -1,4 +1,4 @@
-package com.greglaun.lector.data
+package com.greglaun.lector.store.sideeffect.persistence
 
 import com.greglaun.lector.store.Action
 import com.greglaun.lector.store.SideEffect
@@ -12,7 +12,6 @@ class PersistenceSideEffect(val store: Store)
     }
 
     override suspend fun handle(action: Action) {
-//        println("Persistence thread: ${Thread.currentThread().name}")
 //        when (action) {
 //            is CreationAction -> CreationHandler.handle(action) { store.dispatch(it) }
 //            is UpdateAction -> UpdateHandler.handle(action) { store.dispatch(it) }
