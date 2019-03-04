@@ -3,7 +3,7 @@ package com.greglaun.lector.ui.course
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.CourseSource
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.mockito.Mockito.*
 

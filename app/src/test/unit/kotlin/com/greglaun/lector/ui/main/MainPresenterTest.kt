@@ -6,7 +6,7 @@ import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.TTSContract
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Test
 import org.mockito.ArgumentMatchers

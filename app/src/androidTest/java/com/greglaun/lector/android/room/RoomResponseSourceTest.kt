@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.SavedArticleCache
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.After

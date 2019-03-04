@@ -6,9 +6,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.android.okHttpToWebView
 import com.greglaun.lector.ui.main.MainContract
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
                         val onNonWikiUrl: (WebResourceRequest) -> Boolean,
