@@ -7,7 +7,7 @@ import androidx.room.ForeignKey.CASCADE
         entity = RoomArticleContext::class,
         parentColumns = arrayOf("id"),
         childColumns = arrayOf("articleContextId"), onDelete = CASCADE)),
-        indices = arrayOf(Index(value = "articleContextId")))
+        indices = arrayOf(Index(value = ["articleContextId"])))
 
 
 data class CachedResponse(@PrimaryKey(autoGenerate = true) var id: Long?,

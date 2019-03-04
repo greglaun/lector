@@ -1,7 +1,7 @@
 package com.greglaun.lector.ui.speak
 
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.channels.SendChannel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.SendChannel
 
 class TtsActorStateMachine : TtsStateMachine {
     internal var ACTOR_LOOP: SendChannel<TtsMsg>? = null

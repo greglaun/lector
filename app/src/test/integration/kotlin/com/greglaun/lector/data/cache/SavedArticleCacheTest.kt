@@ -2,7 +2,7 @@ package com.greglaun.lector.data.cache
 
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import com.greglaun.lector.data.net.TEN_GB
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.After

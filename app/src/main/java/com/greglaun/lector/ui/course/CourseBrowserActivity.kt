@@ -19,8 +19,8 @@ import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseDownloaderImpl
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.ThinCourseDetails
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
     private lateinit var courseBrowserRecyclerView: RecyclerView

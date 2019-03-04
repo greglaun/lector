@@ -26,7 +26,6 @@
             android:parentActivityName="com.greglaun.lector.ui.main.MainActivity">
         </activity>
         <activity android:name=".ui.main.SettingsActivity">
-            android:label="Settings"
         </activity>
         <service android:name=".android.bound.BindableTtsService" />
     </application>

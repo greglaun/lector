@@ -33,6 +33,7 @@ android {
             buildConfigField "String", "BASE_URL_LOCAL", System.env.LECTOR_BASE_URL_LOCAL ?: "\"$lectorUrlLocal\""
         }
         release {
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "BASE_URL", System.env.LECTOR_BASE_URL ?: "\"$lectorUrl\""
@@ -64,7 +65,7 @@ dependencies {
     kapt    "io.arrow-kt:arrow-annotations-processor:$ARROW_VERSION"
 
     // Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2-eap13'
 
     // OkHttp
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'

@@ -3,7 +3,7 @@ package com.greglaun.lector.data.cache
 import com.greglaun.lector.data.net.OkHttpConnectionFactory
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.data.whitelist.HashSetCacheEntryClassifier
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.After

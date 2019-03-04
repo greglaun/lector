@@ -2,8 +2,8 @@ package com.greglaun.lector.ui.speak
 
 import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.utteranceId
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.channels.actor
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.actor
 
 private val actorContext = newSingleThreadContext("ActorContext")
 

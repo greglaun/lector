@@ -7,7 +7,7 @@ import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response

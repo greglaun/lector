@@ -4,8 +4,8 @@ import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.course.ThinCourseDetails
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class CourseBrowserPresenter(val view: CourseBrowserContract.View,
                              val courseDownloader: CourseDownloader,

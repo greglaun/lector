@@ -1,10 +1,10 @@
 package com.greglaun.lector.store
 
-import kotlinx.coroutines.experimental.CoroutineScope
-import kotlinx.coroutines.experimental.CoroutineStart
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.newSingleThreadContext
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**

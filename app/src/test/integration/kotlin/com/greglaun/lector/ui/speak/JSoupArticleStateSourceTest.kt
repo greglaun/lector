@@ -4,7 +4,7 @@ import com.greglaun.lector.data.cache.HashMapSavedArticleCache
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.contextToUrl
 import com.greglaun.lector.data.whitelist.HashSetCacheEntryClassifier
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import java.io.File

@@ -1,7 +1,7 @@
 package com.greglaun.lector.data.course
 
 import com.greglaun.lector.BuildConfig
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File

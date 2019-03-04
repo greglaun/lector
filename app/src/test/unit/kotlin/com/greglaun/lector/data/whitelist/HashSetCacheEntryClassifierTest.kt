@@ -1,7 +1,7 @@
 package com.greglaun.lector.data.whitelist
 
 import com.greglaun.lector.data.cache.BasicArticleContext
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
