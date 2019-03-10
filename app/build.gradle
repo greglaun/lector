@@ -48,7 +48,7 @@ configurations {
 }
 
 def ARROW_VERSION = "0.7.3"
-def MOCKITO_VERSION = "2.22.0"
+def MOCKITO_VERSION = "2.25.0"
 def JACKSON_VERSION = "2.9.7"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
