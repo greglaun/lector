@@ -37,14 +37,17 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onAttach() {
         ttsPresenter.onStart(this)
-        downloadCompleter?.let {
-            downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
-            downloadScheduler?.startDownloads()
-        }
+//        downloadCompleter?.let {
+//            downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
+//            downloadScheduler?.startDownloads()
+//        }
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
         isActivityRunning = true
         handleState(store.state)
+        GlobalScope.launch {
+            store.dispatch(ReadAction.StartDownloadAction())
+        }
     }
 
     override fun onDetach() {

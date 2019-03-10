@@ -56,6 +56,7 @@ abstract class Store {
             is UpdateAction.UpdateCourseDetailsAction ->
                 reduceUpdateCourseDetailsAction(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
+            is ReadAction.StartDownloadAction ->  reduceStartDowloadAction(action, state)
 //            is CreationAction -> CreationReducer.reduce(action, currentState)
 //            is UpdateAction -> UpdateReducer.reduce(action, currentState)
 //            is ReadAction -> ReadReducer.reduce(action, currentState)

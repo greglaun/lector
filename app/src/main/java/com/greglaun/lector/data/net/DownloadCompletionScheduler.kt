@@ -11,6 +11,7 @@ class DownloadCompletionScheduler(
         val unfinishedDownloadSource: UnfinishedDownloadSource) {
 
     var fixedRateTimer: Timer? = null
+    var isRunning: Boolean = false
 
     fun startDownloads() {
         fixedRateTimer = fixedRateTimer(name = "download-finish-timer",
@@ -22,6 +23,7 @@ class DownloadCompletionScheduler(
                         unfinishedDownloadSource.markFinished(it)
                     }
                 }
+                isRunning = true
             }
         }
 
@@ -29,6 +31,7 @@ class DownloadCompletionScheduler(
 
     fun stopDownloads() {
         fixedRateTimer?.cancel()
+        isRunning = false
     }
 }
 

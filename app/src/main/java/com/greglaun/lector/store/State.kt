@@ -21,7 +21,9 @@ enum class Navigation {
 enum class Changed {
     NONE,
     PREFERENCE,
+    BACKGROUND
 }
+
 
 data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState(),
                                 val currentCourse: CourseContext = EmptyCourseContext(),
@@ -39,19 +41,24 @@ data class Preferences(val autoPlay: Boolean = true,
                        val isSlow: Boolean = false,
                        val speechRate: Float = 1f)
 
+data class Background(val downloadFinisher: Boolean = false)
+
 data class State(
         val currentArticleScreen: CurrentArticleScreen = CurrentArticleScreen(),
         val readingListScreen: ReadingListScreen = ReadingListScreen(),
         val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen(),
         val navigation: Navigation = Navigation.NEW_ARTICLE,
+        val preferences: Preferences = Preferences(),
+        val background: Background = Background(),
         val changed: List<Changed> = listOf(Changed.NONE)
 )
 
 fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
-    return State(newArticleScreen, readingListScreen, courseBrowserScreen, navigation, changed)
+    return State(newArticleScreen, readingListScreen, courseBrowserScreen, navigation,
+            preferences, background, changed)
 }
 
 fun State.updateReadingListScreen(newReadingListScreen: ReadingListScreen): State {
     return State(currentArticleScreen, newReadingListScreen, courseBrowserScreen, navigation,
-            changed)
+            preferences, background, changed)
 }
