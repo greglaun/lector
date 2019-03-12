@@ -32,3 +32,7 @@ fun reduceFetchCourseDetailsAction(action: ReadAction.FetchCourseDetailsAction,
             Lce.Loading))
 }
 
+fun reduceStartDowloadAction(action: ReadAction.StartDownloadAction,
+                             currentState: State): State {
+    return currentState
+}

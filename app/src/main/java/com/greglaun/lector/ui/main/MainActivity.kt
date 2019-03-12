@@ -98,8 +98,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         })
 
         downloaderWebView = findViewById(R.id.downloader_webview) as WebView
-        mainPresenter.downloadCompleter = AndroidDownloadCompleter(
-                AndroidInternetChecker(this),
+        (application as LectorApplication).addDownloadCompletionSideEffect(
                 WebviewDownloadTool(downloaderWebView, mainPresenter, this))
 
         readingListViewManager = LinearLayoutManager(this)
