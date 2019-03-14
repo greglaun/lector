@@ -14,6 +14,7 @@ sealed class UpdateAction: Action() {
 sealed class ReadAction: Action() {
     data class FetchCourseDetailsAction(val courseContext: CourseContext) : ReadAction()
     class StartDownloadAction: ReadAction()
+    class StopDownloadAction: ReadAction()
 }
 
 

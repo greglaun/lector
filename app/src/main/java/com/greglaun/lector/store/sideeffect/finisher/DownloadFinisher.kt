@@ -16,6 +16,10 @@ class DownloadFinisher(val store: Store,
         when (action) {
             is ReadAction.StartDownloadAction ->
                 finishDownloadsInBackground(action) { store.dispatch(it) }
+            is ReadAction.StopDownloadAction -> {
+                downloadCompletionScheduler?.stopDownloads()
+            }
+
         }
     }
 

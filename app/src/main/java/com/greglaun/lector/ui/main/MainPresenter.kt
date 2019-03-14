@@ -18,11 +18,8 @@ class MainPresenter(val view : MainContract.View,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener, StateHandler {
-    override var downloadCompleter: DownloadCompleter? = null
     private val contextThread = newSingleThreadContext("ContextThread")
-    private var downloadScheduler: DownloadCompletionScheduler? = null
     private var articleStateSource: ArticleStateSource? = null
-
 
     // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
@@ -37,10 +34,6 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onAttach() {
         ttsPresenter.onStart(this)
-//        downloadCompleter?.let {
-//            downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
-//            downloadScheduler?.startDownloads()
-//        }
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
         isActivityRunning = true
@@ -52,7 +45,9 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onDetach() {
         ttsPresenter.onStop()
-        downloadScheduler?.stopDownloads()
+        runBlocking {
+            store.dispatch(ReadAction.StopDownloadAction())
+        }
         store.stateHandlers.remove(this)
     }
 
