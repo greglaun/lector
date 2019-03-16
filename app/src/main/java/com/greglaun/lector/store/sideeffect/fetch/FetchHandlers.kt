@@ -1,16 +1,11 @@
 package com.greglaun.lector.store.sideeffect.fetch
 
 import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.store.Action
 import com.greglaun.lector.store.ReadAction
 import com.greglaun.lector.store.UpdateAction
-import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.ArticleStateSource
-import com.greglaun.lector.ui.speak.articleStatefromTitle
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 suspend fun fetchCourseDetails(action: ReadAction.FetchCourseDetailsAction,
                                courseDownloader: CourseDownloader,

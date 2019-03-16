@@ -25,7 +25,7 @@ enum class Changed {
 }
 
 
-data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState(),
+data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState,
                                 val currentCourse: CourseContext = EmptyCourseContext(),
                                 val speakerState: SpeakerState = SpeakerState.NOT_READY)
 
