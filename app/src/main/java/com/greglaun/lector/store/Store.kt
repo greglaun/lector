@@ -1,5 +1,6 @@
 package com.greglaun.lector.store
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,7 @@ abstract class Store {
 
     private val stateActor =
             CoroutineScope(storeContext).actor<Action>(
-                    Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
+                    Dispatchers.Default, 2, CoroutineStart.DEFAULT, null, {
                 for (msg in channel) {
                     handle(msg)
                 }
@@ -52,7 +53,7 @@ abstract class Store {
 
     private fun reduce(action: Action, currentState: State): State {
         val newState = when (action) {
-            is UpdateAction.UpdateArticleAction -> reduceUpdateArticleAction(action, state)
+            is UpdateAction.LoadNewArticleAction -> reduceUpdateArticleAction(action, state)
             is UpdateAction.UpdateCourseDetailsAction ->
                 reduceUpdateCourseDetailsAction(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
@@ -62,6 +63,7 @@ abstract class Store {
 //            is ReadAction -> ReadReducer.reduce(action, currentState)
 //            is DeleteAction -> DeleteReducer.reduce(action, currentState)
 //            is NavigationAction -> NavigationReducer.reduce(action, currentState)
+            else -> return currentState
         }
         return newState
     }

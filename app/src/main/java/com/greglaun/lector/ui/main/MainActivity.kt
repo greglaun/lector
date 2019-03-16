@@ -207,14 +207,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
         val ttsStateMachine = bindableTtsService
+        mainPresenter.onDetach()
         mainPresenter = MainPresenter(this, LectorApplication.AppStore,
                 TtsPresenter(androidAudioView, ttsStateMachine),
                 mainPresenter.responseSource(), mainPresenter.courseSource())
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
-
-        mainPresenter.downloadCompleter = mainPresenter.downloadCompleter
 
         webView.webViewClient = WikiWebViewClient(mainPresenter, {
             val intent = Intent(Intent.ACTION_VIEW, it.url)
