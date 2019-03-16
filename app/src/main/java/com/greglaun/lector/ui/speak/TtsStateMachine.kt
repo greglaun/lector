@@ -1,7 +1,9 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.Store
+
 interface TtsStateMachine {
-    fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener)
+    fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener, store: Store)
     fun stopMachine()
 
     suspend fun updateArticle(articleState: ArticleState)

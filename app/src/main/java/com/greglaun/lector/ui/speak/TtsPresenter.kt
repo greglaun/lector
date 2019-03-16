@@ -1,10 +1,12 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.Store
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class TtsPresenter(private val tts: TTSContract.AudioView,
-                   val stateMachine: TtsStateMachine)
+                   val stateMachine: TtsStateMachine,
+                   val store: Store)
     : TTSContract.Presenter, TtsActorClient {
     var onPositionUpdate: ((AbstractArticleState) -> Unit)? = null
 
@@ -17,7 +19,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     }
 
     override fun onStart(stateListener: TtsStateListener) {
-        stateMachine?.startMachine(this, stateListener)
+        stateMachine?.startMachine(this, stateListener, store)
     }
 
     override fun onStop() {

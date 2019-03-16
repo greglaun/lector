@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.store.Store
 import com.greglaun.lector.ui.speak.*
 
 class BindableTtsService : Service(), TtsStateMachine {
@@ -13,8 +14,10 @@ class BindableTtsService : Service(), TtsStateMachine {
     private var delegateStateMachine: TtsActorStateMachine? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
-    override fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener) {
-        this.delegateStateMachine!!.startMachine(ttsActorClient, stateListener)
+    override fun startMachine(ttsActorClient: TtsActorClient,
+                              stateListener: TtsStateListener,
+                              store: Store) {
+        this.delegateStateMachine!!.startMachine(ttsActorClient, stateListener, store)
     }
 
     override fun stopMachine() {

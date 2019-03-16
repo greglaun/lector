@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.Store
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 
@@ -11,9 +12,11 @@ class TtsActorStateMachine : TtsStateMachine {
 
     // Basic machine state
 
-    override fun startMachine(ttsActorClient: TtsActorClient, ttsStateListener: TtsStateListener) {
+    override fun startMachine(ttsActorClient: TtsActorClient,
+                              ttsStateListener: TtsStateListener,
+                              store: Store) {
         if (ACTOR_LOOP == null) {
-            ACTOR_LOOP = ttsActor(ttsActorClient, ttsStateListener)
+            ACTOR_LOOP = ttsActor(ttsActorClient, ttsStateListener, store)
         }
     }
 

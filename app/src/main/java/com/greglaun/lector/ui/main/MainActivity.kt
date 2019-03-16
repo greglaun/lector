@@ -209,7 +209,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val ttsStateMachine = bindableTtsService
         mainPresenter.onDetach()
         mainPresenter = MainPresenter(this, LectorApplication.AppStore,
-                TtsPresenter(androidAudioView, ttsStateMachine),
+                TtsPresenter(androidAudioView, ttsStateMachine, LectorApplication.AppStore),
                 mainPresenter.responseSource(), mainPresenter.courseSource())
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)

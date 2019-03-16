@@ -2,12 +2,13 @@ package com.greglaun.lector.ui.speak
 
 import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.utteranceId
+import com.greglaun.lector.store.Store
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 
 private val actorContext = newSingleThreadContext("ActorContext")
 
-fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener) =
+fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, store: Store) =
         CoroutineScope(actorContext).actor<TtsMsg>(
                 Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     var articleState: ArticleState? = null
