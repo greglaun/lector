@@ -7,9 +7,6 @@ import com.greglaun.lector.store.Store
 class PersistenceSideEffect(val store: Store)
     : SideEffect {
 
-    init {
-        store.sideEffects.add(this)
-    }
 
     override suspend fun handle(action: Action) {
 //        when (action) {

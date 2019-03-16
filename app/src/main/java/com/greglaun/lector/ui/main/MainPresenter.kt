@@ -3,12 +3,9 @@ package com.greglaun.lector.ui.main
 import com.greglaun.lector.data.cache.*
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseSource
-import com.greglaun.lector.data.net.DownloadCompleter
-import com.greglaun.lector.data.net.DownloadCompletionScheduler
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.*
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
@@ -18,18 +15,13 @@ class MainPresenter(val view : MainContract.View,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener, StateHandler {
-    override var downloadCompleter: DownloadCompleter? = null
     private val contextThread = newSingleThreadContext("ContextThread")
-    private var downloadScheduler: DownloadCompletionScheduler? = null
     private var articleStateSource: ArticleStateSource? = null
-
 
     // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
     override val courseList = mutableListOf<CourseContext>()
 
-    // Preferences
-    // todo(state): Find a better solution to preferences that doesn't depend on Android libs
     private var autoPlay = true
     private var autoDelete = true
 
@@ -37,10 +29,6 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onAttach() {
         ttsPresenter.onStart(this)
-//        downloadCompleter?.let {
-//            downloadScheduler = DownloadCompletionScheduler(downloadCompleter!!, responseSource)
-//            downloadScheduler?.startDownloads()
-//        }
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
         isActivityRunning = true
@@ -52,7 +40,9 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onDetach() {
         ttsPresenter.onStop()
-        downloadScheduler?.stopDownloads()
+        runBlocking {
+            store.dispatch(ReadAction.StopDownloadAction())
+        }
         store.stateHandlers.remove(this)
     }
 
@@ -77,7 +67,6 @@ class MainPresenter(val view : MainContract.View,
                     }
                 }
             }
-
             Navigation.NEW_ARTICLE -> {
                 handleNewArticle(state)
             }
@@ -149,7 +138,9 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-        ttsPresenter.speakInLoop({
+            ttsPresenter.onArticleChanged(
+                    store.state.currentArticleScreen.articleState as ArticleState)
+            ttsPresenter.speakInLoop({
             GlobalScope.launch {
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
@@ -165,74 +156,14 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onUrlChanged(urlString: String) {
-        computeCurrentContext(urlString)
-        stopSpeakingAndEnablePlayButton()
-        var position = POSITION_BEGINNING
-        if (responseSource.contains(urlToContext(urlString))) {
-            responseSource.getArticleContext(urlToContext(urlString))?.let {
-                position = it.position
-            }
-        }
-        articleStateSource?.getArticle(urlString)?.let {
-            ttsPresenter.onArticleChanged(fastForward(it, position))
-            if (it.title != store.state.currentArticleScreen.articleState.title) {
-                val previousTitle = store.state.currentArticleScreen.articleState.title
-                store.dispatch(UpdateAction.UpdateArticleAction(it))
-                GlobalScope.launch {
-                    responseSource.update(previousTitle, it.title)
-                }
-            }
+        GlobalScope.launch {
+            store.dispatch(ReadAction.LoadNewUrlAction(urlString))
         }
     }
 
     override suspend fun loadFromContext(articleContext: ArticleContext) {
         onUrlChanged(contextToUrl(articleContext.contextString))
         view.unhideWebView()
-    }
-
-    private fun computeCurrentContext(urlString: String) {
-        // todo(caching, REST): Replace this ugliness
-        // todo(concurrency): Handle access of store.state.currentArticleScreen.articleState.title from multiple threads
-        CoroutineScope(contextThread).launch {
-            var computedContext = store.state.currentArticleScreen.articleState.title
-            synchronized(store.state.currentArticleScreen.articleState.title) {
-                computedContext = store.state.currentArticleScreen.articleState.title
-                if (urlString.contains("index.php?search=")) {
-                    if (urlString.substringAfterLast("search=") == "") {
-                        return@launch
-                    }
-                    val client = OkHttpClient().newBuilder()
-                            .followRedirects(false)
-                            .followSslRedirects(false)
-                            .build()
-                    val request = Request.Builder()
-                            .url(urlString)
-                            .build()
-                    val response = client.newCall(request).execute()
-                    if (response != null) {
-                        if (response.isRedirect) {
-                            val url = response.networkResponse()?.headers()?.toMultimap()?.
-                                    get("Location")
-                            if (url != null) {
-                                GlobalScope.launch {
-                                    store.dispatch(UpdateAction.UpdateArticleAction(articleStatefromTitle(
-                                            urlToContext(url.get(0)))))
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    GlobalScope.launch {
-                        store.dispatch(UpdateAction.UpdateArticleAction(articleStatefromTitle(
-                                urlToContext(urlString))))
-                    }
-                }
-                computedContext = store.state.currentArticleScreen.articleState.title
-            }
-            if (!this@MainPresenter.responseSource.contains(computedContext)) {
-                responseSource.add(computedContext)
-            }
-        }
     }
 
     override suspend fun onRequest(url: String): Response? {

@@ -29,7 +29,7 @@ abstract class Store {
 
     private val stateActor =
             CoroutineScope(storeContext).actor<Action>(
-                    Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
+                    Dispatchers.Default, 2, CoroutineStart.DEFAULT, null, {
                 for (msg in channel) {
                     handle(msg)
                 }
@@ -62,6 +62,7 @@ abstract class Store {
 //            is ReadAction -> ReadReducer.reduce(action, currentState)
 //            is DeleteAction -> DeleteReducer.reduce(action, currentState)
 //            is NavigationAction -> NavigationReducer.reduce(action, currentState)
+            else -> return currentState
         }
         return newState
     }

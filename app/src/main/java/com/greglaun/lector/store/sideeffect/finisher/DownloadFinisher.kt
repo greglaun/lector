@@ -8,14 +8,15 @@ import com.greglaun.lector.store.Store
 
 class DownloadFinisher(val store: Store,
                       val downloadCompletionScheduler: DownloadCompletionScheduler): SideEffect {
-    init {
-        store.sideEffects.add(this)
-    }
 
     override suspend fun handle(action: Action) {
         when (action) {
             is ReadAction.StartDownloadAction ->
                 finishDownloadsInBackground(action) { store.dispatch(it) }
+            is ReadAction.StopDownloadAction -> {
+                downloadCompletionScheduler?.stopDownloads()
+            }
+
         }
     }
 

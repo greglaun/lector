@@ -29,9 +29,6 @@ interface MainContract {
     }
 
     interface Presenter : LectorPresenter<View> {
-        // todo(immutability): Find solution to ugly circular dependency re: downloadCompleter
-        var downloadCompleter: DownloadCompleter?
-
         val readingList: MutableList<ArticleContext>
         val courseList: MutableList<CourseContext>
 
