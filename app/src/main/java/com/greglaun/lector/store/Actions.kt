@@ -8,7 +8,7 @@ import com.greglaun.lector.ui.speak.AbstractArticleState
 sealed class Action
 
 sealed class UpdateAction: Action() {
-    data class LoadNewArticleAction(val articleState: AbstractArticleState): UpdateAction()
+    data class UpdateArticleAction(val articleState: AbstractArticleState): UpdateAction()
     data class UpdateCourseDetailsAction(val courseDetails: ThinCourseDetails): UpdateAction()
 }
 

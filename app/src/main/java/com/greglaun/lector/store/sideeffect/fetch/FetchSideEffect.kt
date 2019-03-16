@@ -11,6 +11,8 @@ import com.greglaun.lector.store.ReadAction
 import com.greglaun.lector.store.SideEffect
 import com.greglaun.lector.store.Store
 import com.greglaun.lector.ui.speak.ArticleState
+import com.greglaun.lector.ui.speak.ArticleStateSource
+import com.greglaun.lector.ui.speak.JSoupArticleStateSource
 import com.greglaun.lector.ui.speak.articleStatefromTitle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -19,14 +21,19 @@ import okhttp3.Request
 
 class FetchSideEffect(val store: Store, val responseSource: ResponseSource,
                       val courseSource: CourseSource,
-                      val courseDownloader: CourseDownloader): SideEffect {
+                      val courseDownloader: CourseDownloader,
+                      val articleStateSource: ArticleStateSource = JSoupArticleStateSource(
+                              responseSource)): SideEffect {
 
 
     override suspend fun handle(action: Action) {
         when (action) {
             is ReadAction.FetchCourseDetailsAction ->
                 fetchCourseDetails(action, courseDownloader) { store.dispatch(it) }
-            is ReadAction.LoadNewUrlAction -> loadNewUrl(action, responseSource)  {
+            is ReadAction.LoadNewUrlAction -> loadNewUrl(
+                    action,
+                    responseSource,
+                    articleStateSource)  {
                 store.dispatch(it)
             }
         }

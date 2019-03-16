@@ -138,9 +138,11 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-        ttsPresenter.speakInLoop({
+            ttsPresenter.onArticleChanged(
+                    store.state.currentArticleScreen.articleState as ArticleState)
+            ttsPresenter.speakInLoop({
             GlobalScope.launch {
-                store.dispatch(UpdateAction.LoadNewArticleAction(updatePosition()))
+                store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
         })}
         view.enablePauseButton()

@@ -2,7 +2,7 @@ package com.greglaun.lector.store
 
 import com.greglaun.lector.data.cache.BasicArticleContext
 
-fun reduceUpdateArticleAction(action: UpdateAction.LoadNewArticleAction, currentState: State): State {
+fun reduceUpdateArticleAction(action: UpdateAction.UpdateArticleAction, currentState: State): State {
     return currentState.updateArticleScreen(CurrentArticleScreen(
             action.articleState,
             currentState.currentArticleScreen.currentCourse,
