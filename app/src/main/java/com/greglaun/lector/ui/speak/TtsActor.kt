@@ -1,8 +1,8 @@
 package com.greglaun.lector.ui.speak
 
-import com.greglaun.lector.data.cache.md5
 import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.store.Store
+import com.greglaun.lector.store.UpdateAction
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 
@@ -11,82 +11,74 @@ private val actorContext = newSingleThreadContext("ActorContext")
 fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, store: Store) =
         CoroutineScope(actorContext).actor<TtsMsg>(
                 Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
-    var articleState: ArticleState? = null
-    var state = SpeakerState.NOT_READY
     for (msg in channel) {
         when (msg) {
-            is TTSUpdateArticleState -> {
-                state = SpeakerState.NOT_READY
-                articleState = msg.articleState
-                synchronized(state) {
-                    state = SpeakerState.READY
-                }
+            is MarkReady -> {
+//                store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.READY))
             }
             is StopSeakingAndMarkNotReady -> {
                 ttsClient.stopSpeechViewImmediately()
                 ttsStateListener.onSpeechStopped()
             }
-            is GetSpeakerState -> msg.response.complete(state)
+            is GetSpeakerState -> msg.response.complete(store.state.speakerState)
             is StopSpeaking -> {
-                val previousState = state
                 ttsClient.stopSpeechViewImmediately()
-                if (previousState == SpeakerState.SPEAKING) {
-                    state = SpeakerState.READY
-                } else {
-                    state = previousState
+                if (store.state.speakerState == SpeakerState.SPEAKING) {
+                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.READY))
                 }
             }
             is TTSForwardOne -> {
-                if (articleState != null && articleState.currentIndex() != null &&
-                        articleState.hasNext()) {
-                    val initialState = state
+                store.dispatch(UpdateAction.FastForwardOne())
+                ttsStateListener.onUtteranceEnded(
+                        store.state.currentArticleScreen.articleState!! as ArticleState)
+                if (store.state.currentArticleScreen.articleState.hasNext()) {
                     ttsClient.stopSpeechViewImmediately()
-                    state = SpeakerState.SCRUBBING
-                    ttsClient.stopSpeechViewImmediately()
-                    articleState = articleState.next()
-                    state = initialState
                 }
-                msg.newArticleState.complete(articleState!!)
+                msg.newArticleState.complete(
+                        store.state.currentArticleScreen.articleState!! as ArticleState)
             }
             is TTSBackOne -> {
-                if (articleState != null && articleState.currentPosition != null &&
-                        articleState.hasPrevious()) {
-                    val initalState = state
+                store.dispatch(UpdateAction.RewindOne())
+                ttsStateListener.onUtteranceEnded(
+                        store.state.currentArticleScreen.articleState!! as ArticleState)
+                if (store.state.currentArticleScreen.articleState.hasPrevious()) {
                     ttsClient.stopSpeechViewImmediately()
-                    state = SpeakerState.SCRUBBING
-                    ttsClient.stopSpeechViewImmediately()
-                    articleState = articleState.previous()
-                    state = initalState
                 }
-                msg.newArticleState.complete(articleState!!)
+
+                msg.newArticleState.complete(
+                        store.state.currentArticleScreen.articleState!! as ArticleState)
             }
             is TTSGetArticleState -> {
-                msg.articleState.complete(articleState!!)
+                msg.articleState.complete(
+                        store.state.currentArticleScreen.articleState!! as ArticleState)
             }
             is SpeakOne -> {
-                if (state == SpeakerState.READY) {
-                    state = SpeakerState.SPEAKING
+                if (store.state.speakerState != SpeakerState.SPEAKING) {
+                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.SPEAKING))
+                    // todo: Delete this hack after refactoring is finished
+                    while (store.state.speakerState != SpeakerState.SPEAKING) {
+                        delay(10)
+                    }
                 }
-                if (state == SpeakerState.SPEAKING) {
-                    ttsStateListener.onUtteranceStarted(articleState!!)
-                    var text = articleState!!.current()!!
-                    ttsClient.speechViewSpeak(cleanUtterance(text), text.md5()) {
-                        if (it == utteranceId(text)) {
+                val articleState = store.state.currentArticleScreen.articleState as ArticleState
+                ttsStateListener.onUtteranceStarted(articleState!!)
+                var text = articleState!!.current()!!
+                ttsClient.speechViewSpeak(cleanUtterance(text), utteranceId(text)) {
+                    if (it == utteranceId(text)) {
                             ttsStateListener.onUtteranceEnded(articleState!!)
-                            if (articleState!!.hasNext()) {
-                                articleState = articleState!!.next()!! // Advance again after completion
-                            } else {
-                                state = SpeakerState.NOT_READY
-                                ttsStateListener.onSpeechStopped()
-                                runBlocking {
-                                    ttsStateListener.onArticleFinished(articleState!!)
-                                }
+                        if (articleState!!.hasNext()) {
+                            runBlocking {
+                                store.dispatch(UpdateAction.FastForwardOne())
                             }
-                            msg.speakerState.complete(state)
+                        } else {
+                            runBlocking {
+                                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(
+                                            SpeakerState.NOT_READY))
+                                ttsStateListener.onSpeechStopped()
+                                ttsStateListener.onArticleFinished(articleState!!)
+                            }
                         }
                     }
-                } else {
-                    msg.speakerState.complete(state)
                 }
             }
         }
@@ -109,7 +101,7 @@ object StopSpeaking : TtsMsg()
 
 @Deprecated("Soon to be removed")
 class UpdateArticleStateDeprecated(val articleState: ArticleState, val position: String): TtsMsg()
-class TTSUpdateArticleState(val articleState: ArticleState): TtsMsg()
+class MarkReady(val articleState: ArticleState): TtsMsg()
 
 class TTSForwardOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
 class TTSBackOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()

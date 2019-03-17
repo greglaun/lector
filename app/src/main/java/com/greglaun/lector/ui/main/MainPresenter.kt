@@ -76,11 +76,15 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleCurrentArticle(state: State) {
-        throw NotImplementedError()
+         // Do nothing for now.
     }
 
     private fun handleNewArticle(state: State) {
         view.loadUrl(contextToUrl(state.currentArticleScreen.articleState.title))
+        GlobalScope.launch {
+            // todo(refactoring): Is this the right way to handle confirming article loading?
+            store.dispatch(UpdateAction.UpdateNavigationAction(Navigation.CURRENT_ARTICLE))
+        }
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -274,9 +278,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun playAllPressed(title: String) {
-        // todo: we are going to have to handle the notion of autoplay being temporarily enabled,
-        // todo: or else change the language from "play all" to "start playing" or something else
-        if (readingList != null && readingList.size > 0) {
+        if (readingList.size > 0) {
             GlobalScope.launch {
                 onUrlChanged(contextToUrl(readingList[0].contextString))
                 onPlayButtonPressed()

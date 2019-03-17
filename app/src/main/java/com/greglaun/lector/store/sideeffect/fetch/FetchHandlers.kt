@@ -30,7 +30,7 @@ suspend fun loadNewUrl(action: ReadAction.LoadNewUrlAction,
         if (!responseSource.contains(it.title)) {
             responseSource.add(it.title)
         }
-        actionDispatcher(UpdateAction.UpdateArticleAction(it))
+        actionDispatcher(UpdateAction.NewArticleAction(it))
     }
 }
 

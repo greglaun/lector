@@ -28,7 +28,7 @@ class TtsActorStateMachine : TtsStateMachine {
 
     override suspend fun updateArticle(articleState: ArticleState) {
         actionStopSpeaking()
-        ACTOR_LOOP?.send(TTSUpdateArticleState(articleState))
+        ACTOR_LOOP?.send(MarkReady(articleState))
     }
 
     override suspend fun getArticleState(): ArticleState {
@@ -57,7 +57,8 @@ class TtsActorStateMachine : TtsStateMachine {
             }
             var stillSpeaking = true
             while(stillSpeaking) {
-                var speakingState = actionSpeakOne()
+                actionSpeakOne()
+                var speakingState = getSpeakerState()
                 val articleState = getArticleState()
                 articleState.current()?.also {
                     this@TtsActorStateMachine.onPositionUpdate?.invoke(articleState)
@@ -91,7 +92,8 @@ class TtsActorStateMachine : TtsStateMachine {
         val oldSpeakingState = getSpeakerState()
         val newArticleState = CompletableDeferred<ArticleState>()
         ACTOR_LOOP?.send(TTSForwardOne(newArticleState = newArticleState))
-        onDone(newArticleState.await())
+        newArticleState.await() // todo: Useless, delete after refactoring
+        onDone(getArticleState())
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }
         }
@@ -101,7 +103,8 @@ class TtsActorStateMachine : TtsStateMachine {
         val oldSpeakingState = getSpeakerState()
         val newArticleState = CompletableDeferred<ArticleState>()
         ACTOR_LOOP?.send(TTSBackOne(newArticleState = newArticleState))
-        onDone(newArticleState.await())
+        newArticleState.await() // todo: Useless, delete after refactoring
+        onDone(getArticleState())
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }
         }
