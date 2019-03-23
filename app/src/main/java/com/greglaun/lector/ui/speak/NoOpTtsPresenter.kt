@@ -1,6 +1,10 @@
 package com.greglaun.lector.ui.speak
 
 class NoOpTtsPresenter : TTSContract.Presenter {
+    override fun stopImmediately() {
+        // Do nothing
+    }
+
     override fun deprecatedOnStart(ttsStateListener: TtsStateListener) {
         // Do nothing
     }

@@ -12,15 +12,15 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
 
     // Basic machine state
 
-    override fun startMachine(ttsActorClient: TtsActorClient,
-                              ttsStateListener: TtsStateListener,
-                              store: Store) {
+    override fun attach(ttsActorClient: TtsActorClient,
+                        ttsStateListener: TtsStateListener,
+                        store: Store) {
         if (ACTOR_LOOP == null) {
             ACTOR_LOOP = ttsActor(ttsActorClient, ttsStateListener, store)
         }
     }
 
-    override fun stopMachine() {
+    override fun detach() {
         ACTOR_LOOP?.close()
     }
 

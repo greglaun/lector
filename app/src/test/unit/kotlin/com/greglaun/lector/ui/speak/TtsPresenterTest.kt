@@ -23,7 +23,7 @@ class TtsPresenterTest {
     fun onStart() {
         val stateListener = mock(TtsStateListener::class.java)
         ttsPresenter!!.deprecatedOnStart(stateListener)
-        verify(stateMachine, times(1))!!.startMachine(
+        verify(stateMachine, times(1))!!.attach(
                 ttsPresenter!!,
                 stateListener, LectorApplication.AppStore)
     }
@@ -31,7 +31,7 @@ class TtsPresenterTest {
     @Test
     fun onStop() {
         ttsPresenter!!.deprecatedOnStop()
-        verify(stateMachine, times(1))!!.stopMachine()
+        verify(stateMachine, times(1))!!.detach()
     }
 
     @Test

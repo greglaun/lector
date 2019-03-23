@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.store.Navigation
 import com.greglaun.lector.store.State
 import com.greglaun.lector.store.StateHandler
 import com.greglaun.lector.store.Store
@@ -19,18 +18,17 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     private var delegateStateMachine: TtsActorStateMachine? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
-    override fun startMachine(ttsActorClient: TtsActorClient,
-                              stateListener: TtsStateListener,
-                              store: Store) {
+    override fun attach(ttsActorClient: TtsActorClient,
+                        stateListener: TtsStateListener,
+                        store: Store) {
         ttsPresenter = ttsActorClient as TtsPresenter
-        this.delegateStateMachine!!.startMachine(ttsActorClient, stateListener, store)
+        ttsPresenter?.store?.stateHandlers?.add(this)
+        this.delegateStateMachine!!.attach(ttsActorClient, stateListener, store)
     }
 
 
     override suspend fun handle(state: State) {
-//        if (isBound()) // Figure out how to tell this {
-            handleState(state)
-//        }
+        handleState(state)
     }
 
     private fun handleState(state: State) {
@@ -40,8 +38,9 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     }
 
 
-    override fun stopMachine() {
-        delegateStateMachine!!.stopMachine()
+    override fun detach() {
+        ttsPresenter?.store?.stateHandlers?.remove(this)
+        delegateStateMachine!!.detach()
     }
 
     override fun stopImmediately() {

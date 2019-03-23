@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     /*
-     * Service Accounts
+     * Service
      *
      */
 
