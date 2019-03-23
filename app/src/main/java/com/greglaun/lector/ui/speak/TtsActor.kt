@@ -15,17 +15,17 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
     for (msg in channel) {
         when (msg) {
             is StopSeakingAndMarkNotReady -> {
-                ttsClient.stopSpeechViewImmediately()
+                store.dispatch(SpeakerAction.StopSpeakingAction())
                 ttsStateListener.onSpeechStopped()
             }
             is GetSpeakerState -> msg.response.complete(store.state.speakerState)
             is StopSpeaking -> {
-//                ttsClient.stopSpeechViewImmediately()
                 store.dispatch(SpeakerAction.StopSpeakingAction())
                 if (store.state.speakerState == SpeakerState.SPEAKING) {
                     store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.READY))
                 }
             }
+            // todo msg
             is TTSForwardOne -> {
                 store.dispatch(UpdateAction.FastForwardOne())
                 ttsStateListener.onUtteranceEnded(
@@ -36,6 +36,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 msg.newArticleState.complete(
                         store.state.currentArticleScreen.articleState!! as ArticleState)
             }
+            // todo msg
             is TTSBackOne -> {
                 store.dispatch(UpdateAction.RewindOne())
                 ttsStateListener.onUtteranceEnded(
@@ -47,10 +48,12 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 msg.newArticleState.complete(
                         store.state.currentArticleScreen.articleState!! as ArticleState)
             }
+            // todo msg
             is TTSGetArticleState -> {
                 msg.articleState.complete(
                         store.state.currentArticleScreen.articleState!! as ArticleState)
             }
+            // todo
             is SpeakOne -> {
                 if (store.state.speakerState != SpeakerState.SPEAKING) {
                     store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.SPEAKING))
