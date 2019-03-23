@@ -2,7 +2,7 @@ package com.greglaun.lector.ui.speak
 
 import com.greglaun.lector.store.Store
 
-interface TtsStateMachine {
+interface DeprecatedTtsStateMachine {
     fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener, store: Store)
     fun stopMachine()
 

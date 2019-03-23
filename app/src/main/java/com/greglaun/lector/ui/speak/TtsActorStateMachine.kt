@@ -4,7 +4,7 @@ import com.greglaun.lector.store.Store
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 
-class TtsActorStateMachine : TtsStateMachine {
+class TtsActorStateMachine : DeprecatedTtsStateMachine {
     internal var ACTOR_LOOP: SendChannel<TtsMsg>? = null
     internal var SPEECH_LOOP: Job? = null
     private val actorClient = newSingleThreadContext("ActorClient")

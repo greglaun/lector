@@ -18,6 +18,10 @@ sealed class UpdateAction: Action() {
     class RewindOne: UpdateAction()
 }
 
+sealed class SpeakerAction: Action() {
+    class StopSpeakingAction: SpeakerAction()
+}
+
 sealed class ReadAction: Action() {
     data class FetchCourseDetailsAction(val courseContext: CourseContext) : ReadAction()
     class StartDownloadAction: ReadAction()

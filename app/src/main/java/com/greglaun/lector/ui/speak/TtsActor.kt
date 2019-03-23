@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.speak
 
 import com.greglaun.lector.data.cache.utteranceId
+import com.greglaun.lector.store.SpeakerAction
 import com.greglaun.lector.store.Store
 import com.greglaun.lector.store.UpdateAction
 import kotlinx.coroutines.*
@@ -13,16 +14,14 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     for (msg in channel) {
         when (msg) {
-            is MarkReady -> {
-//                store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.READY))
-            }
             is StopSeakingAndMarkNotReady -> {
                 ttsClient.stopSpeechViewImmediately()
                 ttsStateListener.onSpeechStopped()
             }
             is GetSpeakerState -> msg.response.complete(store.state.speakerState)
             is StopSpeaking -> {
-                ttsClient.stopSpeechViewImmediately()
+//                ttsClient.stopSpeechViewImmediately()
+                store.dispatch(SpeakerAction.StopSpeakingAction())
                 if (store.state.speakerState == SpeakerState.SPEAKING) {
                     store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.READY))
                 }

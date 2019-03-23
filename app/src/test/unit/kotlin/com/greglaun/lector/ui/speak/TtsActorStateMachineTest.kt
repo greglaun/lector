@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.LectorApplication
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
@@ -12,7 +13,7 @@ class TtsActorStateMachineTest {
 
     @Test
     fun startAndStopMachine() {
-        stateMachine.startMachine(fakeClient, mockListener)
+        stateMachine.startMachine(fakeClient, mockListener, LectorApplication.AppStore)
         assertFalse(stateMachine.ACTOR_LOOP!!.isClosedForSend)
         stateMachine.stopMachine()
         assertTrue(stateMachine.ACTOR_LOOP!!.isClosedForSend)
@@ -21,7 +22,7 @@ class TtsActorStateMachineTest {
     @Test
     fun changeStateUpdateArticle() {
         val articleState = ArticleState("Test", listOf("A", "B", "C"))
-        stateMachine.startMachine(fakeClient, mockListener)
+        stateMachine.startMachine(fakeClient, mockListener, LectorApplication.AppStore)
         runBlocking {
             assertEquals(stateMachine.getSpeakerState(), SpeakerState.NOT_READY)
             stateMachine.updateArticle(articleState)
@@ -37,7 +38,7 @@ class TtsActorStateMachineTest {
     @Test
     fun actionSpeakOne() {
         val articleState = ArticleState("Test", listOf("A", "B", "C"))
-        stateMachine.startMachine(fakeClient, mockListener)
+        stateMachine.startMachine(fakeClient, mockListener, LectorApplication.AppStore)
         runBlocking {
             stateMachine.updateArticle(articleState)
             stateMachine.actionSpeakOne()
@@ -50,7 +51,7 @@ class TtsActorStateMachineTest {
     @Test
     fun actionSpeakInLoop() {
         val articleState = ArticleState("Test", listOf("A", "B", "C"))
-        stateMachine.startMachine(fakeClient, mockListener)
+        stateMachine.startMachine(fakeClient, mockListener, LectorApplication.AppStore)
         runBlocking {
             stateMachine.updateArticle(articleState)
             stateMachine.actionSpeakInLoop {}
@@ -76,7 +77,7 @@ class TtsActorStateMachineTest {
     @Test
     fun transport() {
         val articleState = ArticleState("Test", listOf("A", "B"))
-        stateMachine.startMachine(fakeClient, mockListener)
+        stateMachine.startMachine(fakeClient, mockListener, LectorApplication.AppStore)
         runBlocking {
             assertEquals(stateMachine.getSpeakerState(), SpeakerState.NOT_READY)
             stateMachine.updateArticle(articleState)
@@ -113,7 +114,7 @@ class TtsActorStateMachineTest {
     @Test
     fun stopSpeaking() {
         val articleState = ArticleState("Test", listOf("A", "B", "C"))
-        stateMachine.startMachine(fakeClient, mockListener)
+        stateMachine.startMachine(fakeClient, mockListener, LectorApplication.AppStore)
 
         runBlocking {
             stateMachine.updateArticle(articleState)

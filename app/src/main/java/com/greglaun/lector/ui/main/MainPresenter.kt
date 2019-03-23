@@ -28,7 +28,7 @@ class MainPresenter(val view : MainContract.View,
     private var isActivityRunning = false
 
     override fun onAttach() {
-        ttsPresenter.onStart(this)
+        ttsPresenter.deprecatedOnStart(this)
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
         isActivityRunning = true
@@ -39,7 +39,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onDetach() {
-        ttsPresenter.onStop()
+        ttsPresenter.deprecatedOnStop()
         runBlocking {
             store.dispatch(ReadAction.StopDownloadAction())
         }
@@ -142,9 +142,9 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-            ttsPresenter.onArticleChanged(
+            ttsPresenter.deprecatedOnArticleChanged(
                     store.state.currentArticleScreen.articleState as ArticleState)
-            ttsPresenter.speakInLoop({
+            ttsPresenter.deprecatedSpeakInLoop({
             GlobalScope.launch {
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
@@ -154,7 +154,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun stopSpeakingAndEnablePlayButton() {
         runBlocking {
-            ttsPresenter.stopSpeaking()
+            ttsPresenter.deprecatedStopSpeaking()
         }
         view.enablePlayButton()
     }
@@ -240,14 +240,14 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onRewindOne() {
-        ttsPresenter.reverseOne { it ->
+        ttsPresenter.deprecatedReverseOne { it ->
             view.unhighlightAllText()
             view.highlightText(it)
         }
     }
 
     override fun onForwardOne() {
-        ttsPresenter.advanceOne { it ->
+        ttsPresenter.deprecatedAdvanceOne { it ->
             view.unhighlightAllText()
             view.highlightText(it)
         }
@@ -255,18 +255,18 @@ class MainPresenter(val view : MainContract.View,
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         runBlocking {
-            ttsPresenter.stopSpeaking()
+            ttsPresenter.deprecatedStopSpeaking()
         }
         view.enablePlayButton()
-        ttsPresenter.setHandsomeBritish(shouldBeBritish)
+        ttsPresenter.deprecatedHandsomeBritish(shouldBeBritish)
     }
 
     override fun setSpeechRate(speechRate: Float) {
         runBlocking {
-            ttsPresenter.stopSpeaking()
+            ttsPresenter.deprecatedStopSpeaking()
         }
         view.enablePlayButton()
-        ttsPresenter.setSpeechRate(speechRate)
+        ttsPresenter.deprecatedSetSpeechRate(speechRate)
     }
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {

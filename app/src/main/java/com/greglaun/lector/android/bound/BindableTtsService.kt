@@ -5,11 +5,16 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.store.Navigation
+import com.greglaun.lector.store.State
+import com.greglaun.lector.store.StateHandler
 import com.greglaun.lector.store.Store
 import com.greglaun.lector.ui.speak.*
 
-class BindableTtsService : Service(), TtsStateMachine {
+class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Presenter,
+        StateHandler {
     private val binder = LocalBinder()
+    private var ttsPresenter: TtsPresenter? = null
 
     private var delegateStateMachine: TtsActorStateMachine? = null
 
@@ -17,12 +22,68 @@ class BindableTtsService : Service(), TtsStateMachine {
     override fun startMachine(ttsActorClient: TtsActorClient,
                               stateListener: TtsStateListener,
                               store: Store) {
+        ttsPresenter = ttsActorClient as TtsPresenter
         this.delegateStateMachine!!.startMachine(ttsActorClient, stateListener, store)
     }
+
+
+    override suspend fun handle(state: State) {
+//        if (isBound()) // Figure out how to tell this {
+            handleState(state)
+//        }
+    }
+
+    private fun handleState(state: State) {
+        if (state.speakerState != SpeakerState.SPEAKING) {
+          stopImmediately()
+        }
+    }
+
 
     override fun stopMachine() {
         delegateStateMachine!!.stopMachine()
     }
+
+    override fun stopImmediately() {
+        ttsPresenter?.stopImmediately()
+    }
+
+    override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override suspend fun deprecatedStopSpeaking() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deprecatedOnStart(stateListener: TtsStateListener) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deprecatedOnStop() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deprecatedReverseOne(onDone: (ArticleState) -> Unit) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun deprecatedSetSpeechRate(speechRate: Float) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 
     override suspend fun getSpeakerState(): SpeakerState {
         return delegateStateMachine!!.getSpeakerState()

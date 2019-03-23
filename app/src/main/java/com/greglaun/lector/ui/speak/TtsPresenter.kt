@@ -5,7 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class TtsPresenter(private val tts: TTSContract.AudioView,
-                   val stateMachine: TtsStateMachine,
+                   val stateMachine: DeprecatedTtsStateMachine,
                    val store: Store)
     : TTSContract.Presenter, TtsActorClient {
     var onPositionUpdate: ((AbstractArticleState) -> Unit)? = null
@@ -18,15 +18,20 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         }
     }
 
-    override fun onStart(stateListener: TtsStateListener) {
+    override fun stopImmediately() {
+        tts.stopImmediately()
+    }
+
+
+    override fun deprecatedOnStart(stateListener: TtsStateListener) {
         stateMachine?.startMachine(this, stateListener, store)
     }
 
-    override fun onStop() {
+    override fun deprecatedOnStop() {
         stateMachine?.stopMachine()
     }
 
-    override suspend fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         this.onPositionUpdate = onPositionUpdate
         stateMachine?.actionSpeakInLoop(onPositionUpdate)
     }
@@ -35,31 +40,31 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         tts.stopImmediately()
     }
 
-    override suspend fun onArticleChanged(articleState: ArticleState) {
+    override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
         stateMachine?.updateArticle(articleState)
     }
 
-    override suspend fun stopSpeaking() {
+    override suspend fun deprecatedStopSpeaking() {
         stateMachine?.actionStopSpeaking()
     }
 
-    override fun advanceOne(onDone: (ArticleState) -> Unit) {
+    override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
         GlobalScope.launch {
             stateMachine?.stopAdvanceOneAndResume(onDone)
         }
     }
 
-    override fun reverseOne(onDone: (ArticleState) -> Unit) {
+    override fun deprecatedReverseOne(onDone: (ArticleState) -> Unit) {
         GlobalScope.launch {
             stateMachine?.stopReverseOneAndResume(onDone)
         }
     }
 
-    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
+    override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
         tts.setHandsomeBritish(shouldBeBritish)
     }
 
-    override fun setSpeechRate(speechRate: Float) {
+    override fun deprecatedSetSpeechRate(speechRate: Float) {
         tts.setSpeechRate(speechRate)
     }
 }

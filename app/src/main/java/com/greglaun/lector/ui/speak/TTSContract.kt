@@ -10,14 +10,15 @@ interface TTSContract {
     }
 
     interface Presenter {
-        suspend fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
-        suspend fun stopSpeaking()
-        suspend fun onArticleChanged(articleState: ArticleState)
-        fun onStart(stateListener: TtsStateListener)
-        fun onStop()
-        fun advanceOne(onDone: (ArticleState) -> Unit)
-        fun reverseOne(onDone: (ArticleState) -> Unit)
-        fun setHandsomeBritish(shouldBeBritish: Boolean)
-        fun setSpeechRate(speechRate: Float)
+        fun stopImmediately()
+        suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
+        suspend fun deprecatedStopSpeaking()
+        suspend fun deprecatedOnArticleChanged(articleState: ArticleState)
+        fun deprecatedOnStart(stateListener: TtsStateListener)
+        fun deprecatedOnStop()
+        fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit)
+        fun deprecatedReverseOne(onDone: (ArticleState) -> Unit)
+        fun deprecatedHandsomeBritish(shouldBeBritish: Boolean)
+        fun deprecatedSetSpeechRate(speechRate: Float)
     }
 }
