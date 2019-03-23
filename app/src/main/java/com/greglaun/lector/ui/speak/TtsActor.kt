@@ -14,20 +14,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     for (msg in channel) {
         when (msg) {
-            is StopSpeaking -> {
-                store.dispatch(SpeakerAction.StopSpeakingAction())
-                if (store.state.speakerState == SpeakerState.SPEAKING) {
-                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.READY))
-                }
-            }
-            is TTSForwardOne -> {
-                store.dispatch(UpdateAction.FastForwardOne())
-                ttsStateListener.onUtteranceEnded(
-                        store.state.currentArticleScreen.articleState!! as ArticleState)
-                if (store.state.currentArticleScreen.articleState.hasNext()) {
-                    ttsClient.stopSpeechViewImmediately()
-                }
-            }
             is TTSBackOne -> {
                 store.dispatch(UpdateAction.RewindOne())
                 ttsStateListener.onUtteranceEnded(
@@ -79,15 +65,10 @@ enum class SpeakerState {
 
 // Message types for ttsActor
 sealed class TtsMsg
-object StopSeakingAndMarkNotReady: TtsMsg() // Mark as ready to speak
-class GetSpeakerState(val response: CompletableDeferred<SpeakerState>): TtsMsg()
 class SpeakOne(val speakerState: CompletableDeferred<SpeakerState>) : TtsMsg()
-object StopSpeaking : TtsMsg()
 
 @Deprecated("Soon to be removed")
 class UpdateArticleStateDeprecated(val articleState: ArticleState, val position: String): TtsMsg()
 class MarkReady(val articleState: ArticleState): TtsMsg()
 
-class TTSForwardOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
 class TTSBackOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()
-class TTSGetArticleState(val articleState: CompletableDeferred<ArticleState>): TtsMsg()

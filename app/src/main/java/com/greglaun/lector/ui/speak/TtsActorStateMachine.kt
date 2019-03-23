@@ -1,6 +1,8 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.SpeakerAction
 import com.greglaun.lector.store.Store
+import com.greglaun.lector.store.UpdateAction
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 
@@ -10,7 +12,8 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     private val actorClient = newSingleThreadContext("ActorClient")
     private var onPositionUpdate: ((ArticleState) -> Unit)? = null
     private var store: Store? = null
-    private var ttsListener: TtsStateListener? = null
+    private var ttsStateListener: TtsStateListener? = null
+    private var ttsClient: TtsActorClient? = null
 
     // Basic machine state
 
@@ -18,7 +21,8 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
                         ttsStateListener: TtsStateListener,
                         store: Store) {
         this.store = store
-        this.ttsListener = ttsListener
+        this.ttsStateListener = this.ttsStateListener
+        ttsClient = ttsActorClient
         if (ACTOR_LOOP == null) {
             ACTOR_LOOP = ttsActor(ttsActorClient, ttsStateListener, store)
         }
@@ -82,17 +86,26 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     }
 
     override suspend fun actionStopSpeaking() {
-        ACTOR_LOOP?.send(StopSpeaking)
-        SPEECH_LOOP?.isActive.let { SPEECH_LOOP?.cancel() }
+        store?.dispatch(SpeakerAction.StopSpeakingAction())
+        ttsStateListener?.onSpeechStopped()
     }
 
     // Transport
 
+   suspend fun forwardOne() {
+        store?.let {
+           store!!.dispatch(UpdateAction.FastForwardOne())
+           ttsStateListener?.onUtteranceEnded(
+                   store!!.state.currentArticleScreen.articleState!! as ArticleState)
+           if (store!!.state.currentArticleScreen.articleState.hasNext()) {
+               ttsClient?.stopSpeechViewImmediately()
+           }
+       }
+   }
+
     override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
         val oldSpeakingState = getSpeakerState()
-        val newArticleState = CompletableDeferred<ArticleState>()
-        ACTOR_LOOP?.send(TTSForwardOne(newArticleState = newArticleState))
-        newArticleState.await() // todo: Useless, delete after refactoring
+        forwardOne()
         onDone(getArticleState())
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }
@@ -110,3 +123,4 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
         }
     }
 }
+
