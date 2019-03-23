@@ -10,6 +10,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     private val actorClient = newSingleThreadContext("ActorClient")
     private var onPositionUpdate: ((ArticleState) -> Unit)? = null
     private var store: Store? = null
+    private var ttsListener: TtsStateListener? = null
 
     // Basic machine state
 
@@ -17,6 +18,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
                         ttsStateListener: TtsStateListener,
                         store: Store) {
         this.store = store
+        this.ttsListener = ttsListener
         if (ACTOR_LOOP == null) {
             ACTOR_LOOP = ttsActor(ttsActorClient, ttsStateListener, store)
         }

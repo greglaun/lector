@@ -14,17 +14,12 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     for (msg in channel) {
         when (msg) {
-            is StopSeakingAndMarkNotReady -> {
-                store.dispatch(SpeakerAction.StopSpeakingAction())
-                ttsStateListener.onSpeechStopped()
-            }
             is StopSpeaking -> {
                 store.dispatch(SpeakerAction.StopSpeakingAction())
                 if (store.state.speakerState == SpeakerState.SPEAKING) {
                     store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.READY))
                 }
             }
-            // todo msg
             is TTSForwardOne -> {
                 store.dispatch(UpdateAction.FastForwardOne())
                 ttsStateListener.onUtteranceEnded(
@@ -32,10 +27,7 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 if (store.state.currentArticleScreen.articleState.hasNext()) {
                     ttsClient.stopSpeechViewImmediately()
                 }
-                msg.newArticleState.complete(
-                        store.state.currentArticleScreen.articleState!! as ArticleState)
             }
-            // todo msg
             is TTSBackOne -> {
                 store.dispatch(UpdateAction.RewindOne())
                 ttsStateListener.onUtteranceEnded(
@@ -43,14 +35,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 if (store.state.currentArticleScreen.articleState.hasPrevious()) {
                     ttsClient.stopSpeechViewImmediately()
                 }
-
-                msg.newArticleState.complete(
-                        store.state.currentArticleScreen.articleState!! as ArticleState)
-            }
-            // todo msg
-            is TTSGetArticleState -> {
-                msg.articleState.complete(
-                        store.state.currentArticleScreen.articleState!! as ArticleState)
             }
             // todo
             is SpeakOne -> {
