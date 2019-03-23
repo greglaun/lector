@@ -34,9 +34,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     }
 
     override suspend fun getArticleState(): ArticleState {
-        val articleStateDeferred = CompletableDeferred<ArticleState>()
-        ACTOR_LOOP?.send(TTSGetArticleState(articleStateDeferred))
-        return articleStateDeferred.await()
+        return store!!.state.currentArticleScreen.articleState as ArticleState
     }
 
     // Speaking state
