@@ -18,7 +18,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 store.dispatch(SpeakerAction.StopSpeakingAction())
                 ttsStateListener.onSpeechStopped()
             }
-            is GetSpeakerState -> msg.response.complete(store.state.speakerState)
             is StopSpeaking -> {
                 store.dispatch(SpeakerAction.StopSpeakingAction())
                 if (store.state.speakerState == SpeakerState.SPEAKING) {

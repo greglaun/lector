@@ -9,12 +9,14 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     internal var SPEECH_LOOP: Job? = null
     private val actorClient = newSingleThreadContext("ActorClient")
     private var onPositionUpdate: ((ArticleState) -> Unit)? = null
+    private var store: Store? = null
 
     // Basic machine state
 
     override fun attach(ttsActorClient: TtsActorClient,
                         ttsStateListener: TtsStateListener,
                         store: Store) {
+        this.store = store
         if (ACTOR_LOOP == null) {
             ACTOR_LOOP = ttsActor(ttsActorClient, ttsStateListener, store)
         }
@@ -76,9 +78,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     }
 
     override suspend fun getSpeakerState(): SpeakerState {
-        val stateDeferred = CompletableDeferred<SpeakerState>()
-        ACTOR_LOOP?.send(GetSpeakerState(stateDeferred))
-        return stateDeferred.await()
+        return store!!.state.speakerState
     }
 
     override suspend fun actionStopSpeaking() {
