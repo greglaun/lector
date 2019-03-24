@@ -103,6 +103,17 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
        }
    }
 
+    suspend fun backOne() {
+        store?.let {
+            store!!.dispatch(UpdateAction.RewindOne())
+            ttsStateListener?.onUtteranceEnded(
+                    store!!.state.currentArticleScreen.articleState!! as ArticleState)
+            if (store!!.state.currentArticleScreen.articleState.hasPrevious()) {
+                ttsClient?.stopSpeechViewImmediately()
+            }
+        }
+    }
+
     override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
         val oldSpeakingState = getSpeakerState()
         forwardOne()
@@ -114,9 +125,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
 
     override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
         val oldSpeakingState = getSpeakerState()
-        val newArticleState = CompletableDeferred<ArticleState>()
-        ACTOR_LOOP?.send(TTSBackOne(newArticleState = newArticleState))
-        newArticleState.await() // todo: Useless, delete after refactoring
+        backOne()
         onDone(getArticleState())
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }

@@ -81,3 +81,9 @@ fun reduceUpdateSpeakerState(action: UpdateAction.UpdateSpeakerStateAction,
     return currentState.updateSpeakerState(action.speakerState)
 }
 
+fun reduceStopSpeakingAction(action: SpeakerAction.StopSpeakingAction, currentState: State): State {
+    when (currentState.speakerState) {
+        SpeakerState.SPEAKING -> return currentState.updateSpeakerState(SpeakerState.READY)
+        else -> return currentState // READY -> READY, NOT_READY -> NOT_READY
+    }
+}

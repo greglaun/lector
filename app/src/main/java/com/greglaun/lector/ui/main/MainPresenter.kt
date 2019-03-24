@@ -76,7 +76,10 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleCurrentArticle(state: State) {
-         // Do nothing for now.
+        view.unhighlightAllText()
+        if (state.speakerState == SpeakerState.SPEAKING) {
+            view.highlightText(state.currentArticleScreen.articleState as ArticleState)
+        }
     }
 
     private fun handleNewArticle(state: State) {
@@ -154,7 +157,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun stopSpeakingAndEnablePlayButton() {
         runBlocking {
-            ttsPresenter.deprecatedStopSpeaking()
+            store.dispatch(SpeakerAction.StopSpeakingAction())
         }
         view.enablePlayButton()
     }

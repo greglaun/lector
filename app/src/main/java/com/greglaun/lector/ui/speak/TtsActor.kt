@@ -14,14 +14,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
                 Dispatchers.Default, 0, CoroutineStart.DEFAULT, null, {
     for (msg in channel) {
         when (msg) {
-            is TTSBackOne -> {
-                store.dispatch(UpdateAction.RewindOne())
-                ttsStateListener.onUtteranceEnded(
-                        store.state.currentArticleScreen.articleState!! as ArticleState)
-                if (store.state.currentArticleScreen.articleState.hasPrevious()) {
-                    ttsClient.stopSpeechViewImmediately()
-                }
-            }
             // todo
             is SpeakOne -> {
                 if (store.state.speakerState != SpeakerState.SPEAKING) {
@@ -59,7 +51,6 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
 enum class SpeakerState {
     NOT_READY,
     READY,
-    SCRUBBING,
     SPEAKING
 }
 
