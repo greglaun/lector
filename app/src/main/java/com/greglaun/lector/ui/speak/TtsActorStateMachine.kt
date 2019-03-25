@@ -23,16 +23,8 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
         ttsClient = ttsActorClient
     }
 
-    override fun detach() {}
-
-    // Article State
-
     override suspend fun updateArticle(articleState: ArticleState) {
         actionStopSpeaking()
-    }
-
-    override suspend fun getArticleState(): ArticleState {
-        return store!!.state.currentArticleScreen.articleState as ArticleState
     }
 
     // Speaking state
@@ -41,10 +33,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
         store?.dispatch(SpeakerAction.SpeakAction())
     }
 
-    override suspend fun actionSpeakOne(): SpeakerState {
-        val speakingState = CompletableDeferred<SpeakerState>()
-        return speakingState.await()
-    }
 
     override suspend fun getSpeakerState(): SpeakerState {
         return store!!.state.speakerState
@@ -52,7 +40,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
 
     override suspend fun actionStopSpeaking() {
         store?.dispatch(SpeakerAction.StopSpeakingAction())
-        ttsStateListener?.onSpeechStopped()
     }
 
     // Transport
@@ -78,7 +65,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
         val oldSpeakingState = getSpeakerState()
         forwardOne()
-        onDone(getArticleState())
+        onDone(store!!.state.currentArticleScreen.articleState as ArticleState)
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }
         }
@@ -87,7 +74,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
         val oldSpeakingState = getSpeakerState()
         backOne()
-        onDone(getArticleState())
+        onDone(store!!.state.currentArticleScreen.articleState as ArticleState)
         if (oldSpeakingState == SpeakerState.SPEAKING) {
             actionSpeakInLoop { onPositionUpdate }
         }

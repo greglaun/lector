@@ -27,7 +27,7 @@ enum class SpeakerState {
     NOT_READY,
     READY,
     SPEAKING,
-    SPEAKING_NEW
+    SPEAKING_NEW_UTTERANCE
 }
 
 data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState,
@@ -88,14 +88,14 @@ fun State.updateSpeakerState(speakerState: SpeakerState): State {
 
 fun stripNew(speakerState: SpeakerState): SpeakerState {
     when (speakerState) {
-        SpeakerState.SPEAKING_NEW -> return SpeakerState.SPEAKING
+        SpeakerState.SPEAKING_NEW_UTTERANCE -> return SpeakerState.SPEAKING
         else -> return speakerState
     }
 }
 
 fun maybeNew(speakerState: SpeakerState): SpeakerState {
     when (speakerState) {
-        SpeakerState.SPEAKING -> return SpeakerState.SPEAKING_NEW
+        SpeakerState.SPEAKING -> return SpeakerState.SPEAKING_NEW_UTTERANCE
         else -> return speakerState
     }
 }

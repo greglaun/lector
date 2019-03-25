@@ -27,7 +27,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     }
 
     override fun deprecatedOnStop() {
-        stateMachine?.detach()
+//        stateMachine?.detach()
     }
 
     override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {

@@ -171,6 +171,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         override fun onServiceDisconnected(arg0: ComponentName) {
             bindableTtsServiceIsBound = false
+            bindableTtsService?.detach()
         }
     }
 

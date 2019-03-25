@@ -86,7 +86,7 @@ fun reduceUpdateSpeakerState(action: UpdateAction.UpdateSpeakerStateAction,
 fun reduceStopSpeakingAction(action: SpeakerAction.StopSpeakingAction, currentState: State): State {
     when (currentState.speakerState) {
         SpeakerState.SPEAKING -> return currentState.updateSpeakerState(SpeakerState.READY)
-        SpeakerState.SPEAKING_NEW -> return currentState.updateSpeakerState(SpeakerState.READY)
+        SpeakerState.SPEAKING_NEW_UTTERANCE -> return currentState.updateSpeakerState(SpeakerState.READY)
         else -> return currentState // READY -> READY, NOT_READY -> NOT_READY
     }
 }
@@ -109,5 +109,5 @@ fun reduceSpeakAction(action: SpeakerAction.SpeakAction, currentState: State): S
 //            }
 //        }
 //    }
-    return currentState.updateSpeakerState(SpeakerState.SPEAKING_NEW)
+    return currentState.updateSpeakerState(SpeakerState.SPEAKING_NEW_UTTERANCE)
 }

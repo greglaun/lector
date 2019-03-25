@@ -36,10 +36,10 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     private suspend fun handleState(state: State) {
         if (state.speakerState != SpeakerState.SPEAKING &&
-                state.speakerState != SpeakerState.SPEAKING_NEW) {
+                state.speakerState != SpeakerState.SPEAKING_NEW_UTTERANCE) {
           stopImmediately()
         }
-        if (state.speakerState == SpeakerState.SPEAKING_NEW) {
+        if (state.speakerState == SpeakerState.SPEAKING_NEW_UTTERANCE) {
             startSpeaking(state)
         }
     }
@@ -56,7 +56,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
             } else {
                     store?.dispatch(UpdateAction.UpdateSpeakerStateAction(
                             SpeakerState.NOT_READY))
-                    ttsStateListener?.onSpeechStopped()
                     ttsStateListener?.onArticleFinished(articleState!! as ArticleState)
                 }
             }
@@ -65,9 +64,8 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         }
     }
 
-    override fun detach() {
+    fun detach() {
         ttsPresenter?.store?.stateHandlers?.remove(this)
-        delegateStateMachine!!.detach()
     }
 
     override fun stopImmediately() {
@@ -119,20 +117,12 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         return delegateStateMachine!!.updateArticle(articleState)
     }
 
-    override suspend fun actionSpeakOne(): SpeakerState {
-        return delegateStateMachine!!.actionSpeakOne()
-    }
-
     override suspend fun actionStopSpeaking() {
         return delegateStateMachine!!.actionStopSpeaking()
     }
 
     override suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?) {
         return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
-    }
-
-    override suspend fun getArticleState(): ArticleState {
-        return delegateStateMachine!!.getArticleState()
     }
 
     override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {

@@ -75,11 +75,13 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleCurrentArticle(state: State) {
-        if (state.speakerState != SpeakerState.SPEAKING_NEW &&
+        if (state.speakerState != SpeakerState.SPEAKING_NEW_UTTERANCE &&
                 state.speakerState != SpeakerState.SPEAKING) {
             view.unhighlightAllText()
+            view.enablePlayButton()
         }
-        if (state.speakerState == SpeakerState.SPEAKING_NEW) {
+        if (state.speakerState == SpeakerState.SPEAKING_NEW_UTTERANCE) {
+            view.enablePauseButton()
             view.unhighlightAllText()
             view.highlightText(state.currentArticleScreen.articleState as ArticleState)
         }
@@ -134,10 +136,6 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    override fun onSpeechStopped() {
-        view.enablePlayButton()
-    }
-
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
             ttsPresenter.deprecatedOnArticleChanged(
@@ -147,7 +145,6 @@ class MainPresenter(val view : MainContract.View,
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
         })}
-        view.enablePauseButton()
     }
 
     override fun stopSpeakingAndEnablePlayButton() {
