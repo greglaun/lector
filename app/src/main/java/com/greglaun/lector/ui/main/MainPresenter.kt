@@ -15,7 +15,6 @@ class MainPresenter(val view : MainContract.View,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
     : MainContract.Presenter, TtsStateListener, StateHandler {
-    private val contextThread = newSingleThreadContext("ContextThread")
     private var articleStateSource: ArticleStateSource? = null
 
     // todo(data): Replace readingList and courseList with LiveData?
@@ -61,7 +60,7 @@ class MainPresenter(val view : MainContract.View,
             Navigation.BROWSE_COURSES -> {
                 val currentCourse = state.currentArticleScreen.currentCourse
                 GlobalScope.launch {
-                    courseSource.getArticlesForCourse(currentCourse.id!!)?.let {
+                    courseSource.getArticlesForCourse(currentCourse.id!!).let {
                         displayArticleList(it,
                                 currentCourse.courseName)
                     }
@@ -76,8 +75,12 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleCurrentArticle(state: State) {
-        view.unhighlightAllText()
-        if (state.speakerState == SpeakerState.SPEAKING) {
+        if (state.speakerState != SpeakerState.SPEAKING_NEW &&
+                state.speakerState != SpeakerState.SPEAKING) {
+            view.unhighlightAllText()
+        }
+        if (state.speakerState == SpeakerState.SPEAKING_NEW) {
+            view.unhighlightAllText()
             view.highlightText(state.currentArticleScreen.articleState as ArticleState)
         }
     }
@@ -100,14 +103,6 @@ class MainPresenter(val view : MainContract.View,
 
     override fun courseSource(): CourseSource {
         return courseSource
-    }
-
-    override fun onUtteranceStarted(articleState: ArticleState) {
-        view.highlightText(articleState)
-    }
-
-    override fun onUtteranceEnded(articleState: ArticleState) {
-        view.unhighlightAllText()
     }
 
     override suspend fun onArticleFinished(articleState: ArticleState) {

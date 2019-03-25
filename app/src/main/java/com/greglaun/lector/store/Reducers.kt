@@ -33,7 +33,8 @@ fun reduceFastForwardOne(action: UpdateAction.FastForwardOne, currentState: Stat
     if (articleState.hasNext()) {
         return currentState.updateArticleScreen(CurrentArticleScreen(
                 articleState.next()!!,
-                currentState.currentArticleScreen.currentCourse), currentState.speakerState)
+                currentState.currentArticleScreen.currentCourse),
+                maybeNew(currentState.speakerState))
     }
     return currentState
 }
@@ -43,7 +44,8 @@ fun reduceRewindOne(action: UpdateAction.RewindOne, currentState: State): State 
     if (articleState.hasPrevious()) {
         return currentState.updateArticleScreen(CurrentArticleScreen(
                 articleState.previous()!!,
-                currentState.currentArticleScreen.currentCourse), currentState.speakerState)
+                currentState.currentArticleScreen.currentCourse),
+                maybeNew(currentState.speakerState))
     }
     return currentState
 }
@@ -84,6 +86,28 @@ fun reduceUpdateSpeakerState(action: UpdateAction.UpdateSpeakerStateAction,
 fun reduceStopSpeakingAction(action: SpeakerAction.StopSpeakingAction, currentState: State): State {
     when (currentState.speakerState) {
         SpeakerState.SPEAKING -> return currentState.updateSpeakerState(SpeakerState.READY)
+        SpeakerState.SPEAKING_NEW -> return currentState.updateSpeakerState(SpeakerState.READY)
         else -> return currentState // READY -> READY, NOT_READY -> NOT_READY
     }
+}
+
+fun reduceSpeakAction(action: SpeakerAction.SpeakAction, currentState: State): State {
+//    ttsClient.speechViewSpeak(cleanUtterance(text), utteranceId(text)) {
+//        if (it == utteranceId(text)) {
+//            ttsStateListener.onUtteranceEnded(articleState!!)
+//            if (articleState!!.hasNext()) {
+//                runBlocking {
+//                    store.dispatch(UpdateAction.FastForwardOne())
+//                }
+//            } else {
+//                runBlocking {
+//                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(
+//                            SpeakerState.NOT_READY))
+//                    ttsStateListener.onSpeechStopped()
+//                    ttsStateListener.onArticleFinished(articleState!!)
+//                }
+//            }
+//        }
+//    }
+    return currentState.updateSpeakerState(SpeakerState.SPEAKING_NEW)
 }

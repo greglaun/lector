@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.speak
 
 interface TtsActorClient {
-    fun speechViewSpeak(text: String, utteranceId: String, callback: (String) -> Unit)
+    suspend fun speechViewSpeak(text: String, utteranceId: String,
+                                callback: suspend (String) -> Unit)
     fun stopSpeechViewImmediately()
 }

@@ -5,7 +5,6 @@ import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.ui.speak.AbstractArticleState
 import com.greglaun.lector.ui.speak.EmptyArticleState
-import com.greglaun.lector.ui.speak.SpeakerState
 
 val DEFAULT_READING_LIST = "All Articles"
 val LECTOR_UNIVERSE = ""
@@ -24,6 +23,12 @@ enum class Changed {
     BACKGROUND
 }
 
+enum class SpeakerState {
+    NOT_READY,
+    READY,
+    SPEAKING,
+    SPEAKING_NEW
+}
 
 data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState,
                                 val currentCourse: CourseContext = EmptyCourseContext())
@@ -68,15 +73,29 @@ fun State.newArticleScreen(newArticleScreen: CurrentArticleScreen,
 
 fun State.updateNavigation(navigation: Navigation): State {
     return State(currentArticleScreen, readingListScreen, courseBrowserScreen, navigation,
-            preferences, background, changed, speakerState)
+            preferences, background, changed, stripNew(speakerState))
 }
 
 fun State.updateReadingListScreen(newReadingListScreen: ReadingListScreen): State {
     return State(currentArticleScreen, newReadingListScreen, courseBrowserScreen, navigation,
-            preferences, background, changed, speakerState)
+            preferences, background, changed, stripNew(speakerState))
 }
 
 fun State.updateSpeakerState(speakerState: SpeakerState): State {
     return State(currentArticleScreen, readingListScreen, courseBrowserScreen, navigation,
             preferences, background, changed, speakerState)
+}
+
+fun stripNew(speakerState: SpeakerState): SpeakerState {
+    when (speakerState) {
+        SpeakerState.SPEAKING_NEW -> return SpeakerState.SPEAKING
+        else -> return speakerState
+    }
+}
+
+fun maybeNew(speakerState: SpeakerState): SpeakerState {
+    when (speakerState) {
+        SpeakerState.SPEAKING -> return SpeakerState.SPEAKING_NEW
+        else -> return speakerState
+    }
 }

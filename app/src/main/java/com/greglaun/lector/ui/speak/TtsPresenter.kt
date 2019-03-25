@@ -10,11 +10,10 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     : TTSContract.Presenter, TtsActorClient {
     var onPositionUpdate: ((AbstractArticleState) -> Unit)? = null
 
-    override fun speechViewSpeak(text: String, utteranceId: String, callback: (String) -> Unit) {
-        synchronized(tts) {
-            tts.speak(text, utteranceId) {
-                callback(it)
-            }
+    override suspend fun speechViewSpeak(text: String, utteranceId: String,
+                                         callback: suspend (String) -> Unit) {
+        tts.speak(text, utteranceId) {
+            callback(it)
         }
     }
 

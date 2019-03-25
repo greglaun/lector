@@ -1,9 +1,8 @@
 package com.greglaun.lector.ui.speak
 
-import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.store.SpeakerAction
+import com.greglaun.lector.store.SpeakerState
 import com.greglaun.lector.store.Store
-import com.greglaun.lector.store.UpdateAction
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 
@@ -16,43 +15,11 @@ fun ttsActor(ttsClient: TtsActorClient, ttsStateListener: TtsStateListener, stor
         when (msg) {
             // todo
             is SpeakOne -> {
-                if (store.state.speakerState != SpeakerState.SPEAKING) {
-                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(SpeakerState.SPEAKING))
-                    // todo: Delete this hack after refactoring is finished
-                    while (store.state.speakerState != SpeakerState.SPEAKING) {
-                        delay(10)
-                    }
-                }
-                val articleState = store.state.currentArticleScreen.articleState as ArticleState
-                ttsStateListener.onUtteranceStarted(articleState!!)
-                var text = articleState!!.current()!!
-                ttsClient.speechViewSpeak(cleanUtterance(text), utteranceId(text)) {
-                    if (it == utteranceId(text)) {
-                            ttsStateListener.onUtteranceEnded(articleState!!)
-                        if (articleState!!.hasNext()) {
-                            runBlocking {
-                                store.dispatch(UpdateAction.FastForwardOne())
-                            }
-                        } else {
-                            runBlocking {
-                                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(
-                                            SpeakerState.NOT_READY))
-                                ttsStateListener.onSpeechStopped()
-                                ttsStateListener.onArticleFinished(articleState!!)
-                            }
-                        }
-                    }
-                }
+                store.dispatch(SpeakerAction.SpeakAction())
             }
         }
     }
 })
-
-enum class SpeakerState {
-    NOT_READY,
-    READY,
-    SPEAKING
-}
 
 // Message types for ttsActor
 sealed class TtsMsg
@@ -61,5 +28,3 @@ class SpeakOne(val speakerState: CompletableDeferred<SpeakerState>) : TtsMsg()
 @Deprecated("Soon to be removed")
 class UpdateArticleStateDeprecated(val articleState: ArticleState, val position: String): TtsMsg()
 class MarkReady(val articleState: ArticleState): TtsMsg()
-
-class TTSBackOne(val newArticleState: CompletableDeferred<ArticleState>): TtsMsg()

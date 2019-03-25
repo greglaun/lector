@@ -1,10 +1,8 @@
 package com.greglaun.lector.store
 
-import androidx.annotation.RequiresPermission
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.ThinCourseDetails
 import com.greglaun.lector.ui.speak.AbstractArticleState
-import com.greglaun.lector.ui.speak.SpeakerState
 
 sealed class Action
 
@@ -20,6 +18,7 @@ sealed class UpdateAction: Action() {
 
 sealed class SpeakerAction: Action() {
     class StopSpeakingAction: SpeakerAction()
+    class SpeakAction: SpeakerAction()
 }
 
 sealed class ReadAction: Action() {

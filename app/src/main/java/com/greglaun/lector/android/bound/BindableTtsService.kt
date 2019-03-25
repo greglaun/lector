@@ -5,15 +5,16 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.greglaun.lector.data.cache.ResponseSource
-import com.greglaun.lector.store.State
-import com.greglaun.lector.store.StateHandler
-import com.greglaun.lector.store.Store
+import com.greglaun.lector.data.cache.utteranceId
+import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
 
 class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Presenter,
         StateHandler {
     private val binder = LocalBinder()
     private var ttsPresenter: TtsPresenter? = null
+    private var ttsStateListener: TtsStateListener? = null
+    private var store: Store? = null
 
     private var delegateStateMachine: TtsActorStateMachine? = null
 
@@ -22,7 +23,9 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
                         stateListener: TtsStateListener,
                         store: Store) {
         ttsPresenter = ttsActorClient as TtsPresenter
+        ttsStateListener = stateListener
         ttsPresenter?.store?.stateHandlers?.add(this)
+        this.store = store
         this.delegateStateMachine!!.attach(ttsActorClient, stateListener, store)
     }
 
@@ -31,12 +34,36 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         handleState(state)
     }
 
-    private fun handleState(state: State) {
-        if (state.speakerState != SpeakerState.SPEAKING) {
+    private suspend fun handleState(state: State) {
+        if (state.speakerState != SpeakerState.SPEAKING &&
+                state.speakerState != SpeakerState.SPEAKING_NEW) {
           stopImmediately()
+        }
+        if (state.speakerState == SpeakerState.SPEAKING_NEW) {
+            startSpeaking(state)
         }
     }
 
+   suspend fun startSpeaking(state: State) {
+        val articleState = state.currentArticleScreen.articleState
+        articleState.current()?.let {text ->
+            ttsPresenter?.speechViewSpeak(cleanUtterance(text),
+                    utteranceId(text)) {
+                        if (it == utteranceId(text)) {
+            if (articleState!!.hasNext()) {
+                store?.dispatch(UpdateAction.FastForwardOne())
+
+            } else {
+                    store?.dispatch(UpdateAction.UpdateSpeakerStateAction(
+                            SpeakerState.NOT_READY))
+                    ttsStateListener?.onSpeechStopped()
+                    ttsStateListener?.onArticleFinished(articleState!! as ArticleState)
+                }
+            }
+        }
+
+        }
+    }
 
     override fun detach() {
         ttsPresenter?.store?.stateHandlers?.remove(this)
