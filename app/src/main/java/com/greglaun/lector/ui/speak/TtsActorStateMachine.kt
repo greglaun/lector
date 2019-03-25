@@ -8,9 +8,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 
 class TtsActorStateMachine : DeprecatedTtsStateMachine {
-    internal var ACTOR_LOOP: SendChannel<TtsMsg>? = null
-    internal var SPEECH_LOOP: Job? = null
-    private val actorClient = newSingleThreadContext("ActorClient")
     private var onPositionUpdate: ((ArticleState) -> Unit)? = null
     private var store: Store? = null
     private var ttsStateListener: TtsStateListener? = null
@@ -24,20 +21,14 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
         this.store = store
         this.ttsStateListener = this.ttsStateListener
         ttsClient = ttsActorClient
-        if (ACTOR_LOOP == null) {
-            ACTOR_LOOP = ttsActor(ttsActorClient, ttsStateListener, store)
-        }
     }
 
-    override fun detach() {
-        ACTOR_LOOP?.close()
-    }
+    override fun detach() {}
 
     // Article State
 
     override suspend fun updateArticle(articleState: ArticleState) {
         actionStopSpeaking()
-        ACTOR_LOOP?.send(MarkReady(articleState))
     }
 
     override suspend fun getArticleState(): ArticleState {
@@ -52,7 +43,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
 
     override suspend fun actionSpeakOne(): SpeakerState {
         val speakingState = CompletableDeferred<SpeakerState>()
-        ACTOR_LOOP?.send(SpeakOne(speakingState))
         return speakingState.await()
     }
 
