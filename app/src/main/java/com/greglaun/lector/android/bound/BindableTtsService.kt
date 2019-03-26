@@ -71,6 +71,13 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     override fun stopImmediately() {
         ttsPresenter?.stopImmediately()
     }
+    override suspend fun forwardOne() {
+        ttsPresenter?.forwardOne()
+    }
+
+    override suspend fun backOne() {
+        ttsPresenter?.backOne()
+    }
 
     override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -123,14 +130,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?) {
         return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
-    }
-
-    override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
-        return delegateStateMachine!!.stopAdvanceOneAndResume(onDone)
-    }
-
-    override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
-        return delegateStateMachine!!.stopReverseOneAndResume(onDone)
     }
 
     /**

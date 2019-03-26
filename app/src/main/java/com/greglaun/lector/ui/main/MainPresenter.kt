@@ -234,18 +234,12 @@ class MainPresenter(val view : MainContract.View,
         view.displayCourses()
     }
 
-    override fun onRewindOne() {
-        ttsPresenter.deprecatedReverseOne { it ->
-            view.unhighlightAllText()
-            view.highlightText(it)
-        }
+    override suspend fun onRewindOne() {
+        ttsPresenter.backOne()
     }
 
-    override fun onForwardOne() {
-        ttsPresenter.deprecatedAdvanceOne { it ->
-            view.unhighlightAllText()
-            view.highlightText(it)
-        }
+    override suspend fun onForwardOne() {
+        ttsPresenter.forwardOne()
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {

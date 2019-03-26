@@ -39,8 +39,8 @@ interface MainContract {
         suspend fun onUrlChanged(url : String)
         suspend fun onRequest(url : String): Response?
         suspend fun onDisplayReadingList()
-        fun onRewindOne()
-        fun onForwardOne()
+        suspend fun onRewindOne()
+        suspend fun onForwardOne()
         fun responseSource(): ResponseSource
         fun courseSource(): CourseSource
         suspend fun loadFromContext(articleContext: ArticleContext)

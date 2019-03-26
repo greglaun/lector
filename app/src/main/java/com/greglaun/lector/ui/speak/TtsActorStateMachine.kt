@@ -14,7 +14,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     var ttsClient: TtsActorClient? = null
 
     // Basic machine state
-
     override fun attach(ttsActorClient: TtsActorClient,
                         ttsStateListener: TtsStateListener,
                         store: Store) {
@@ -28,7 +27,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     }
 
     // Speaking state
-
     override suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?) {
         store?.dispatch(SpeakerAction.SpeakAction())
     }
@@ -43,7 +41,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     }
 
     // Transport
-
    suspend fun forwardOne() {
         store?.let {
            store!!.dispatch(UpdateAction.FastForwardOne())
@@ -62,22 +59,5 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
         }
     }
 
-    override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
-        val oldSpeakingState = getSpeakerState()
-        forwardOne()
-        onDone(store!!.state.currentArticleScreen.articleState as ArticleState)
-        if (oldSpeakingState == SpeakerState.SPEAKING) {
-            actionSpeakInLoop { onPositionUpdate }
-        }
-    }
-
-    override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
-        val oldSpeakingState = getSpeakerState()
-        backOne()
-        onDone(store!!.state.currentArticleScreen.articleState as ArticleState)
-        if (oldSpeakingState == SpeakerState.SPEAKING) {
-            actionSpeakInLoop { onPositionUpdate }
-        }
-    }
 }
 

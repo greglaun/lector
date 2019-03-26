@@ -365,11 +365,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_forward -> {
-                mainPresenter.onForwardOne()
+                GlobalScope.launch {
+                    mainPresenter.onForwardOne()
+                }
                 return true
             }
             R.id.action_rewind -> {
-                mainPresenter.onRewindOne()
+                GlobalScope.launch {
+                    mainPresenter.onRewindOne()
+                }
                 return true
             }
             R.id.action_settings -> {

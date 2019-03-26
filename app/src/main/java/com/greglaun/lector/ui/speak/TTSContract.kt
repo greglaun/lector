@@ -21,5 +21,7 @@ interface TTSContract {
         fun deprecatedReverseOne(onDone: (ArticleState) -> Unit)
         fun deprecatedHandsomeBritish(shouldBeBritish: Boolean)
         fun deprecatedSetSpeechRate(speechRate: Float)
+        suspend fun forwardOne()
+        suspend fun backOne()
     }
 }

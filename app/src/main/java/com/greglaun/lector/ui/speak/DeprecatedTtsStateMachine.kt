@@ -11,7 +11,4 @@ interface DeprecatedTtsStateMachine {
     suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?)
     suspend fun getSpeakerState(): SpeakerState
     suspend fun actionStopSpeaking()
-
-    suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit)
-    suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit)
 }
