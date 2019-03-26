@@ -58,7 +58,6 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     }
 
     override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
-        stateMachine?.updateArticle(articleState)
     }
 
     override suspend fun deprecatedStopSpeaking() {

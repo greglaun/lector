@@ -120,10 +120,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         return delegateStateMachine!!.getSpeakerState()
     }
 
-    override suspend fun updateArticle(articleState: ArticleState) {
-        return delegateStateMachine!!.updateArticle(articleState)
-    }
-
     override suspend fun actionStopSpeaking() {
         return delegateStateMachine!!.actionStopSpeaking()
     }

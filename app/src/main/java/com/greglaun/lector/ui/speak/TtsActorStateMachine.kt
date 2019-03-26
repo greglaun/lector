@@ -22,10 +22,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
         ttsClient = ttsActorClient
     }
 
-    override suspend fun updateArticle(articleState: ArticleState) {
-        actionStopSpeaking()
-    }
-
     // Speaking state
     override suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?) {
         store?.dispatch(SpeakerAction.SpeakAction())
