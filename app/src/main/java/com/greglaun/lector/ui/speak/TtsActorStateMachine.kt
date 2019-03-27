@@ -28,7 +28,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
     }
 
     override suspend fun actionStopSpeaking() {
-        store?.dispatch(SpeakerAction.StopSpeakingAction())
+
     }
 
     // Transport

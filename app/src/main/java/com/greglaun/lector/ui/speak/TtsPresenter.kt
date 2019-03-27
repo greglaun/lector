@@ -59,7 +59,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     }
 
     override suspend fun deprecatedStopSpeaking() {
-        stateMachine?.actionStopSpeaking()
+        store?.dispatch(SpeakerAction.StopSpeakingAction())
     }
 
     override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
