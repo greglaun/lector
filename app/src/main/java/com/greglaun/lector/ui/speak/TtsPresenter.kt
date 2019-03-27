@@ -4,27 +4,25 @@ import com.greglaun.lector.store.SpeakerAction
 import com.greglaun.lector.store.Store
 import com.greglaun.lector.store.UpdateAction
 
-class TtsPresenter(private val tts: TTSContract.AudioView,
+class TtsPresenter(val ttsView: TTSContract.AudioView,
                    val stateMachine: DeprecatedTtsStateMachine,
                    val store: Store)
     : TTSContract.Presenter, TtsActorClient {
 
-    override suspend fun speechViewSpeak(text: String, utteranceId: String,
-                                         callback: suspend (String) -> Unit) {
-        tts.speak(text, utteranceId) {
-            callback(it)
-        }
+    override fun ttsView(): TTSContract.AudioView? {
+        return ttsView
     }
 
+
     override fun stopImmediately() {
-        tts.stopImmediately()
+        ttsView.stopImmediately()
     }
 
     override suspend fun forwardOne() {
         store?.let {
             store!!.dispatch(UpdateAction.FastForwardOne())
             if (store!!.state.currentArticleScreen.articleState.hasNext()) {
-                stopSpeechViewImmediately()
+                ttsView.stopImmediately()
             }
         }
     }
@@ -33,7 +31,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         store?.let {
             store!!.dispatch(UpdateAction.RewindOne())
             if (store!!.state.currentArticleScreen.articleState.hasPrevious()) {
-                stopSpeechViewImmediately()
+                ttsView.stopImmediately()
             }
         }
     }
@@ -46,10 +44,6 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         store?.dispatch(SpeakerAction.SpeakAction())
-    }
-
-    override fun stopSpeechViewImmediately() {
-        tts.stopImmediately()
     }
 
     override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
@@ -66,10 +60,10 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     }
 
     override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
-        tts.setHandsomeBritish(shouldBeBritish)
+        ttsView.setHandsomeBritish(shouldBeBritish)
     }
 
     override fun deprecatedSetSpeechRate(speechRate: Float) {
-        tts.setSpeechRate(speechRate)
+        ttsView.setSpeechRate(speechRate)
     }
 }

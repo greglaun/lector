@@ -15,7 +15,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     private var ttsPresenter: TtsPresenter? = null
     private var ttsStateListener: TtsStateListener? = null
     private var store: Store? = null
-
     private var delegateStateMachine: TtsActorStateMachine? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
@@ -47,7 +46,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
    suspend fun startSpeaking(state: State) {
         val articleState = state.currentArticleScreen.articleState
         articleState.current()?.let {text ->
-            ttsPresenter?.speechViewSpeak(cleanUtterance(text),
+            ttsPresenter?.ttsView?.speak(cleanUtterance(text),
                     utteranceId(text)) {
                         if (it == utteranceId(text)) {
             if (articleState!!.hasNext()) {
@@ -115,6 +114,9 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun ttsView(): TTSContract.AudioView? {
+        return ttsPresenter?.ttsView
+    }
 
     /**
      * Class used for the client Binder.  Because we know this service always

@@ -1,6 +1,10 @@
 package com.greglaun.lector.ui.speak
 
 class NoOpTtsPresenter : TTSContract.Presenter {
+    override fun ttsView(): TTSContract.AudioView? {
+        return null
+    }
+
     override suspend fun forwardOne() {
         // Do nothing
     }

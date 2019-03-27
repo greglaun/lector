@@ -11,6 +11,7 @@ interface TTSContract {
     }
 
     interface Presenter {
+        fun ttsView(): AudioView?
         fun stopImmediately()
         suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
         suspend fun stopSpeaking()
