@@ -6,5 +6,4 @@ import com.greglaun.lector.store.Store
 interface DeprecatedTtsStateMachine {
     fun attach(ttsActorClient: TtsActorClient, stateListener: TtsStateListener, store: Store)
 
-    suspend fun getSpeakerState(): SpeakerState
 }
