@@ -7,5 +7,4 @@ interface DeprecatedTtsStateMachine {
     fun attach(ttsActorClient: TtsActorClient, stateListener: TtsStateListener, store: Store)
 
     suspend fun getSpeakerState(): SpeakerState
-    suspend fun actionStopSpeaking()
 }

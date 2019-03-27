@@ -27,10 +27,6 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
         return store!!.state.speakerState
     }
 
-    override suspend fun actionStopSpeaking() {
-
-    }
-
     // Transport
    suspend fun forwardOne() {
         store?.let {
