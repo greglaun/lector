@@ -18,16 +18,14 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     private var delegateStateMachine: TtsActorStateMachine? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
-    override fun attach(ttsActorClient: TtsActorClient,
-                        ttsPresenter: TtsPresenter,
+    override fun attach(ttsPresenter: TtsPresenter,
                         stateListener: TtsStateListener,
                         store: Store) {
-//        ttsPresenter = ttsActorClient as TtsPresenter
         this.ttsPresenter = ttsPresenter
         ttsStateListener = stateListener
         ttsPresenter?.store?.stateHandlers?.add(this)
         this.store = store
-        this.delegateStateMachine!!.attach(ttsActorClient, ttsPresenter!!, stateListener, store)
+        this.delegateStateMachine!!.attach(ttsPresenter!!, stateListener, store)
     }
 
 
