@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.SpeakerAction
 import com.greglaun.lector.store.Store
 import com.greglaun.lector.store.UpdateAction
 import kotlinx.coroutines.GlobalScope
@@ -44,13 +45,10 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
         stateMachine?.attach(this, stateListener, store)
     }
 
-    override fun deprecatedOnStop() {
-//        stateMachine?.detach()
-    }
+    override fun deprecatedOnStop() {}
 
     override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
-        this.onPositionUpdate = onPositionUpdate
-        stateMachine?.actionSpeakInLoop(onPositionUpdate)
+        store?.dispatch(SpeakerAction.SpeakAction())
     }
 
     override fun stopSpeechViewImmediately() {
