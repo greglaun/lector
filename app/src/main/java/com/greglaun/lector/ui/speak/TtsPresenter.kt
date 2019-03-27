@@ -3,14 +3,11 @@ package com.greglaun.lector.ui.speak
 import com.greglaun.lector.store.SpeakerAction
 import com.greglaun.lector.store.Store
 import com.greglaun.lector.store.UpdateAction
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class TtsPresenter(private val tts: TTSContract.AudioView,
                    val stateMachine: DeprecatedTtsStateMachine,
                    val store: Store)
     : TTSContract.Presenter, TtsActorClient {
-    var onPositionUpdate: ((AbstractArticleState) -> Unit)? = null
 
     override suspend fun speechViewSpeak(text: String, utteranceId: String,
                                          callback: suspend (String) -> Unit) {
