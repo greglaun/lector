@@ -1,11 +1,7 @@
 package com.greglaun.lector.ui.speak
 
-import com.greglaun.lector.store.SpeakerAction
-import com.greglaun.lector.store.SpeakerState
 import com.greglaun.lector.store.Store
 import com.greglaun.lector.store.UpdateAction
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
 
 class TtsActorStateMachine : DeprecatedTtsStateMachine {
     private var onPositionUpdate: ((ArticleState) -> Unit)? = null
