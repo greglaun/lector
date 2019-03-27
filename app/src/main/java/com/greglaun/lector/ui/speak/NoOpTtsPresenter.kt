@@ -21,11 +21,11 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override suspend fun deprecatedStopSpeaking() {
+    override suspend fun stopSpeaking() {
         // Do nothing
     }
 
-    override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         // Do nothing
     }
 

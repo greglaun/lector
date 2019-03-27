@@ -44,7 +44,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
 
     override fun deprecatedOnStop() {}
 
-    override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         store?.dispatch(SpeakerAction.SpeakAction())
     }
 
@@ -55,7 +55,7 @@ class TtsPresenter(private val tts: TTSContract.AudioView,
     override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
     }
 
-    override suspend fun deprecatedStopSpeaking() {
+    override suspend fun stopSpeaking() {
         store?.dispatch(SpeakerAction.StopSpeakingAction())
     }
 

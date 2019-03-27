@@ -12,8 +12,8 @@ interface TTSContract {
 
     interface Presenter {
         fun stopImmediately()
-        suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
-        suspend fun deprecatedStopSpeaking()
+        suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
+        suspend fun stopSpeaking()
         suspend fun deprecatedOnArticleChanged(articleState: ArticleState)
         fun deprecatedOnStart(stateListener: TtsStateListener)
         fun deprecatedOnStop()

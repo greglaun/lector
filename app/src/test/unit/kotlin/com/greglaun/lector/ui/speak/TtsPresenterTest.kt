@@ -37,7 +37,7 @@ class TtsPresenterTest {
     @Test
     fun speakInLoop() {
         runBlocking {
-            ttsPresenter!!.deprecatedSpeakInLoop(null)
+            ttsPresenter!!.startSpeaking(null)
             verify(stateMachine, times(1))!!
                     .actionSpeakInLoop(null)
         }
@@ -60,7 +60,7 @@ class TtsPresenterTest {
     @Test
     fun stopSpeaking() {
         runBlocking {
-            ttsPresenter!!.deprecatedStopSpeaking()
+            ttsPresenter!!.stopSpeaking()
         }
         runBlocking {
             verify(stateMachine, times(1))!!.actionStopSpeaking()

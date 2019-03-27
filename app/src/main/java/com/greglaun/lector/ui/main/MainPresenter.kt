@@ -140,7 +140,7 @@ class MainPresenter(val view : MainContract.View,
         GlobalScope.launch {
             ttsPresenter.deprecatedOnArticleChanged(
                     store.state.currentArticleScreen.articleState as ArticleState)
-            ttsPresenter.deprecatedSpeakInLoop({
+            ttsPresenter.startSpeaking({
             GlobalScope.launch {
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
@@ -244,7 +244,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         runBlocking {
-            ttsPresenter.deprecatedStopSpeaking()
+            ttsPresenter.stopSpeaking()
         }
         view.enablePlayButton()
         ttsPresenter.deprecatedHandsomeBritish(shouldBeBritish)
@@ -252,7 +252,7 @@ class MainPresenter(val view : MainContract.View,
 
     override fun setSpeechRate(speechRate: Float) {
         runBlocking {
-            ttsPresenter.deprecatedStopSpeaking()
+            ttsPresenter.stopSpeaking()
         }
         view.enablePlayButton()
         ttsPresenter.deprecatedSetSpeechRate(speechRate)

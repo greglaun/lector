@@ -79,11 +79,11 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         ttsPresenter?.backOne()
     }
 
-    override suspend fun deprecatedSpeakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override suspend fun deprecatedStopSpeaking() {
+    override suspend fun stopSpeaking() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

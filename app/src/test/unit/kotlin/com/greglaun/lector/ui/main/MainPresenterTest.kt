@@ -48,7 +48,7 @@ class MainPresenterTest {
     fun onPlayButtonPressed() {
         mainPresenter.onPlayButtonPressed()
         runBlocking {
-            verify(mockTts, times(1)).deprecatedSpeakInLoop(ArgumentMatchers.any())
+            verify(mockTts, times(1)).startSpeaking(ArgumentMatchers.any())
             verify(mockView, times(1)).enablePauseButton()
         }
     }
@@ -57,7 +57,7 @@ class MainPresenterTest {
     fun stopSpeakingAndEnablePlayButton() {
         mainPresenter.stopSpeakingAndEnablePlayButton()
         runBlocking {
-            verify(mockTts, times(1)).deprecatedStopSpeaking()
+            verify(mockTts, times(1)).stopSpeaking()
         }
         verify(mockView, times(1)).enablePlayButton()
     }
