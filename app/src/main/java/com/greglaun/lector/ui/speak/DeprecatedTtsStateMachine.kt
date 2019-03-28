@@ -4,5 +4,7 @@ import com.greglaun.lector.store.Store
 
 interface DeprecatedTtsStateMachine {
     fun attach(ttsPresenter: TtsPresenter,
-               stateListener: TtsStateListener, store: Store)
+               ttsView: TTSContract.AudioView,
+               stateListener: TtsStateListener,
+               store: Store)
 }

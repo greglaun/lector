@@ -1,5 +1,7 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.Store
+
 // This is an attempt at the MVP
 interface TTSContract {
     interface AudioView { // Surely there's a better name.

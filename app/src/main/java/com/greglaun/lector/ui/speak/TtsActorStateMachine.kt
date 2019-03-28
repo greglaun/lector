@@ -8,6 +8,7 @@ class TtsActorStateMachine : DeprecatedTtsStateMachine {
 
     // Basic machine state
     override fun attach(ttsPresenter: TtsPresenter,
+                        ttsView: TTSContract.AudioView,
                         ttsStateListener: TtsStateListener,
                         store: Store) {
         this.store = store

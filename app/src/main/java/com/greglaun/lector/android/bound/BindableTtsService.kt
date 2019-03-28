@@ -12,20 +12,21 @@ import com.greglaun.lector.ui.speak.*
 class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Presenter,
         StateHandler {
     private val binder = LocalBinder()
-    private var ttsPresenter: TtsPresenter? = null
     private var ttsStateListener: TtsStateListener? = null
     private var store: Store? = null
     private var delegateStateMachine: TtsActorStateMachine? = null
+    private var ttsView: TTSContract.AudioView? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
     override fun attach(ttsPresenter: TtsPresenter,
+                        ttsView: TTSContract.AudioView,
                         stateListener: TtsStateListener,
                         store: Store) {
-        this.ttsPresenter = ttsPresenter
         ttsStateListener = stateListener
         ttsPresenter?.store?.stateHandlers?.add(this)
+        this.ttsView = ttsView
         this.store = store
-        this.delegateStateMachine!!.attach(ttsPresenter!!, stateListener, store)
+        this.delegateStateMachine!!.attach(ttsPresenter!!, ttsView, stateListener, store)
     }
 
 
@@ -46,7 +47,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
    suspend fun startSpeaking(state: State) {
         val articleState = state.currentArticleScreen.articleState
         articleState.current()?.let {text ->
-            ttsPresenter?.ttsView?.speak(cleanUtterance(text),
+            ttsView?.speak(cleanUtterance(text),
                     utteranceId(text)) {
                         if (it == utteranceId(text)) {
             if (articleState!!.hasNext()) {
@@ -64,18 +65,28 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     }
 
     fun detach() {
-        ttsPresenter?.store?.stateHandlers?.remove(this)
+        store?.stateHandlers?.remove(this)
     }
 
     override fun stopImmediately() {
-        ttsPresenter?.stopImmediately()
+       ttsView?.stopImmediately()
     }
     override suspend fun forwardOne() {
-        ttsPresenter?.forwardOne()
+        store?.let {
+            store!!.dispatch(UpdateAction.FastForwardOne())
+            if (store!!.state.currentArticleScreen.articleState.hasNext()) {
+                ttsView?.stopImmediately()
+            }
+        }
     }
 
     override suspend fun backOne() {
-        ttsPresenter?.backOne()
+        store?.let {
+            store!!.dispatch(UpdateAction.RewindOne())
+            if (store!!.state.currentArticleScreen.articleState.hasPrevious()) {
+                ttsView?.stopImmediately()
+            }
+        }
     }
 
     override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
@@ -115,7 +126,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     }
 
     override fun ttsView(): TTSContract.AudioView? {
-        return ttsPresenter?.ttsView
+        return ttsView
     }
 
     /**
