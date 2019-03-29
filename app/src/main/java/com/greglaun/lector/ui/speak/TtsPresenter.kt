@@ -36,8 +36,8 @@ class TtsPresenter(val ttsView: TTSContract.AudioView,
         }
     }
 
-    override fun deprecatedOnStart(stateListener: TtsStateListener) {
-        stateMachine?.attach(ttsView, stateListener, store)
+    override fun deprecatedOnStart() {
+        stateMachine?.attach(ttsView, store)
     }
 
     override fun deprecatedOnStop() {}

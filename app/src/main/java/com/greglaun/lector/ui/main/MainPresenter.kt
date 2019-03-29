@@ -14,7 +14,7 @@ class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
-    : MainContract.Presenter, TtsStateListener, StateHandler {
+    : MainContract.Presenter, StateHandler {
     private var articleStateSource: ArticleStateSource? = null
 
     // todo(data): Replace readingList and courseList with LiveData?
@@ -27,7 +27,7 @@ class MainPresenter(val view : MainContract.View,
     private var isActivityRunning = false
 
     override fun onAttach() {
-        ttsPresenter.deprecatedOnStart(this)
+        ttsPresenter.deprecatedOnStart()
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
         isActivityRunning = true

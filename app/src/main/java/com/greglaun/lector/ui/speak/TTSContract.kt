@@ -18,7 +18,7 @@ interface TTSContract {
         suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
         suspend fun stopSpeaking()
         suspend fun deprecatedOnArticleChanged(articleState: ArticleState)
-        fun deprecatedOnStart(stateListener: TtsStateListener)
+        fun deprecatedOnStart()
         fun deprecatedOnStop()
         fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit)
         fun deprecatedReverseOne(onDone: (ArticleState) -> Unit)

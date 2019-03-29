@@ -12,20 +12,17 @@ import com.greglaun.lector.ui.speak.*
 class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Presenter,
         StateHandler {
     private val binder = LocalBinder()
-    private var ttsStateListener: TtsStateListener? = null
     private var store: Store? = null
     private var delegateStateMachine: TtsActorStateMachine? = null
     private var ttsView: TTSContract.AudioView? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
     override fun attach(ttsView: TTSContract.AudioView,
-                        stateListener: TtsStateListener,
                         store: Store) {
-        ttsStateListener = stateListener
         store?.stateHandlers?.add(this)
         this.ttsView = ttsView
         this.store = store
-        this.delegateStateMachine!!.attach(ttsView, stateListener, store)
+        this.delegateStateMachine!!.attach(ttsView, store)
     }
 
 
@@ -98,7 +95,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun deprecatedOnStart(stateListener: TtsStateListener) {
+    override fun deprecatedOnStart() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

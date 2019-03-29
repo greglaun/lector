@@ -17,7 +17,7 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun deprecatedOnStart(ttsStateListener: TtsStateListener) {
+    override fun deprecatedOnStart() {
         // Do nothing
     }
 
