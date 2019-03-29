@@ -84,7 +84,7 @@ fun reduceUpdateSpeakerState(action: UpdateAction.UpdateSpeakerStateAction,
     return currentState.updateSpeakerState(action.speakerState)
 }
 
-fun reduceStopSpeakingAction(action: SpeakerAction.StopSpeakingAction, currentState: State): State {
+fun reduceStopSpeakingAction(action: Action, currentState: State): State {
     when (currentState.speakerState) {
         SpeakerState.SPEAKING -> return currentState.updateSpeakerState(SpeakerState.READY)
         SpeakerState.SPEAKING_NEW_UTTERANCE -> return currentState.updateSpeakerState(SpeakerState.READY)
@@ -111,4 +111,8 @@ fun reduceSpeakAction(action: SpeakerAction.SpeakAction, currentState: State): S
 //        }
 //    }
     return currentState.updateSpeakerState(SpeakerState.SPEAKING_NEW_UTTERANCE)
+}
+
+fun reduceArticleOverAction(action: UpdateAction.ArticleOverAction, currentState: State): State {
+    return reduceStopSpeakingAction(action, currentState)
 }

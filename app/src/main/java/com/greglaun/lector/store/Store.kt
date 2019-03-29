@@ -59,6 +59,7 @@ abstract class Store {
             is UpdateAction.RewindOne -> reduceRewindOne(action, state)
             is UpdateAction.UpdateCourseDetailsAction ->
                 reduceUpdateCourseDetailsAction(action, state)
+            is UpdateAction.ArticleOverAction -> reduceArticleOverAction(action, state)
             is UpdateAction.UpdateSpeakerStateAction -> reduceUpdateSpeakerState(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
             is ReadAction.StartDownloadAction ->  reduceStartDowloadAction(action, state)

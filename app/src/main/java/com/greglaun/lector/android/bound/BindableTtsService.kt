@@ -49,17 +49,17 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
             ttsView?.speak(cleanUtterance(text),
                     utteranceId(text)) {
                         if (it == utteranceId(text)) {
-            if (articleState!!.hasNext()) {
-                store?.dispatch(UpdateAction.FastForwardOne())
+                            if (articleState!!.hasNext()) {
+                                store?.dispatch(UpdateAction.FastForwardOne())
 
-            } else {
-                store?.dispatch(UpdateAction.ArticleOverAction())
-                }
+                            } else {
+                                store?.dispatch(UpdateAction.ArticleOverAction())
+                            }
+                        }
             }
-        }
 
         }
-    }
+   }
 
     fun detach() {
         store?.stateHandlers?.remove(this)

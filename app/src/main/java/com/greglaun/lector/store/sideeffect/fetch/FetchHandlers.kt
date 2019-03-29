@@ -9,6 +9,7 @@ import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.ArticleStateSource
+import kotlinx.coroutines.runBlocking
 
 suspend fun fetchCourseDetails(action: ReadAction.FetchCourseDetailsAction,
                                courseDownloader: CourseDownloader,
@@ -43,7 +44,6 @@ suspend fun handleArticleOver(action: UpdateAction.ArticleOverAction,
                               courseSource: CourseSource,
                               articleStateSource: ArticleStateSource,
                               actionDispatcher: suspend (Action) -> Unit) {
-    actionDispatcher(SpeakerAction.StopSpeakingAction())
     if (store.state.preferences.autoPlay) {
         autoPlayNext(store, responseSource, courseSource, actionDispatcher, articleStateSource)
         actionDispatcher(SpeakerAction.SpeakAction())
