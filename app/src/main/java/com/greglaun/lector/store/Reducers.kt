@@ -1,8 +1,10 @@
 package com.greglaun.lector.store
 
-import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.BasicArticleContext
-import com.greglaun.lector.ui.speak.*
+import com.greglaun.lector.ui.speak.hasNext
+import com.greglaun.lector.ui.speak.hasPrevious
+import com.greglaun.lector.ui.speak.next
+import com.greglaun.lector.ui.speak.previous
 
 fun reduceUpdateArticleAction(action: UpdateAction.UpdateArticleAction, currentState: State,
                               isNew: Boolean = false): State {
@@ -74,10 +76,10 @@ fun reduceFetchCourseDetailsAction(action: ReadAction.FetchCourseDetailsAction,
                     Lce.Loading))
 }
 
-fun reduceStartDowloadAction(action: ReadAction.StartDownloadAction,
-                             currentState: State): State {
-    return currentState
-}
+//fun reduceStartDowloadAction(action: ReadAction.StartDownloadAction,
+//                             currentState: State): State {
+//    return currentState
+//}
 
 fun reduceUpdateSpeakerState(action: UpdateAction.UpdateSpeakerStateAction,
                              currentState: State): State {
@@ -93,23 +95,6 @@ fun reduceStopSpeakingAction(action: Action, currentState: State): State {
 }
 
 fun reduceSpeakAction(action: SpeakerAction.SpeakAction, currentState: State): State {
-//    ttsClient.speechViewSpeak(cleanUtterance(text), utteranceId(text)) {
-//        if (it == utteranceId(text)) {
-//            ttsStateListener.onUtteranceEnded(articleState!!)
-//            if (articleState!!.hasNext()) {
-//                runBlocking {
-//                    store.dispatch(UpdateAction.FastForwardOne())
-//                }
-//            } else {
-//                runBlocking {
-//                    store.dispatch(UpdateAction.UpdateSpeakerStateAction(
-//                            SpeakerState.NOT_READY))
-//                    ttsStateListener.onSpeechStopped()
-//                    ttsStateListener.onArticleFinished(articleState!!)
-//                }
-//            }
-//        }
-//    }
     return currentState.updateSpeakerState(SpeakerState.SPEAKING_NEW_UTTERANCE)
 }
 

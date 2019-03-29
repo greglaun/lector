@@ -24,15 +24,6 @@ val EmptyArticleState = ArticleState(DEFAULT_ARTICLE,
         ArticlePosition(0, ""))
 
 
-//data class EmptyArticleState(override val title: String = DEFAULT_ARTICLE,
-//                             override val paragraphs: List<String> = emptyList(),
-//                             override val currentPosition: ArticlePosition =
-//                                     ArticlePosition(0, "")): AbstractArticleState
-
-fun articleStatefromTitle(title: String): ArticleState {
-    return ArticleState(title, emptyList(), ArticlePosition())
-}
-
 fun AbstractArticleState.currentIndex(): Int {
     return currentPosition.index
 }

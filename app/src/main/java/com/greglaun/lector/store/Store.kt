@@ -62,7 +62,6 @@ abstract class Store {
             is UpdateAction.ArticleOverAction -> reduceArticleOverAction(action, state)
             is UpdateAction.UpdateSpeakerStateAction -> reduceUpdateSpeakerState(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
-            is ReadAction.StartDownloadAction ->  reduceStartDowloadAction(action, state)
             is SpeakerAction.SpeakAction -> reduceSpeakAction(action, state)
             is SpeakerAction.StopSpeakingAction -> reduceStopSpeakingAction(action, state)
 //            is CreationAction -> CreationReducer.reduce(action, currentState)

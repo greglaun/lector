@@ -28,14 +28,3 @@ sealed class ReadAction: Action() {
     class StopDownloadAction: ReadAction()
     data class LoadNewUrlAction(val newUrl: String): ReadAction()
 }
-
-
-
-// Starting up action
-// Winding down action
-// Link clicked
-// Settings change in UI
-// Fast forward
-// Rewind
-// Play
-// Pause

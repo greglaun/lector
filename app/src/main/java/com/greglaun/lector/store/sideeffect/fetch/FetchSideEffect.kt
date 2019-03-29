@@ -25,7 +25,6 @@ class FetchSideEffect(val store: Store, val responseSource: ResponseSource,
                 store.dispatch(it)
             }
             is UpdateAction.ArticleOverAction -> handleArticleOver(
-                    action,
                     store,
                     responseSource,
                     courseSource,
