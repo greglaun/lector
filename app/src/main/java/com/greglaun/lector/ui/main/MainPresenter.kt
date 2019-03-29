@@ -107,14 +107,14 @@ class MainPresenter(val view : MainContract.View,
         return courseSource
     }
 
-    override suspend fun onArticleFinished(articleState: ArticleState) {
-        if (autoPlay) {
-            autoPlayNext(articleState)
-        }
-        if (autoDelete) {
-            autoDeleteCurrent(articleState)
-        }
-    }
+//    override suspend fun onArticleFinished(articleState: ArticleState) {
+//        if (autoPlay) {
+//            autoPlayNext(articleState)
+//        }
+//        if (autoDelete) {
+//            autoDeleteCurrent(articleState)
+//        }
+//    }
 
     private fun autoDeleteCurrent(articleState: ArticleState) {
         GlobalScope.launch {
@@ -122,19 +122,19 @@ class MainPresenter(val view : MainContract.View,
         }
     }
 
-    private suspend fun autoPlayNext(articleState: ArticleState) {
-        var nextArticle: ArticleContext? = null
-        if (store.state.currentArticleScreen.articleState.title == DEFAULT_ARTICLE) {
-            nextArticle = responseSource.getNextArticle(articleState.title)
-        } else {
-            nextArticle = courseSource.getNextInCourse(
-                    store.state.currentArticleScreen.articleState.title, articleState.title)
-        }
-        nextArticle?.let {
-            onUrlChanged(contextToUrl(it.contextString))
-            onPlayButtonPressed()
-        }
-    }
+//    private suspend fun autoPlayNext(articleState: ArticleState) {
+//        var nextArticle: ArticleContext? = null
+//        if (store.state.currentArticleScreen.articleState.title == DEFAULT_ARTICLE) {
+//            nextArticle = responseSource.getNextArticle(articleState.title)
+//        } else {
+//            nextArticle = courseSource.getNextInCourse(
+//                    store.state.currentArticleScreen.articleState.title, articleState.title)
+//        }
+//        nextArticle?.let {
+//            onUrlChanged(contextToUrl(it.contextString))
+//            onPlayButtonPressed()
+//        }
+//    }
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {

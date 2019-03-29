@@ -1,5 +1,6 @@
 package com.greglaun.lector.store
 
+import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.BasicArticleContext
 import com.greglaun.lector.ui.speak.*
 

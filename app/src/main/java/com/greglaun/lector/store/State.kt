@@ -56,7 +56,6 @@ data class State(
         val background: Background = Background(),
         val changed: List<Changed> = listOf(Changed.NONE),
         val speakerState: SpeakerState = SpeakerState.NOT_READY
-
 )
 
 fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen,

@@ -69,3 +69,24 @@ fun AbstractArticleState.current(): String? {
     }
     return paragraphs.get(currentIndex())
 }
+
+fun AbstractArticleState.scrubTo(index: Int): ArticleState {
+    if (index < paragraphs.size) {
+        return ArticleState(title, paragraphs,
+                ArticlePosition(index, utteranceId(paragraphs[index])))
+    }
+    return this as ArticleState
+}
+
+fun AbstractArticleState.scrubTo(positionHash: String): ArticleState {
+    if (positionHash == "") {
+        return this as ArticleState
+    }
+    val matches = paragraphs.withIndex().filter{
+        utteranceId(it.value) == positionHash
+    }.map {it.index}
+    if (matches == null || matches.size == 0) {
+        return this as ArticleState
+    }
+    return this.scrubTo(matches.get(0))
+}

@@ -53,9 +53,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
                 store?.dispatch(UpdateAction.FastForwardOne())
 
             } else {
-                    store?.dispatch(UpdateAction.UpdateSpeakerStateAction(
-                            SpeakerState.NOT_READY))
-                    ttsStateListener?.onArticleFinished(articleState!! as ArticleState)
+                store?.dispatch(UpdateAction.ArticleOverAction())
                 }
             }
         }

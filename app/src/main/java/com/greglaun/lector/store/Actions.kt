@@ -14,6 +14,7 @@ sealed class UpdateAction: Action() {
     data class UpdateSpeakerStateAction(val speakerState: SpeakerState): UpdateAction()
     class FastForwardOne: UpdateAction()
     class RewindOne: UpdateAction()
+    class ArticleOverAction: UpdateAction()
 }
 
 sealed class SpeakerAction: Action() {
