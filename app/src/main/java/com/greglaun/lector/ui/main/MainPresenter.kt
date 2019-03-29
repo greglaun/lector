@@ -107,12 +107,6 @@ class MainPresenter(val view : MainContract.View,
         return courseSource
     }
 
-    private fun autoDeleteCurrent(articleState: ArticleState) {
-        GlobalScope.launch {
-            responseSource.delete(articleState.title)
-        }
-    }
-
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
             ttsPresenter.deprecatedOnArticleChanged(
