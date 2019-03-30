@@ -1,6 +1,12 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.Store
+
 class NoOpTtsPresenter : TTSContract.Presenter {
+    override fun attach(ttsView: TTSContract.AudioView?, store: Store) {
+        // Do nothing
+    }
+
     override fun ttsView(): TTSContract.AudioView? {
         return null
     }
@@ -14,10 +20,6 @@ class NoOpTtsPresenter : TTSContract.Presenter {
     }
 
     override fun stopImmediately() {
-        // Do nothing
-    }
-
-    override fun deprecatedOnStart() {
         // Do nothing
     }
 

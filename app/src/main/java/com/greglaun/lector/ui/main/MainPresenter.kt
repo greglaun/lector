@@ -27,7 +27,7 @@ class MainPresenter(val view : MainContract.View,
     private var isActivityRunning = false
 
     override fun onAttach() {
-        ttsPresenter.deprecatedOnStart()
+        ttsPresenter.attach(ttsPresenter.ttsView(), store)
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
         isActivityRunning = true

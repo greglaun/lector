@@ -5,9 +5,9 @@ import com.greglaun.lector.store.Store
 import com.greglaun.lector.store.UpdateAction
 
 class TtsPresenter(val ttsView: TTSContract.AudioView,
-                   val stateMachine: DeprecatedTtsStateMachine,
+                   val realPresenter: TTSContract.Presenter,
                    val store: Store)
-    : TTSContract.Presenter, TtsActorClient {
+    : TTSContract.Presenter {
 
     override fun ttsView(): TTSContract.AudioView? {
         return ttsView
@@ -36,8 +36,10 @@ class TtsPresenter(val ttsView: TTSContract.AudioView,
         }
     }
 
-    override fun deprecatedOnStart() {
-        stateMachine?.attach(ttsView, store)
+    override fun attach(ttsView: TTSContract.AudioView?, store: Store) {
+        ttsView?.let{
+            realPresenter?.attach(ttsView, store)
+        }
     }
 
     override fun deprecatedOnStop() {}

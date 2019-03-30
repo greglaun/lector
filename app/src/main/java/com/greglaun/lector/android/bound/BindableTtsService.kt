@@ -17,12 +17,11 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     private var ttsView: TTSContract.AudioView? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
-    override fun attach(ttsView: TTSContract.AudioView,
+    override fun attach(ttsView: TTSContract.AudioView?,
                         store: Store) {
         store?.stateHandlers?.add(this)
         this.ttsView = ttsView
         this.store = store
-        this.delegateStateMachine!!.attach(ttsView, store)
     }
 
 
@@ -92,10 +91,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     }
 
     override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun deprecatedOnStart() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

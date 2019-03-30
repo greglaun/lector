@@ -85,29 +85,29 @@ class TtsActorStateMachineTest {
             assertEquals(stateMachine.getArticleState(), articleState)
 
 //            // Attempting to seek past beginning of utterance list
-//            stateMachine.stopReverseOneAndResume {}
-//            assertEquals(stateMachine.getSpeakerState(), SpeakerState.READY)
-//            assertEquals(stateMachine.getArticleState(), articleState)
+//            realPresenter.stopReverseOneAndResume {}
+//            assertEquals(realPresenter.getSpeakerState(), SpeakerState.READY)
+//            assertEquals(realPresenter.getArticleState(), articleState)
 //
 //            // Now on B
-//            stateMachine.stopAdvanceOneAndResume {}
-//            assertEquals(stateMachine.getSpeakerState(), SpeakerState.READY)
-//            assertEquals(stateMachine.getArticleState(), articleState.next())
+//            realPresenter.stopAdvanceOneAndResume {}
+//            assertEquals(realPresenter.getSpeakerState(), SpeakerState.READY)
+//            assertEquals(realPresenter.getArticleState(), articleState.next())
 //
 //            // Now on A
-//            stateMachine.stopReverseOneAndResume {}
-//            assertEquals(stateMachine.getSpeakerState(), SpeakerState.READY)
-//            assertEquals(stateMachine.getArticleState(), articleState)
+//            realPresenter.stopReverseOneAndResume {}
+//            assertEquals(realPresenter.getSpeakerState(), SpeakerState.READY)
+//            assertEquals(realPresenter.getArticleState(), articleState)
 //
 //            // Now on B again
-//            stateMachine.stopAdvanceOneAndResume {}
-//            assertEquals(stateMachine.getSpeakerState(), SpeakerState.READY)
-//            assertEquals(stateMachine.getArticleState(), articleState.next())
+//            realPresenter.stopAdvanceOneAndResume {}
+//            assertEquals(realPresenter.getSpeakerState(), SpeakerState.READY)
+//            assertEquals(realPresenter.getArticleState(), articleState.next())
 //
 //            // Attempting to seek past end of utterance list
-//            stateMachine.stopAdvanceOneAndResume {}
-//            assertEquals(stateMachine.getSpeakerState(), SpeakerState.READY)
-//            assertEquals(stateMachine.getArticleState(), articleState.next())
+//            realPresenter.stopAdvanceOneAndResume {}
+//            assertEquals(realPresenter.getSpeakerState(), SpeakerState.READY)
+//            assertEquals(realPresenter.getArticleState(), articleState.next())
         }
     }
 

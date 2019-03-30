@@ -13,12 +13,13 @@ interface TTSContract {
     }
 
     interface Presenter {
+        fun attach(ttsView: TTSContract.AudioView?,
+                   store: Store)
         fun ttsView(): AudioView?
         fun stopImmediately()
         suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
         suspend fun stopSpeaking()
         suspend fun deprecatedOnArticleChanged(articleState: ArticleState)
-        fun deprecatedOnStart()
         fun deprecatedOnStop()
         fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit)
         fun deprecatedReverseOne(onDone: (ArticleState) -> Unit)
