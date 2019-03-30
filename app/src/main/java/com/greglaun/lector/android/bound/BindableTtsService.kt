@@ -83,35 +83,35 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     }
 
     override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        store?.dispatch(SpeakerAction.SpeakAction())
     }
 
     override suspend fun stopSpeaking() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        store?.dispatch(SpeakerAction.StopSpeakingAction())
     }
 
     override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun deprecatedOnStop() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun deprecatedReverseOne(onDone: (ArticleState) -> Unit) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun deprecatedSetSpeechRate(speechRate: Float) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun ttsView(): TTSContract.AudioView? {
