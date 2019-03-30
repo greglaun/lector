@@ -24,15 +24,6 @@ val EmptyArticleState = ArticleState(DEFAULT_ARTICLE,
         ArticlePosition(0, ""))
 
 
-//data class EmptyArticleState(override val title: String = DEFAULT_ARTICLE,
-//                             override val paragraphs: List<String> = emptyList(),
-//                             override val currentPosition: ArticlePosition =
-//                                     ArticlePosition(0, "")): AbstractArticleState
-
-fun articleStatefromTitle(title: String): ArticleState {
-    return ArticleState(title, emptyList(), ArticlePosition())
-}
-
 fun AbstractArticleState.currentIndex(): Int {
     return currentPosition.index
 }
@@ -68,4 +59,25 @@ fun AbstractArticleState.current(): String? {
         return null
     }
     return paragraphs.get(currentIndex())
+}
+
+fun AbstractArticleState.scrubTo(index: Int): ArticleState {
+    if (index < paragraphs.size) {
+        return ArticleState(title, paragraphs,
+                ArticlePosition(index, utteranceId(paragraphs[index])))
+    }
+    return this as ArticleState
+}
+
+fun AbstractArticleState.scrubTo(positionHash: String): ArticleState {
+    if (positionHash == "") {
+        return this as ArticleState
+    }
+    val matches = paragraphs.withIndex().filter{
+        utteranceId(it.value) == positionHash
+    }.map {it.index}
+    if (matches == null || matches.size == 0) {
+        return this as ArticleState
+    }
+    return this.scrubTo(matches.get(0))
 }

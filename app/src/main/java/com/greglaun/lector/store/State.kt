@@ -5,7 +5,6 @@ import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.ui.speak.AbstractArticleState
 import com.greglaun.lector.ui.speak.EmptyArticleState
-import com.greglaun.lector.ui.speak.SpeakerState
 
 val DEFAULT_READING_LIST = "All Articles"
 val LECTOR_UNIVERSE = ""
@@ -24,10 +23,15 @@ enum class Changed {
     BACKGROUND
 }
 
+enum class SpeakerState {
+    NOT_READY,
+    READY,
+    SPEAKING,
+    SPEAKING_NEW_UTTERANCE
+}
 
 data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState,
-                                val currentCourse: CourseContext = EmptyCourseContext(),
-                                val speakerState: SpeakerState = SpeakerState.NOT_READY)
+                                val currentCourse: CourseContext = EmptyCourseContext())
 
 data class ReadingListScreen(val currentReadingList: String = DEFAULT_READING_LIST,
                              val articles: Lce<List<ArticleContext>> =
@@ -50,15 +54,47 @@ data class State(
         val navigation: Navigation = Navigation.NEW_ARTICLE,
         val preferences: Preferences = Preferences(),
         val background: Background = Background(),
-        val changed: List<Changed> = listOf(Changed.NONE)
+        val changed: List<Changed> = listOf(Changed.NONE),
+        val speakerState: SpeakerState = SpeakerState.NOT_READY
 )
 
-fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen): State {
+fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen,
+                              speakerState: SpeakerState): State {
     return State(newArticleScreen, readingListScreen, courseBrowserScreen, navigation,
-            preferences, background, changed)
+            preferences, background, changed, speakerState)
+}
+
+fun State.newArticleScreen(newArticleScreen: CurrentArticleScreen,
+                              speakerState: SpeakerState): State {
+    return State(newArticleScreen, readingListScreen, courseBrowserScreen, Navigation.NEW_ARTICLE,
+            preferences, background, changed, speakerState)
+}
+
+fun State.updateNavigation(navigation: Navigation): State {
+    return State(currentArticleScreen, readingListScreen, courseBrowserScreen, navigation,
+            preferences, background, changed, stripNew(speakerState))
 }
 
 fun State.updateReadingListScreen(newReadingListScreen: ReadingListScreen): State {
     return State(currentArticleScreen, newReadingListScreen, courseBrowserScreen, navigation,
-            preferences, background, changed)
+            preferences, background, changed, stripNew(speakerState))
+}
+
+fun State.updateSpeakerState(speakerState: SpeakerState): State {
+    return State(currentArticleScreen, readingListScreen, courseBrowserScreen, navigation,
+            preferences, background, changed, speakerState)
+}
+
+fun stripNew(speakerState: SpeakerState): SpeakerState {
+    when (speakerState) {
+        SpeakerState.SPEAKING_NEW_UTTERANCE -> return SpeakerState.SPEAKING
+        else -> return speakerState
+    }
+}
+
+fun maybeNew(speakerState: SpeakerState): SpeakerState {
+    when (speakerState) {
+        SpeakerState.SPEAKING -> return SpeakerState.SPEAKING_NEW_UTTERANCE
+        else -> return speakerState
+    }
 }

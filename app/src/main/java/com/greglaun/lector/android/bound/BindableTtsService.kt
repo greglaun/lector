@@ -5,52 +5,117 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.utteranceId
+import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
 
-class BindableTtsService : Service(), TtsStateMachine {
+class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Presenter,
+        StateHandler {
     private val binder = LocalBinder()
-
+    private var store: Store? = null
     private var delegateStateMachine: TtsActorStateMachine? = null
+    private var ttsView: TTSContract.AudioView? = null
 
     // todo(error_handling): Remove ugly null assertions in this file
-    override fun startMachine(ttsActorClient: TtsActorClient, stateListener: TtsStateListener) {
-        this.delegateStateMachine!!.startMachine(ttsActorClient, stateListener)
+    override fun attach(ttsView: TTSContract.AudioView?,
+                        store: Store) {
+        store?.stateHandlers?.add(this)
+        this.ttsView = ttsView
+        this.store = store
     }
 
-    override fun stopMachine() {
-        delegateStateMachine!!.stopMachine()
+
+    override suspend fun handle(state: State) {
+        handleState(state)
     }
 
-    override suspend fun getSpeakerState(): SpeakerState {
-        return delegateStateMachine!!.getSpeakerState()
+    private suspend fun handleState(state: State) {
+        if (state.speakerState != SpeakerState.SPEAKING &&
+                state.speakerState != SpeakerState.SPEAKING_NEW_UTTERANCE) {
+          stopImmediately()
+        }
+        if (state.speakerState == SpeakerState.SPEAKING_NEW_UTTERANCE) {
+            startSpeaking(state)
+        }
     }
 
-    override suspend fun updateArticle(articleState: ArticleState) {
-        return delegateStateMachine!!.updateArticle(articleState)
+   suspend fun startSpeaking(state: State) {
+        val articleState = state.currentArticleScreen.articleState
+        articleState.current()?.let {text ->
+            ttsView?.speak(cleanUtterance(text),
+                    utteranceId(text)) {
+                        if (it == utteranceId(text)) {
+                            if (articleState!!.hasNext()) {
+                                store?.dispatch(UpdateAction.FastForwardOne())
+
+                            } else {
+                                store?.dispatch(UpdateAction.ArticleOverAction())
+                            }
+                        }
+            }
+
+        }
+   }
+
+    fun detach() {
+        store?.stateHandlers?.remove(this)
     }
 
-    override suspend fun actionSpeakOne(): SpeakerState {
-        return delegateStateMachine!!.actionSpeakOne()
+    override fun stopImmediately() {
+       ttsView?.stopImmediately()
+    }
+    override suspend fun forwardOne() {
+        store?.let {
+            store!!.dispatch(UpdateAction.FastForwardOne())
+            if (store!!.state.currentArticleScreen.articleState.hasNext()) {
+                ttsView?.stopImmediately()
+            }
+        }
     }
 
-    override suspend fun actionStopSpeaking() {
-        return delegateStateMachine!!.actionStopSpeaking()
+    override suspend fun backOne() {
+        store?.let {
+            store!!.dispatch(UpdateAction.RewindOne())
+            if (store!!.state.currentArticleScreen.articleState.hasPrevious()) {
+                ttsView?.stopImmediately()
+            }
+        }
     }
 
-    override suspend fun actionSpeakInLoop(onPositionUpdate: ((ArticleState) -> Unit)?) {
-        return delegateStateMachine!!.actionSpeakInLoop(onPositionUpdate)
+    override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+        store?.dispatch(SpeakerAction.SpeakAction())
     }
 
-    override suspend fun getArticleState(): ArticleState {
-        return delegateStateMachine!!.getArticleState()
+    override suspend fun stopSpeaking() {
+        store?.dispatch(SpeakerAction.StopSpeakingAction())
     }
 
-    override suspend fun stopAdvanceOneAndResume(onDone: (ArticleState) -> Unit) {
-        return delegateStateMachine!!.stopAdvanceOneAndResume(onDone)
+    override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
+
     }
 
-    override suspend fun stopReverseOneAndResume(onDone: (ArticleState) -> Unit) {
-        return delegateStateMachine!!.stopReverseOneAndResume(onDone)
+    override fun deprecatedOnStop() {
+
+    }
+
+    override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
+
+    }
+
+    override fun deprecatedReverseOne(onDone: (ArticleState) -> Unit) {
+
+    }
+
+    override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
+
+    }
+
+    override fun deprecatedSetSpeechRate(speechRate: Float) {
+
+    }
+
+    override fun ttsView(): TTSContract.AudioView? {
+        return ttsView
     }
 
     /**

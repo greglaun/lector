@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.LectorApplication
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -7,36 +8,36 @@ import org.mockito.Mockito.*
 
 class TtsPresenterTest {
     var ttsPresenter: TtsPresenter? = null
-    var stateMachine: TtsStateMachine? = null
+    var stateMachine: DeprecatedTtsStateMachine? = null
     var audioView: TTSContract.AudioView? = null
     val articleState = ArticleState("MyTitle", listOf("some", "paragraphs"))
 
     @Before
     fun setUp() {
         audioView = mock(TTSContract.AudioView::class.java)
-        stateMachine = mock(TtsStateMachine::class.java)
-        ttsPresenter = TtsPresenter(audioView!!, stateMachine!!)
+        stateMachine = mock(DeprecatedTtsStateMachine::class.java)
+        ttsPresenter = TtsPresenter(audioView!!, stateMachine!!, LectorApplication.AppStore)
     }
 
     @Test
     fun onStart() {
         val stateListener = mock(TtsStateListener::class.java)
-        ttsPresenter!!.onStart(stateListener)
-        verify(stateMachine, times(1))!!.startMachine(
+        ttsPresenter!!.deprecatedOnStart(stateListener)
+        verify(stateMachine, times(1))!!.attach(
                 ttsPresenter!!,
-                stateListener)
+                stateListener, LectorApplication.AppStore)
     }
 
     @Test
     fun onStop() {
-        ttsPresenter!!.onStop()
-        verify(stateMachine, times(1))!!.stopMachine()
+        ttsPresenter!!.deprecatedOnStop()
+        verify(stateMachine, times(1))!!.detach()
     }
 
     @Test
     fun speakInLoop() {
         runBlocking {
-            ttsPresenter!!.speakInLoop(null)
+            ttsPresenter!!.startSpeaking(null)
             verify(stateMachine, times(1))!!
                     .actionSpeakInLoop(null)
         }
@@ -51,7 +52,7 @@ class TtsPresenterTest {
     @Test
     fun onUrlChanged() {
         runBlocking {
-            ttsPresenter!!.onArticleChanged(articleState)
+            ttsPresenter!!.deprecatedOnArticleChanged(articleState)
             verify(stateMachine, times(1))!!.updateArticle(articleState)
         }
     }
@@ -70,23 +71,23 @@ class TtsPresenterTest {
     fun onArticleChanged() {
         val articleState = ArticleState("Test", listOf("A", "B"))
         runBlocking {
-            ttsPresenter!!.onArticleChanged(articleState)
+            ttsPresenter!!.deprecatedOnArticleChanged(articleState)
             verify(stateMachine, times(1))!!.updateArticle(articleState)
         }
     }
 
     @Test
     fun setHandsomeBritish() {
-        ttsPresenter!!.setHandsomeBritish(true)
+        ttsPresenter!!.deprecatedHandsomeBritish(true)
         verify(audioView, times(1))!!.setHandsomeBritish(true)
 
-        ttsPresenter!!.setHandsomeBritish(false)
+        ttsPresenter!!.deprecatedHandsomeBritish(false)
         verify(audioView, times(1))!!.setHandsomeBritish(false)
     }
 
     @Test
     fun setSpeechRate() {
-        ttsPresenter!!.setSpeechRate(12f)
+        ttsPresenter!!.deprecatedSetSpeechRate(12f)
         verify(audioView, times(1))!!.setSpeechRate(12f)
     }
 }

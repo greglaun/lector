@@ -14,8 +14,7 @@ class MainPresenter(val view : MainContract.View,
                     val ttsPresenter: TTSContract.Presenter,
                     val responseSource: ResponseSource,
                     val courseSource: CourseSource)
-    : MainContract.Presenter, TtsStateListener, StateHandler {
-    private val contextThread = newSingleThreadContext("ContextThread")
+    : MainContract.Presenter, StateHandler {
     private var articleStateSource: ArticleStateSource? = null
 
     // todo(data): Replace readingList and courseList with LiveData?
@@ -28,7 +27,7 @@ class MainPresenter(val view : MainContract.View,
     private var isActivityRunning = false
 
     override fun onAttach() {
-        ttsPresenter.onStart(this)
+        ttsPresenter.attach(ttsPresenter.ttsView(), store)
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
         isActivityRunning = true
@@ -39,7 +38,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onDetach() {
-        ttsPresenter.onStop()
+        ttsPresenter.deprecatedOnStop()
         runBlocking {
             store.dispatch(ReadAction.StopDownloadAction())
         }
@@ -61,7 +60,7 @@ class MainPresenter(val view : MainContract.View,
             Navigation.BROWSE_COURSES -> {
                 val currentCourse = state.currentArticleScreen.currentCourse
                 GlobalScope.launch {
-                    courseSource.getArticlesForCourse(currentCourse.id!!)?.let {
+                    courseSource.getArticlesForCourse(currentCourse.id!!).let {
                         displayArticleList(it,
                                 currentCourse.courseName)
                     }
@@ -76,11 +75,24 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleCurrentArticle(state: State) {
-        throw NotImplementedError()
+        if (state.speakerState != SpeakerState.SPEAKING_NEW_UTTERANCE &&
+                state.speakerState != SpeakerState.SPEAKING) {
+            view.unhighlightAllText()
+            view.enablePlayButton()
+        }
+        if (state.speakerState == SpeakerState.SPEAKING_NEW_UTTERANCE) {
+            view.enablePauseButton()
+            view.unhighlightAllText()
+            view.highlightText(state.currentArticleScreen.articleState as ArticleState)
+        }
     }
 
     private fun handleNewArticle(state: State) {
         view.loadUrl(contextToUrl(state.currentArticleScreen.articleState.title))
+        GlobalScope.launch {
+            // todo(refactoring): Is this the right way to handle confirming article loading?
+            store.dispatch(UpdateAction.UpdateNavigationAction(Navigation.CURRENT_ARTICLE))
+        }
     }
 
     override fun getLectorView(): MainContract.View? {
@@ -95,62 +107,20 @@ class MainPresenter(val view : MainContract.View,
         return courseSource
     }
 
-    override fun onUtteranceStarted(articleState: ArticleState) {
-        view.highlightText(articleState)
-    }
-
-    override fun onUtteranceEnded(articleState: ArticleState) {
-        view.unhighlightAllText()
-    }
-
-    override suspend fun onArticleFinished(articleState: ArticleState) {
-        if (autoPlay) {
-            autoPlayNext(articleState)
-        }
-        if (autoDelete) {
-            autoDeleteCurrent(articleState)
-        }
-    }
-
-    private fun autoDeleteCurrent(articleState: ArticleState) {
-        GlobalScope.launch {
-            responseSource.delete(articleState.title)
-        }
-    }
-
-    private suspend fun autoPlayNext(articleState: ArticleState) {
-        var nextArticle: ArticleContext? = null
-        if (store.state.currentArticleScreen.articleState.title == DEFAULT_ARTICLE) {
-            nextArticle = responseSource.getNextArticle(articleState.title)
-        } else {
-            nextArticle = courseSource.getNextInCourse(
-                    store.state.currentArticleScreen.articleState.title, articleState.title)
-        }
-        nextArticle?.let {
-            onUrlChanged(contextToUrl(it.contextString))
-            onPlayButtonPressed()
-        }
-    }
-
-    override fun onSpeechStopped() {
-        view.enablePlayButton()
-    }
-
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-            ttsPresenter.onArticleChanged(
+            ttsPresenter.deprecatedOnArticleChanged(
                     store.state.currentArticleScreen.articleState as ArticleState)
-            ttsPresenter.speakInLoop({
+            ttsPresenter.startSpeaking({
             GlobalScope.launch {
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
             }
         })}
-        view.enablePauseButton()
     }
 
     override fun stopSpeakingAndEnablePlayButton() {
         runBlocking {
-            ttsPresenter.stopSpeaking()
+            store.dispatch(SpeakerAction.StopSpeakingAction())
         }
         view.enablePlayButton()
     }
@@ -235,18 +205,12 @@ class MainPresenter(val view : MainContract.View,
         view.displayCourses()
     }
 
-    override fun onRewindOne() {
-        ttsPresenter.reverseOne { it ->
-            view.unhighlightAllText()
-            view.highlightText(it)
-        }
+    override suspend fun onRewindOne() {
+        ttsPresenter.backOne()
     }
 
-    override fun onForwardOne() {
-        ttsPresenter.advanceOne { it ->
-            view.unhighlightAllText()
-            view.highlightText(it)
-        }
+    override suspend fun onForwardOne() {
+        ttsPresenter.forwardOne()
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
@@ -254,7 +218,7 @@ class MainPresenter(val view : MainContract.View,
             ttsPresenter.stopSpeaking()
         }
         view.enablePlayButton()
-        ttsPresenter.setHandsomeBritish(shouldBeBritish)
+        ttsPresenter.deprecatedHandsomeBritish(shouldBeBritish)
     }
 
     override fun setSpeechRate(speechRate: Float) {
@@ -262,7 +226,7 @@ class MainPresenter(val view : MainContract.View,
             ttsPresenter.stopSpeaking()
         }
         view.enablePlayButton()
-        ttsPresenter.setSpeechRate(speechRate)
+        ttsPresenter.deprecatedSetSpeechRate(speechRate)
     }
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
@@ -274,9 +238,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun playAllPressed(title: String) {
-        // todo: we are going to have to handle the notion of autoplay being temporarily enabled,
-        // todo: or else change the language from "play all" to "start playing" or something else
-        if (readingList != null && readingList.size > 0) {
+        if (readingList.size > 0) {
             GlobalScope.launch {
                 onUrlChanged(contextToUrl(readingList[0].contextString))
                 onPlayButtonPressed()

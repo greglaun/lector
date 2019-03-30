@@ -1,11 +1,29 @@
 package com.greglaun.lector.ui.speak
 
+import com.greglaun.lector.store.Store
+
 class NoOpTtsPresenter : TTSContract.Presenter {
-    override fun onStart(ttsStateListener: TtsStateListener) {
+    override fun attach(ttsView: TTSContract.AudioView?, store: Store) {
         // Do nothing
     }
 
-    override fun onStop() {
+    override fun ttsView(): TTSContract.AudioView? {
+        return null
+    }
+
+    override suspend fun forwardOne() {
+        // Do nothing
+    }
+
+    override suspend fun backOne() {
+        // Do nothing
+    }
+
+    override fun stopImmediately() {
+        // Do nothing
+    }
+
+    override fun deprecatedOnStop() {
         // Do nothing
     }
 
@@ -13,27 +31,27 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override suspend fun speakInLoop(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         // Do nothing
     }
 
-    override suspend fun onArticleChanged(articleState: ArticleState) {
+    override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
         // Do nothing
     }
 
-    override fun advanceOne(onDone: (ArticleState) -> Unit) {
+    override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
         // Do nothing
     }
 
-    override fun reverseOne(onDone: (ArticleState) -> Unit) {
+    override fun deprecatedReverseOne(onDone: (ArticleState) -> Unit) {
         // Do nothing
     }
 
-    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
+    override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
         // Do nothing
     }
 
-    override fun setSpeechRate(speechRate: Float) {
+    override fun deprecatedSetSpeechRate(speechRate: Float) {
         // Do nothing
     }
 }

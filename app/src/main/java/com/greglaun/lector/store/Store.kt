@@ -52,11 +52,18 @@ abstract class Store {
 
     private fun reduce(action: Action, currentState: State): State {
         val newState = when (action) {
+            is UpdateAction.NewArticleAction -> reduceNewArticleAction(action, state)
             is UpdateAction.UpdateArticleAction -> reduceUpdateArticleAction(action, state)
+            is UpdateAction.UpdateNavigationAction -> reduceUpdateNavigationAction(action, state)
+            is UpdateAction.FastForwardOne -> reduceFastForwardOne(action, state)
+            is UpdateAction.RewindOne -> reduceRewindOne(action, state)
             is UpdateAction.UpdateCourseDetailsAction ->
                 reduceUpdateCourseDetailsAction(action, state)
+            is UpdateAction.ArticleOverAction -> reduceArticleOverAction(action, state)
+            is UpdateAction.UpdateSpeakerStateAction -> reduceUpdateSpeakerState(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
-            is ReadAction.StartDownloadAction ->  reduceStartDowloadAction(action, state)
+            is SpeakerAction.SpeakAction -> reduceSpeakAction(action, state)
+            is SpeakerAction.StopSpeakingAction -> reduceStopSpeakingAction(action, state)
 //            is CreationAction -> CreationReducer.reduce(action, currentState)
 //            is UpdateAction -> UpdateReducer.reduce(action, currentState)
 //            is ReadAction -> ReadReducer.reduce(action, currentState)

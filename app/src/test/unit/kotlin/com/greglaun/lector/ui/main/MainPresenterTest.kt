@@ -35,20 +35,20 @@ class MainPresenterTest {
     @Test
     fun onAttach() {
         mainPresenter.onAttach()
-        verify(mockTts, times(1)).onStart(mainPresenter)
+        verify(mockTts, times(1)).deprecatedOnStart(mainPresenter)
     }
 
     @Test
     fun onDetach() {
         mainPresenter.onDetach()
-        verify(mockTts, times(1)).onStop()
+        verify(mockTts, times(1)).deprecatedOnStop()
     }
 
     @Test
     fun onPlayButtonPressed() {
         mainPresenter.onPlayButtonPressed()
         runBlocking {
-            verify(mockTts, times(1)).speakInLoop(ArgumentMatchers.any())
+            verify(mockTts, times(1)).startSpeaking(ArgumentMatchers.any())
             verify(mockView, times(1)).enablePauseButton()
         }
     }

@@ -5,12 +5,15 @@ import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.ui.speak.TTSContract
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         UtteranceProgressListener() {
-    val callbacks : HashMap<String, (String) -> Unit> = HashMap()
-    override fun speak(textToSpeak: String, utteranceId: String, callback : (String)-> Unit) {
+    val callbacks : HashMap<String, suspend (String) -> Unit> = HashMap()
+    override suspend fun speak(textToSpeak: String, utteranceId: String,
+                               callback : suspend (String)-> Unit) {
         if (textToSpeak == "") {
             if (callback != null) {
                 callback(utteranceId(""))
@@ -38,8 +41,10 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         if (utteranceId != null) {
             val callback = callbacks.get(utteranceId)
             if (callback != null) {
-                callback(utteranceId)
-                callbacks.remove(utteranceId)
+                GlobalScope.launch {
+                    callback(utteranceId)
+                    callbacks.remove(utteranceId)
+                }
             }
         }
     }
