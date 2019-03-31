@@ -59,14 +59,14 @@ class MainPresenter(val view : MainContract.View,
             }
 
             Navigation.BROWSE_COURSES -> {
-                val currentCourse = state.currentArticleScreen.currentCourse
-                GlobalScope.launch {
-                    // todo(unidirectional): courseSource
-                    courseSource.getArticlesForCourse(currentCourse.id!!).let {
-                        displayArticleList(it,
-                                currentCourse.courseName)
-                    }
-                }
+                store.dispatch(FetchCourseInfoAndDisplayAction())
+//                GlobalScope.launch {
+//                    // todo(unidirectional): courseSource
+//                    courseSource.getArticlesForCourse(currentCourse.id!!).let {
+//                        displayArticleList(it,
+//                                currentCourse.courseName)
+//                    }
+//                }
             }
             Navigation.NEW_ARTICLE -> {
                 handleNewArticle(state)
