@@ -12,7 +12,7 @@ import okhttp3.Response
 
 interface MainContract {
     interface View : LectorView {
-        fun loadUrl(urlString : String)
+        fun loadUrl(urlString : String, onLoaded: (suspend (String) -> Unit)?)
         fun enablePlayButton()
         fun enablePauseButton()
         fun displayReadingList(title: String? = null)

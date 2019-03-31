@@ -21,9 +21,11 @@ fun reduceNewArticleAction(action: UpdateAction.NewArticleAction, currentState: 
     val oldSpeakerState = currentState.speakerState
     val newSpeakerState =
             if (oldSpeakerState == SpeakerState.NOT_READY) SpeakerState.READY else oldSpeakerState
-    return currentState.newArticleScreen(CurrentArticleScreen(
+    val newState = currentState.newArticleScreen(CurrentArticleScreen(
             action.articleState,
-            currentState.currentArticleScreen.currentCourse), newSpeakerState)
+            currentState.currentArticleScreen.currentCourse,
+            true), newSpeakerState)
+    return newState.updateNavigation(Navigation.CURRENT_ARTICLE)
 }
 
 fun reduceUpdateNavigationAction(action: UpdateAction.UpdateNavigationAction,
@@ -76,11 +78,6 @@ fun reduceFetchCourseDetailsAction(action: ReadAction.FetchCourseDetailsAction,
                     Lce.Loading))
 }
 
-//fun reduceStartDowloadAction(action: ReadAction.StartDownloadAction,
-//                             currentState: State): State {
-//    return currentState
-//}
-
 fun reduceUpdateSpeakerState(action: UpdateAction.UpdateSpeakerStateAction,
                              currentState: State): State {
     return currentState.updateSpeakerState(action.speakerState)
@@ -100,4 +97,27 @@ fun reduceSpeakAction(action: SpeakerAction.SpeakAction, currentState: State): S
 
 fun reduceArticleOverAction(action: UpdateAction.ArticleOverAction, currentState: State): State {
     return reduceStopSpeakingAction(action, currentState)
+}
+
+fun reduceUpdateArticleFreshnessState(action: UpdateAction.UpdateArticleFreshnessAction,
+                                      currentState: State): State {
+    if (action.articleState == currentState.currentArticleScreen.articleState) {
+        return currentState.updateArticleScreen(
+                CurrentArticleScreen(
+                currentState.currentArticleScreen.articleState,
+                currentState.currentArticleScreen.currentCourse,
+                false), currentState.speakerState)
+    }
+    return currentState
+}
+
+fun reduceFetchAllPermanentAndDisplay(action: ReadAction.FetchAllPermanentAndDisplay, state: State): State {
+    val newState = state.updateReadingListScreen(ReadingListScreen(
+            articles = Lce.Loading))
+    return newState.updateNavigation(Navigation.MY_READING_LIST)
+}
+
+fun reduceUpdateReadingList(action: UpdateAction.UpdateReadingListAction, state: State): State {
+    return state.updateReadingListScreen(ReadingListScreen(
+            articles = action.readingListLce))
 }
