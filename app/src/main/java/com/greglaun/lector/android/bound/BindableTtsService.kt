@@ -90,30 +90,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         store?.dispatch(SpeakerAction.StopSpeakingAction())
     }
 
-    override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
-
-    }
-
-    override fun deprecatedOnStop() {
-
-    }
-
-    override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
-
-    }
-
-    override fun deprecatedReverseOne(onDone: (ArticleState) -> Unit) {
-
-    }
-
-    override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
-
-    }
-
-    override fun deprecatedSetSpeechRate(speechRate: Float) {
-
-    }
-
     override fun ttsView(): TTSContract.AudioView? {
         return ttsView
     }

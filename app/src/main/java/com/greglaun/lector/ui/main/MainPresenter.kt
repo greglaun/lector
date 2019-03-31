@@ -38,7 +38,6 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onDetach() {
-        ttsPresenter.deprecatedOnStop()
         runBlocking {
             store.dispatch(ReadAction.StopDownloadAction())
         }
@@ -90,7 +89,6 @@ class MainPresenter(val view : MainContract.View,
     private fun handleNewArticle(state: State) {
         view.loadUrl(contextToUrl(state.currentArticleScreen.articleState.title))
         GlobalScope.launch {
-            // todo(refactoring): Is this the right way to handle confirming article loading?
             store.dispatch(UpdateAction.UpdateNavigationAction(Navigation.CURRENT_ARTICLE))
         }
     }
@@ -109,8 +107,6 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-            ttsPresenter.deprecatedOnArticleChanged(
-                    store.state.currentArticleScreen.articleState as ArticleState)
             ttsPresenter.startSpeaking({
             GlobalScope.launch {
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
@@ -214,19 +210,19 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
+        // todo(unidirectional)
         runBlocking {
             ttsPresenter.stopSpeaking()
         }
         view.enablePlayButton()
-        ttsPresenter.deprecatedHandsomeBritish(shouldBeBritish)
     }
 
     override fun setSpeechRate(speechRate: Float) {
+        // todo(unidirectional)
         runBlocking {
             ttsPresenter.stopSpeaking()
         }
         view.enablePlayButton()
-        ttsPresenter.deprecatedSetSpeechRate(speechRate)
     }
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
