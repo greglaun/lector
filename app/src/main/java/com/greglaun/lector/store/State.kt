@@ -31,7 +31,7 @@ enum class SpeakerState {
 
 data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState,
                                 val currentCourse: CourseContext = EmptyCourseContext(),
-                                val newArticle: Boolean = true)
+                                val newArticle: Boolean = false)
 
 data class ReadingListScreen(val currentReadingList: String = DEFAULT_READING_LIST,
                              val articles: Lce<List<ArticleContext>> =
@@ -48,7 +48,10 @@ data class Preferences(val autoPlay: Boolean = true,
 data class Background(val downloadFinisher: Boolean = false)
 
 data class State(
-        val currentArticleScreen: CurrentArticleScreen = CurrentArticleScreen(),
+        val currentArticleScreen: CurrentArticleScreen = CurrentArticleScreen(
+                EmptyArticleState,
+                EmptyCourseContext(),
+                true),
         val readingListScreen: ReadingListScreen = ReadingListScreen(),
         val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen(),
         val navigation: Navigation = Navigation.CURRENT_ARTICLE,
