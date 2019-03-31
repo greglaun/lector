@@ -11,7 +11,6 @@ val LECTOR_UNIVERSE = ""
 
 enum class Navigation {
     CURRENT_ARTICLE,
-    NEW_ARTICLE,
     MY_READING_LIST,
     MY_COURSE_LIST,
     BROWSE_COURSES
@@ -31,7 +30,8 @@ enum class SpeakerState {
 }
 
 data class CurrentArticleScreen(val articleState: AbstractArticleState = EmptyArticleState,
-                                val currentCourse: CourseContext = EmptyCourseContext())
+                                val currentCourse: CourseContext = EmptyCourseContext(),
+                                val newArticle: Boolean = false)
 
 data class ReadingListScreen(val currentReadingList: String = DEFAULT_READING_LIST,
                              val articles: Lce<List<ArticleContext>> =
@@ -51,7 +51,7 @@ data class State(
         val currentArticleScreen: CurrentArticleScreen = CurrentArticleScreen(),
         val readingListScreen: ReadingListScreen = ReadingListScreen(),
         val courseBrowserScreen: CourseBrowserScreen = CourseBrowserScreen(),
-        val navigation: Navigation = Navigation.NEW_ARTICLE,
+        val navigation: Navigation = Navigation.CURRENT_ARTICLE,
         val preferences: Preferences = Preferences(),
         val background: Background = Background(),
         val changed: List<Changed> = listOf(Changed.NONE),
@@ -66,7 +66,8 @@ fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen,
 
 fun State.newArticleScreen(newArticleScreen: CurrentArticleScreen,
                               speakerState: SpeakerState): State {
-    return State(newArticleScreen, readingListScreen, courseBrowserScreen, Navigation.NEW_ARTICLE,
+    return State(newArticleScreen, readingListScreen, courseBrowserScreen,
+            navigation,
             preferences, background, changed, speakerState)
 }
 
