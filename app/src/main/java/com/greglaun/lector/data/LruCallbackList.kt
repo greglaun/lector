@@ -13,11 +13,13 @@ class LruCallbackList<T>(val size: Int = 4) {
     }
 
     fun get(key: T): (suspend (T) -> Unit)? {
-        if (ll.size == 0) {
+        if (ll.isEmpty()) {
             return null
         }
-        return ll.filter {
-            it.first == key
-        }.first()?.second
+        val matches = ll.filter { it.first == key}
+        if (matches == null || matches.isEmpty()) {
+            return null
+        }
+        return matches[0].second
     }
 }
