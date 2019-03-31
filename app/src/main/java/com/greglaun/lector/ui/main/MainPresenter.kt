@@ -28,8 +28,10 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onAttach() {
         ttsPresenter.attach(ttsPresenter.ttsView(), store)
+        // todo(unidirectional): presenter should not have references to these
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
+
         isActivityRunning = true
         handleState(store.state)
         GlobalScope.launch {
@@ -59,6 +61,7 @@ class MainPresenter(val view : MainContract.View,
             Navigation.BROWSE_COURSES -> {
                 val currentCourse = state.currentArticleScreen.currentCourse
                 GlobalScope.launch {
+                    // todo(unidirectional): courseSource
                     courseSource.getArticlesForCourse(currentCourse.id!!).let {
                         displayArticleList(it,
                                 currentCourse.courseName)
@@ -97,10 +100,12 @@ class MainPresenter(val view : MainContract.View,
         return view
     }
 
+    // todo(unidirectional): Delete
     override fun responseSource(): ResponseSource {
         return responseSource
     }
 
+    // todo(unidirectional): Delete
     override fun courseSource(): CourseSource {
         return courseSource
     }
@@ -137,13 +142,16 @@ class MainPresenter(val view : MainContract.View,
         synchronized(store.state.currentArticleScreen.articleState.title) {
             curContext = store.state.currentArticleScreen.articleState.title
         }
+        // todo(unidirectional): responseSource
         return responseSource.getWithContext(Request.Builder()
                 .url(url)
                 .build(), curContext!!)
     }
 
     override suspend fun saveArticle() {
+        // todo(unidirectional)
         val requestContextCopy = store.state.currentArticleScreen.articleState.title
+        // todo(unidirectional): responseSource
         responseSource.markPermanent(requestContextCopy)
     }
 
@@ -158,6 +166,7 @@ class MainPresenter(val view : MainContract.View,
                 onConfirmed = {
                     if (it) {
                         GlobalScope.launch {
+                            // todo(unidirectional): responseSource
                             responseSource.delete(articleContext.contextString)
                             readingList.remove(articleContext)
                             view.onReadingListChanged()
@@ -171,6 +180,7 @@ class MainPresenter(val view : MainContract.View,
                 onConfirmed = {
                     if (it) {
                         GlobalScope.launch {
+                            // todo(unidirectional): responseSource
                             courseSource.delete(courseContext.courseName)
                             courseList.remove(courseContext)
                             view.onCoursesChanged()
@@ -180,6 +190,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onDisplayReadingList() {
+        // todo(unidirectional): responseSource
         responseSource.getAllPermanent()?.let {
             displayArticleList(it, store.state.currentArticleScreen.currentCourse.courseName)
         }
@@ -194,6 +205,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onDisplayCourses() {
         courseList.clear()
+        // todo(unidirectional): courseSource
         courseSource.getCourses()?.let {
             courseList.addAll(it)
         }
@@ -230,6 +242,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onPageDownloadFinished(urlString: String) {
+        // todo(unidirectional): responseSource
         responseSource.markFinished(urlToContext(urlString))
     }
 
