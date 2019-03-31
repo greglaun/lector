@@ -24,6 +24,14 @@ class FetchSideEffect(val store: Store, val responseSource: ResponseSource,
                     articleStateSource)  {
                 store.dispatch(it)
             }
+            is ReadAction.FetchAllPermanentAndDisplay ->
+                reduceFetchAllPermanentAndDisplay(responseSource) {
+                    store.dispatch(it)
+                }
+            is ReadAction.FetchCourseInfoAndDisplay ->
+                reduceFetchCourseInfoAndDisplay(action, courseSource) {
+                    store.dispatch(it)
+                }
             is UpdateAction.ArticleOverAction -> handleArticleOver(
                     store,
                     responseSource,

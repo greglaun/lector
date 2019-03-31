@@ -59,24 +59,33 @@ class MainPresenter(val view : MainContract.View,
             }
 
             Navigation.BROWSE_COURSES -> {
-                store.dispatch(FetchCourseInfoAndDisplayAction())
-//                GlobalScope.launch {
+                GlobalScope.launch {
+                store.dispatch(ReadAction.FetchCourseInfoAndDisplay(
+                        store.state.currentArticleScreen.currentCourse))
 //                    // todo(unidirectional): courseSource
 //                    courseSource.getArticlesForCourse(currentCourse.id!!).let {
 //                        displayArticleList(it,
 //                                currentCourse.courseName)
 //                    }
-//                }
+                }
             }
-            Navigation.NEW_ARTICLE -> {
-                handleNewArticle(state)
+            Navigation.MY_READING_LIST -> {
+                val lce = state.readingListScreen.articles
+                when (lce) {
+                    is Lce.Success -> displayReadingList(lce.data)
+                    is Lce.Loading -> displayReadingList(emptyList())
+                    is Lce.Error -> view.onError(lce.message)
+                }
             }
-
-            else -> throw NotImplementedError()
         }
     }
 
     private fun handleCurrentArticle(state: State) {
+        if (state.currentArticleScreen.newArticle) {
+            handleNewArticle(state)
+            return
+        }
+        view.unhideWebView()
         if (state.speakerState != SpeakerState.SPEAKING_NEW_UTTERANCE &&
                 state.speakerState != SpeakerState.SPEAKING) {
             view.unhighlightAllText()
@@ -90,9 +99,12 @@ class MainPresenter(val view : MainContract.View,
     }
 
     private fun handleNewArticle(state: State) {
-        view.loadUrl(contextToUrl(state.currentArticleScreen.articleState.title))
-        GlobalScope.launch {
-            store.dispatch(UpdateAction.UpdateNavigationAction(Navigation.CURRENT_ARTICLE))
+        view.loadUrl(contextToUrl(state.currentArticleScreen.articleState.title)) {
+            GlobalScope.launch {
+                store.dispatch(UpdateAction.UpdateArticleFreshnessAction(
+                        state.currentArticleScreen.articleState as ArticleState))
+                store.dispatch(UpdateAction.UpdateNavigationAction(Navigation.CURRENT_ARTICLE))
+            }
         }
     }
 
@@ -134,7 +146,6 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun loadFromContext(articleContext: ArticleContext) {
         onUrlChanged(contextToUrl(articleContext.contextString))
-        view.unhideWebView()
     }
 
     override suspend fun onRequest(url: String): Response? {
@@ -190,13 +201,10 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onDisplayReadingList() {
-        // todo(unidirectional): responseSource
-        responseSource.getAllPermanent()?.let {
-            displayArticleList(it, store.state.currentArticleScreen.currentCourse.courseName)
-        }
+        store.dispatch(ReadAction.FetchAllPermanentAndDisplay())
     }
 
-    private fun displayArticleList(articleList: List<ArticleContext>, title: String? = null) {
+    private fun displayReadingList(articleList: List<ArticleContext>, title: String? = null) {
         readingList.clear()
         readingList.addAll(articleList)
         view.onReadingListChanged()

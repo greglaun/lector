@@ -41,7 +41,7 @@ suspend fun handleArticleOver(store: Store,
                               articleStateSource: ArticleStateSource,
                               actionDispatcher: suspend (Action) -> Unit) {
     if (store.state.preferences.autoPlay) {
-        autoPlayNext(store, responseSource, courseSource, actionDispatcher, articleStateSource)
+        autoPlayNext(store, responseSource, courseSource, articleStateSource, actionDispatcher)
         actionDispatcher(SpeakerAction.SpeakAction())
     }
 
@@ -52,8 +52,8 @@ suspend fun handleArticleOver(store: Store,
 
 private suspend fun autoPlayNext(store: Store, responseSource: ResponseSource,
                                  courseSource: CourseSource,
-                                 actionDispatcher: suspend (Action) -> Unit,
-                                 articleStateSource: ArticleStateSource) {
+                                 articleStateSource: ArticleStateSource,
+                                 actionDispatcher: suspend (Action) -> Unit) {
     val nextArticle: ArticleContext?
     val currentArticle = store.state.currentArticleScreen.articleState
     val currentCourse = store.state.currentArticleScreen.currentCourse
@@ -74,4 +74,27 @@ private suspend fun autoPlayNext(store: Store, responseSource: ResponseSource,
 
     }
     store.dispatch(UpdateAction.NewArticleAction(nextArticleState))
+}
+
+suspend fun reduceFetchAllPermanentAndDisplay(responseSource: ResponseSource,
+                                              actionDispatcher: suspend (Action) -> Unit) {
+    // todo(i18n): Better handling of error strings.
+    var readingListLce: Lce<List<ArticleContext>> = Lce.Error("Unable to download reading list.")
+    responseSource.getAllPermanent()?.let {
+        readingListLce = Lce.Success(it)
+    }
+    actionDispatcher.invoke(UpdateAction.UpdateReadingListAction(readingListLce))
+}
+
+suspend fun reduceFetchCourseInfoAndDisplay(action: ReadAction.FetchCourseInfoAndDisplay,
+                                            courseSource: CourseSource,
+                                              actionDispatcher: suspend (Action) -> Unit) {
+    action.courseContext.id?.let {
+        // todo(i18n): Better handling of error strings.
+        var courseArticleLce: Lce<List<ArticleContext>> = Lce.Error("Unable to download reading list.")
+        courseSource.getArticlesForCourse(it)?.let {articleList ->
+            courseArticleLce = Lce.Success(articleList)
+        }
+        actionDispatcher.invoke(UpdateAction.UpdateCourseInfo(courseArticleLce))
+    }
 }

@@ -24,6 +24,7 @@ import com.greglaun.lector.R
 import com.greglaun.lector.android.*
 import com.greglaun.lector.android.bound.BindableTtsService
 import com.greglaun.lector.android.webview.WikiWebViewClient
+import com.greglaun.lector.data.LruCallbackList
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.store.DEFAULT_READING_LIST
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var courseListViewAdapter: RecyclerView.Adapter<*>
     private lateinit var courseListViewManager: RecyclerView.LayoutManager
 
+    private val onLoadedCallbacks = LruCallbackList<String>()
     lateinit var mainPresenter : MainContract.Presenter
     var playMenuItem : MenuItem? = null
     var pauseMenuItem : MenuItem? = null
@@ -220,6 +222,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             startActivity(intent)
             false
         },{
+            handleOnLoadCallbacks(it)
             expandCollapsableElements()
             // todo(javascript): How to avoid having to do this for slow-loading pages?
             GlobalScope.launch {
@@ -438,9 +441,21 @@ class MainActivity : AppCompatActivity(), MainContract.View {
      * Webview
      */
 
-    override fun loadUrl(urlString: String) {
+    override fun loadUrl(urlString: String, onLoaded: (suspend (String)-> Unit)?) {
+        onLoaded?.also {
+            onLoadedCallbacks.push(Pair(urlString, onLoaded))
+        }
         runOnUiThread {
             webView.loadUrl(urlString)
+        }
+    }
+
+    fun handleOnLoadCallbacks(urlString: String?) {
+        urlString?.also {
+            val callback = onLoadedCallbacks.get(urlString)
+            GlobalScope.launch {
+                callback?.invoke(it)
+            }
         }
     }
 
