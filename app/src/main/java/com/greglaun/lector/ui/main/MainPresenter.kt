@@ -17,7 +17,6 @@ class MainPresenter(val view : MainContract.View,
     : MainContract.Presenter, StateHandler {
     private var articleStateSource: ArticleStateSource? = null
 
-    // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
     override val courseList = mutableListOf<CourseContext>()
 
@@ -28,8 +27,10 @@ class MainPresenter(val view : MainContract.View,
 
     override fun onAttach() {
         ttsPresenter.attach(ttsPresenter.ttsView(), store)
+        // todo(unidirectional): presenter should not have references to these
         articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
+
         isActivityRunning = true
         handleState(store.state)
         GlobalScope.launch {
@@ -38,7 +39,6 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun onDetach() {
-        ttsPresenter.deprecatedOnStop()
         runBlocking {
             store.dispatch(ReadAction.StopDownloadAction())
         }
@@ -58,12 +58,9 @@ class MainPresenter(val view : MainContract.View,
             }
 
             Navigation.BROWSE_COURSES -> {
-                val currentCourse = state.currentArticleScreen.currentCourse
                 GlobalScope.launch {
-                    courseSource.getArticlesForCourse(currentCourse.id!!).let {
-                        displayReadingList(it,
-                                currentCourse.courseName)
-                    }
+                store.dispatch(ReadAction.FetchCourseInfoAndDisplay(
+                        store.state.currentArticleScreen.currentCourse))
                 }
             }
             Navigation.MY_READING_LIST -> {
@@ -71,6 +68,16 @@ class MainPresenter(val view : MainContract.View,
                 when (lce) {
                     is Lce.Success -> displayReadingList(lce.data)
                     is Lce.Loading -> displayReadingList(emptyList())
+                    is Lce.Error -> view.onError(lce.message)
+                }
+            }
+            Navigation.MY_COURSE_LIST -> {
+                val lce = state.courseBrowserScreen.availableCourses
+                when (lce) {
+                    is Lce.Success -> {
+                        displayCourses(lce.data)
+                    }
+                    is Lce.Loading -> displayCourses(emptyList())
                     is Lce.Error -> view.onError(lce.message)
                 }
             }
@@ -109,18 +116,18 @@ class MainPresenter(val view : MainContract.View,
         return view
     }
 
+    // todo(unidirectional): Delete
     override fun responseSource(): ResponseSource {
         return responseSource
     }
 
+    // todo(unidirectional): Delete
     override fun courseSource(): CourseSource {
         return courseSource
     }
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-            ttsPresenter.deprecatedOnArticleChanged(
-                    store.state.currentArticleScreen.articleState as ArticleState)
             ttsPresenter.startSpeaking({
             GlobalScope.launch {
                 store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
@@ -146,18 +153,17 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onRequest(url: String): Response? {
-        var curContext: String? = null
-        synchronized(store.state.currentArticleScreen.articleState.title) {
-            curContext = store.state.currentArticleScreen.articleState.title
-        }
+        // todo(unidirectional): How should we handle this? Should this be an exception to the rule?
+        val currentContext = store.state.currentArticleScreen.articleState.title
         return responseSource.getWithContext(Request.Builder()
                 .url(url)
-                .build(), curContext!!)
+                .build(), currentContext!!)
     }
 
     override suspend fun saveArticle() {
-        val requestContextCopy = store.state.currentArticleScreen.articleState.title
-        responseSource.markPermanent(requestContextCopy)
+        GlobalScope.launch{
+            store.dispatch(WriteAction.SaveArticle(store.state.currentArticleScreen.articleState))
+        }
     }
 
     override suspend fun courseDetailsRequested(courseContext: CourseContext) {
@@ -170,10 +176,10 @@ class MainPresenter(val view : MainContract.View,
         view.confirmMessage("Delete article ${articleContext.contextString}?",
                 onConfirmed = {
                     if (it) {
+                        readingList.remove(articleContext)
+                        view.onReadingListChanged()
                         GlobalScope.launch {
-                            responseSource.delete(articleContext.contextString)
-                            readingList.remove(articleContext)
-                            view.onReadingListChanged()
+                            store.dispatch(WriteAction.DeleteArticle(articleContext))
                         }
                     }
                 })
@@ -183,10 +189,10 @@ class MainPresenter(val view : MainContract.View,
         view.confirmMessage("Delete course ${courseContext.courseName}?",
                 onConfirmed = {
                     if (it) {
+                        courseList.remove(courseContext)
+                        view.onCoursesChanged()
                         GlobalScope.launch {
-                            courseSource.delete(courseContext.courseName)
-                            courseList.remove(courseContext)
-                            view.onCoursesChanged()
+                            store.dispatch(WriteAction.DeleteCourse(courseContext))
                         }
                     }
                 })
@@ -203,13 +209,15 @@ class MainPresenter(val view : MainContract.View,
         view.displayReadingList(title)
     }
 
-    override suspend fun onDisplayCourses() {
+    private fun displayCourses(courses: List<CourseContext>) {
         courseList.clear()
-        courseSource.getCourses()?.let {
-            courseList.addAll(it)
-        }
+        courseList.addAll(courses)
         view.onCoursesChanged()
         view.displayCourses()
+    }
+
+    override suspend fun onDisplayCourses() {
+        store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
     }
 
     override suspend fun onRewindOne() {
@@ -221,19 +229,17 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
-        runBlocking {
+        GlobalScope.launch {
             ttsPresenter.stopSpeaking()
+            store.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
         }
-        view.enablePlayButton()
-        ttsPresenter.deprecatedHandsomeBritish(shouldBeBritish)
     }
 
     override fun setSpeechRate(speechRate: Float) {
-        runBlocking {
+        GlobalScope.launch {
             ttsPresenter.stopSpeaking()
+            store.dispatch(PreferenceAction.SetSpeechRate(speechRate))
         }
-        view.enablePlayButton()
-        ttsPresenter.deprecatedSetSpeechRate(speechRate)
     }
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
@@ -241,7 +247,10 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onPageDownloadFinished(urlString: String) {
-        responseSource.markFinished(urlToContext(urlString))
+        GlobalScope.launch {
+            store.dispatch(WriteAction.MarkDownloadFinished(urlString))
+        }
+
     }
 
     override fun playAllPressed(title: String) {

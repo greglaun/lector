@@ -64,11 +64,17 @@ abstract class Store {
             is UpdateAction.UpdateArticleFreshnessAction ->
                 reduceUpdateArticleFreshnessState(action, state)
             is UpdateAction.UpdateReadingListAction -> reduceUpdateReadingList(action, state)
+            is UpdateAction.UpdateCourseListAction -> reduceUpdateCourseList(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
             is ReadAction.FetchAllPermanentAndDisplay -> reduceFetchAllPermanentAndDisplay(action,
                     state)
             is SpeakerAction.SpeakAction -> reduceSpeakAction(action, state)
             is SpeakerAction.StopSpeakingAction -> reduceStopSpeakingAction(action, state)
+            is PreferenceAction.SetHandsomeBritish -> reduceSetHandsomeBritish(action, state)
+            is PreferenceAction.SetSpeechRate -> reduceSetSpeechRate(action, state)
+            is PreferenceAction.SetAutoPlay -> reduceSetAutoPlay(action, state)
+            is PreferenceAction.SetAutoDelete -> reduceSetAutoDelete(action, state)
+            is PreferenceAction.SetIsSlow -> reduceSetIsSlow(action, state)
 //            is CreationAction -> CreationReducer.reduce(action, currentState)
 //            is UpdateAction -> UpdateReducer.reduce(action, currentState)
 //            is ReadAction -> ReadReducer.reduce(action, currentState)

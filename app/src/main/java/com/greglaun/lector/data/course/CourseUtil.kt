@@ -2,6 +2,7 @@ package com.greglaun.lector.data.course
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.greglaun.lector.data.cache.urlToContext
 
 private val mapper: ObjectMapper = ObjectMapper()
 
@@ -32,5 +33,5 @@ fun toCourseDetailsMap(jsonMap: List<Map<String, Object>>): Map<String, ThinCour
 }
 
 private fun splitArticles(s: String): List<String> {
-    return s.split("\r\n")
+    return s.split("\r\n").map{it -> urlToContext(it)}
 }

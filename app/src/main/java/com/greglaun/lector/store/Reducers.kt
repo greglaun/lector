@@ -1,6 +1,7 @@
 package com.greglaun.lector.store
 
 import com.greglaun.lector.data.cache.BasicArticleContext
+import com.greglaun.lector.data.cache.SavedArticleCache
 import com.greglaun.lector.ui.speak.hasNext
 import com.greglaun.lector.ui.speak.hasPrevious
 import com.greglaun.lector.ui.speak.next
@@ -121,3 +122,58 @@ fun reduceUpdateReadingList(action: UpdateAction.UpdateReadingListAction, state:
     return state.updateReadingListScreen(ReadingListScreen(
             articles = action.readingListLce))
 }
+
+fun reduceUpdateCourseList(action: UpdateAction.UpdateCourseListAction, state: State): State {
+    return state.updateCourseBrowserScreen(CourseBrowserScreen(action.courseListLce))
+}
+
+fun reduceSetHandsomeBritish(action: PreferenceAction.SetHandsomeBritish, state: State): State {
+    return state.updatePreferences(Preferences(
+            state.preferences.autoPlay,
+            state.preferences.autoDelete,
+            action.shouldBeBritish,
+            state.preferences.isSlow,
+            state.preferences.speechRate
+    ))
+}
+
+fun reduceSetSpeechRate(action: PreferenceAction.SetSpeechRate, state: State): State {
+    return state.updatePreferences(Preferences(
+            state.preferences.autoPlay,
+            state.preferences.autoDelete,
+            state.preferences.isBritish,
+            state.preferences.isSlow,
+            action.speechRate
+    ))
+}
+
+fun reduceSetAutoPlay(action: PreferenceAction.SetAutoPlay, state: State): State {
+    return state.updatePreferences(Preferences(
+            action.isAutoPlay,
+            state.preferences.autoDelete,
+            state.preferences.isBritish,
+            state.preferences.isSlow,
+            state.preferences.speechRate
+    ))
+}
+
+fun reduceSetAutoDelete(action: PreferenceAction.SetAutoDelete, state: State): State {
+    return state.updatePreferences(Preferences(
+            state.preferences.autoPlay,
+            action.isAutoDelete,
+            state.preferences.isBritish,
+            state.preferences.isSlow,
+            state.preferences.speechRate
+    ))
+}
+
+fun reduceSetIsSlow(action: PreferenceAction.SetIsSlow, state: State): State {
+    return state.updatePreferences(Preferences(
+            state.preferences.autoPlay,
+            state.preferences.autoDelete,
+            state.preferences.isBritish,
+            action.isSlow,
+            state.preferences.speechRate
+    ))
+}
+

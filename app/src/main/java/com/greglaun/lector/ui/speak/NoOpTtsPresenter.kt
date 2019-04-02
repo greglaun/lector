@@ -23,10 +23,6 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override fun deprecatedOnStop() {
-        // Do nothing
-    }
-
     override suspend fun stopSpeaking() {
         // Do nothing
     }
@@ -35,23 +31,4 @@ class NoOpTtsPresenter : TTSContract.Presenter {
         // Do nothing
     }
 
-    override suspend fun deprecatedOnArticleChanged(articleState: ArticleState) {
-        // Do nothing
-    }
-
-    override fun deprecatedAdvanceOne(onDone: (ArticleState) -> Unit) {
-        // Do nothing
-    }
-
-    override fun deprecatedReverseOne(onDone: (ArticleState) -> Unit) {
-        // Do nothing
-    }
-
-    override fun deprecatedHandsomeBritish(shouldBeBritish: Boolean) {
-        // Do nothing
-    }
-
-    override fun deprecatedSetSpeechRate(speechRate: Float) {
-        // Do nothing
-    }
 }
