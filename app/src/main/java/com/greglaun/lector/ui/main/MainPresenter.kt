@@ -237,7 +237,7 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onPageDownloadFinished(urlString: String) {
         GlobalScope.launch {
-            store.dispatch(MarkDownloadFinished(urlString))
+            store.dispatch(WriteAction.MarkDownloadFinished(urlString))
         }
 
     }
