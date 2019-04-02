@@ -112,7 +112,7 @@ fun reduceUpdateArticleFreshnessState(action: UpdateAction.UpdateArticleFreshnes
     return currentState
 }
 
-fun handleFetchAllPermanentAndDisplay(action: ReadAction.FetchAllPermanentAndDisplay, state: State): State {
+fun reduceFetchAllPermanentAndDisplay(action: ReadAction.FetchAllPermanentAndDisplay, state: State): State {
     val newState = state.updateReadingListScreen(ReadingListScreen(
             articles = Lce.Loading))
     return newState.updateNavigation(Navigation.MY_READING_LIST)

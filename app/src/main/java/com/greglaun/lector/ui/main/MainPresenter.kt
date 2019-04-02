@@ -144,14 +144,11 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onRequest(url: String): Response? {
-        var curContext: String? = null
-        synchronized(store.state.currentArticleScreen.articleState.title) {
-            curContext = store.state.currentArticleScreen.articleState.title
-        }
-        // todo(unidirectional): responseSource
+        // todo(unidirectional): How should we handle this? Should this be an exception to the rule?
+        val currentContext = store.state.currentArticleScreen.articleState.title
         return responseSource.getWithContext(Request.Builder()
                 .url(url)
-                .build(), curContext!!)
+                .build(), currentContext!!)
     }
 
     override suspend fun saveArticle() {
@@ -170,11 +167,10 @@ class MainPresenter(val view : MainContract.View,
         view.confirmMessage("Delete article ${articleContext.contextString}?",
                 onConfirmed = {
                     if (it) {
+                        readingList.remove(articleContext)
+                        view.onReadingListChanged()
                         GlobalScope.launch {
-                            // todo(unidirectional): responseSource
-                            responseSource.delete(articleContext.contextString)
-                            readingList.remove(articleContext)
-                            view.onReadingListChanged()
+                            store.dispatch(WriteAction.DeleteArticle(articleContext))
                         }
                     }
                 })

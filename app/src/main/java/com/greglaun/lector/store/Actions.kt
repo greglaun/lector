@@ -40,4 +40,5 @@ sealed class ReadAction: Action() {
 
 sealed class WriteAction: Action() {
     data class SaveArticle(val articleState: AbstractArticleState): WriteAction()
+    data class DeleteArticle(val articleContext: ArticleContext): WriteAction()
 }

@@ -104,3 +104,8 @@ suspend fun handleSaveArticle(action: WriteAction.SaveArticle,
         val requestContextCopy = action.articleState.title
         responseSource.markPermanent(requestContextCopy)
 }
+
+suspend fun handleDeleteArticle(action: WriteAction.DeleteArticle,
+                                responseSource: ResponseSource) {
+    responseSource.delete(action.articleContext.contextString)
+}

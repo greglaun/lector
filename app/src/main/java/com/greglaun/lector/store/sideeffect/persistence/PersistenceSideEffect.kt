@@ -40,6 +40,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                 store.dispatch(it)
             }
             is WriteAction.SaveArticle -> handleSaveArticle(action, responseSource)
+            is WriteAction.DeleteArticle -> handleDeleteArticle(action, responseSource)
         }
     }
 }
