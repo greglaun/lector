@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.main
 
+import androidx.annotation.RequiresPermission
 import com.greglaun.lector.data.cache.*
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseSource
@@ -180,11 +181,10 @@ class MainPresenter(val view : MainContract.View,
         view.confirmMessage("Delete course ${courseContext.courseName}?",
                 onConfirmed = {
                     if (it) {
+                        courseList.remove(courseContext)
+                        view.onCoursesChanged()
                         GlobalScope.launch {
-                            // todo(unidirectional): responseSource
-                            courseSource.delete(courseContext.courseName)
-                            courseList.remove(courseContext)
-                            view.onCoursesChanged()
+                            store.dispatch(WriteAction.DeleteCourse(courseContext))
                         }
                     }
                 })

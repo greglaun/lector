@@ -1,5 +1,6 @@
 package com.greglaun.lector.store.sideeffect.persistence
 
+import androidx.annotation.RequiresPermission
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseSource
@@ -41,6 +42,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
             }
             is WriteAction.SaveArticle -> handleSaveArticle(action, responseSource)
             is WriteAction.DeleteArticle -> handleDeleteArticle(action, responseSource)
+            is WriteAction.DeleteCourse -> handleDeleteCourse(action, courseSource)
         }
     }
 }

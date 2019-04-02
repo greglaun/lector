@@ -109,3 +109,8 @@ suspend fun handleDeleteArticle(action: WriteAction.DeleteArticle,
                                 responseSource: ResponseSource) {
     responseSource.delete(action.articleContext.contextString)
 }
+
+suspend fun handleDeleteCourse(action: WriteAction.DeleteCourse,
+                                courseSource: CourseSource) {
+    courseSource.delete(action.courseContext.courseName)
+}
