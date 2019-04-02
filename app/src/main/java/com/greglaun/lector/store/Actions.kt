@@ -42,4 +42,13 @@ sealed class WriteAction: Action() {
     data class SaveArticle(val articleState: AbstractArticleState): WriteAction()
     data class DeleteArticle(val articleContext: ArticleContext): WriteAction()
     data class DeleteCourse(val courseContext: CourseContext): WriteAction()
+    data class MarkDownloadFinished(val urlString: String): WriteAction()
+}
+
+sealed class PreferenceAction: Action() {
+    data class SetHandsomeBritish(val shouldBeBritish: Boolean): PreferenceAction()
+    data class SetSpeechRate(val speechRate: Float): PreferenceAction()
+    data class SetAutoPlay(val isAutoPlay: Boolean): PreferenceAction()
+    data class SetAutoDelete(val isAutoDelete: Boolean): PreferenceAction()
+    data class SetIsSlow(val isSlow: Boolean): PreferenceAction()
 }

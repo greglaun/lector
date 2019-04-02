@@ -2,6 +2,7 @@ package com.greglaun.lector.store.sideeffect.persistence
 
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.course.EmptyCourseContext
@@ -113,4 +114,9 @@ suspend fun handleDeleteArticle(action: WriteAction.DeleteArticle,
 suspend fun handleDeleteCourse(action: WriteAction.DeleteCourse,
                                 courseSource: CourseSource) {
     courseSource.delete(action.courseContext.courseName)
+}
+
+suspend fun handeMarkDownloadFinished(action: WriteAction.MarkDownloadFinished,
+                                      responseSource: ResponseSource) {
+    responseSource.markFinished(urlToContext(action.urlString))
 }

@@ -1,6 +1,5 @@
 package com.greglaun.lector.ui.main
 
-import androidx.annotation.RequiresPermission
 import com.greglaun.lector.data.cache.*
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseSource
@@ -18,7 +17,6 @@ class MainPresenter(val view : MainContract.View,
     : MainContract.Presenter, StateHandler {
     private var articleStateSource: ArticleStateSource? = null
 
-    // todo(data): Replace readingList and courseList with LiveData?
     override val readingList = mutableListOf<ArticleContext>()
     override val courseList = mutableListOf<CourseContext>()
 
@@ -220,19 +218,17 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
-        // todo(unidirectional)
-        runBlocking {
+        GlobalScope.launch {
             ttsPresenter.stopSpeaking()
+            store.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
         }
-        view.enablePlayButton()
     }
 
     override fun setSpeechRate(speechRate: Float) {
-        // todo(unidirectional)
-        runBlocking {
+        GlobalScope.launch {
             ttsPresenter.stopSpeaking()
+            store.dispatch(PreferenceAction.SetSpeechRate(speechRate))
         }
-        view.enablePlayButton()
     }
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
@@ -240,8 +236,10 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onPageDownloadFinished(urlString: String) {
-        // todo(unidirectional): responseSource
-        responseSource.markFinished(urlToContext(urlString))
+        GlobalScope.launch {
+            store.dispatch(MarkDownloadFinished(urlString))
+        }
+
     }
 
     override fun playAllPressed(title: String) {

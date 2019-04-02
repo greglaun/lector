@@ -58,7 +58,9 @@ data class State(
         val preferences: Preferences = Preferences(),
         val background: Background = Background(),
         val changed: List<Changed> = listOf(Changed.NONE),
-        val speakerState: SpeakerState = SpeakerState.NOT_READY
+        val speakerState: SpeakerState = SpeakerState.NOT_READY,
+        val preferenceChanged: Boolean = false
+
 )
 
 fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen,
@@ -101,4 +103,9 @@ fun maybeNew(speakerState: SpeakerState): SpeakerState {
         SpeakerState.SPEAKING -> return SpeakerState.SPEAKING_NEW_UTTERANCE
         else -> return speakerState
     }
+}
+
+fun State.updatePreferences(preferences: Preferences): State {
+    return State(currentArticleScreen, readingListScreen, courseBrowserScreen, navigation,
+            preferences, background, changed, speakerState, preferenceChanged = true)
 }

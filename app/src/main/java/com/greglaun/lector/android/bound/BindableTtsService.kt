@@ -30,6 +30,10 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     }
 
     private suspend fun handleState(state: State) {
+        if (state.preferenceChanged) {
+            handlePreferenceChanged(state)
+            return
+        }
         if (state.speakerState != SpeakerState.SPEAKING &&
                 state.speakerState != SpeakerState.SPEAKING_NEW_UTTERANCE) {
           stopImmediately()
@@ -56,6 +60,15 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
         }
    }
+
+    fun handlePreferenceChanged(state: State) {
+        ttsView?.setHandsomeBritish(state.preferences.isBritish)
+        if (state.preferences.isSlow) {
+            ttsView?.setSpeechRate(1.0f)
+        } else {
+            ttsView?.setSpeechRate(state.preferences.speechRate)
+        }
+    }
 
     fun detach() {
         store?.stateHandlers?.remove(this)
