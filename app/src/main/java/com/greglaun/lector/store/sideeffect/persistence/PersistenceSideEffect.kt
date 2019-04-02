@@ -43,7 +43,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
             is WriteAction.SaveArticle -> handleSaveArticle(action, responseSource)
             is WriteAction.DeleteArticle -> handleDeleteArticle(action, responseSource)
             is WriteAction.DeleteCourse -> handleDeleteCourse(action, courseSource)
-            is WriteAction.MarkDownloadFinished -> handleMarkDownloadFinished(action,
+            is WriteAction.MarkDownloadFinished -> handeMarkDownloadFinished(action,
                     responseSource)
         }
     }
