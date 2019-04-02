@@ -64,6 +64,7 @@ abstract class Store {
             is UpdateAction.UpdateArticleFreshnessAction ->
                 reduceUpdateArticleFreshnessState(action, state)
             is UpdateAction.UpdateReadingListAction -> reduceUpdateReadingList(action, state)
+            is UpdateAction.UpdateCourseListAction -> reduceUpdateCourseList(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
             is ReadAction.FetchAllPermanentAndDisplay -> reduceFetchAllPermanentAndDisplay(action,
                     state)

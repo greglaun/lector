@@ -123,6 +123,10 @@ fun reduceUpdateReadingList(action: UpdateAction.UpdateReadingListAction, state:
             articles = action.readingListLce))
 }
 
+fun reduceUpdateCourseList(action: UpdateAction.UpdateCourseListAction, state: State): State {
+    return state.updateCourseBrowserScreen(CourseBrowserScreen(action.courseListLce))
+}
+
 fun reduceSetHandsomeBritish(action: PreferenceAction.SetHandsomeBritish, state: State): State {
     return state.updatePreferences(Preferences(
             state.preferences.autoPlay,

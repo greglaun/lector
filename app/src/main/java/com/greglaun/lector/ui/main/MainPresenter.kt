@@ -71,6 +71,16 @@ class MainPresenter(val view : MainContract.View,
                     is Lce.Error -> view.onError(lce.message)
                 }
             }
+            Navigation.MY_COURSE_LIST -> {
+                val lce = state.courseBrowserScreen.availableCourses
+                when (lce) {
+                    is Lce.Success -> {
+                        displayCourses(lce.data)
+                    }
+                    is Lce.Loading -> displayCourses(emptyList())
+                    is Lce.Error -> view.onError(lce.message)
+                }
+            }
         }
     }
 
@@ -199,14 +209,23 @@ class MainPresenter(val view : MainContract.View,
         view.displayReadingList(title)
     }
 
-    override suspend fun onDisplayCourses() {
+    private fun displayCourses(courses: List<CourseContext>) {
         courseList.clear()
-        // todo(unidirectional): courseSource
-        courseSource.getCourses()?.let {
-            courseList.addAll(it)
-        }
+        courseList.addAll(courses)
         view.onCoursesChanged()
         view.displayCourses()
+    }
+
+    override suspend fun onDisplayCourses() {
+        store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
+
+        // todo(unidirectional): courseSource
+//        courseSource.getCourses()?.let {
+//            courseList.addAll(it)
+//        }
+//        courseList.clear()
+//        view.onCoursesChanged()
+//        view.displayCourses()
     }
 
     override suspend fun onRewindOne() {

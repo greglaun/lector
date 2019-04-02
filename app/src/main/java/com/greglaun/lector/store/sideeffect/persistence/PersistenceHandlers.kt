@@ -3,6 +3,7 @@ package com.greglaun.lector.store.sideeffect.persistence
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.urlToContext
+import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.course.EmptyCourseContext
@@ -85,6 +86,16 @@ suspend fun handleFetchAllPermanentAndDisplay(responseSource: ResponseSource,
         readingListLce = Lce.Success(it)
     }
     actionDispatcher.invoke(UpdateAction.UpdateReadingListAction(readingListLce))
+}
+
+suspend fun handleFetchAlCoursesAndDisplay(courseSource: CourseSource,
+                                              actionDispatcher: suspend (Action) -> Unit) {
+    // todo(i18n): Better handling of error strings.
+    var courseListLce: Lce<List<CourseContext>> = Lce.Error("Unable to download courses.")
+    courseSource.getCourses()?.let {
+        courseListLce = Lce.Success(it)
+    }
+    actionDispatcher.invoke(UpdateAction.UpdateCourseListAction(courseListLce))
 }
 
 suspend fun handleFetchCourseInfoAndDisplay(action: ReadAction.FetchCourseInfoAndDisplay,

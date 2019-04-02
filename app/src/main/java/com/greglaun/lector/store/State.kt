@@ -86,6 +86,11 @@ fun State.updateReadingListScreen(newReadingListScreen: ReadingListScreen): Stat
             preferences, background, changed, stripNew(speakerState))
 }
 
+fun State.updateCourseBrowserScreen(courseBrowserScreen: CourseBrowserScreen): State {
+    return State(currentArticleScreen, readingListScreen, courseBrowserScreen, navigation,
+            preferences, background, changed, stripNew(speakerState))
+}
+
 fun State.updateSpeakerState(speakerState: SpeakerState): State {
     return State(currentArticleScreen, readingListScreen, courseBrowserScreen, navigation,
             preferences, background, changed, speakerState)

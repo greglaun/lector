@@ -18,6 +18,7 @@ sealed class UpdateAction: Action() {
                                             val isNew: Boolean = false): UpdateAction()
     data class UpdateReadingListAction(val readingListLce: Lce<List<ArticleContext>>):
             UpdateAction()
+    data class UpdateCourseListAction(val courseListLce: Lce<List<CourseContext>>): UpdateAction()
     data class UpdateCourseInfo(val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()
     class FastForwardOne: UpdateAction()
     class RewindOne: UpdateAction()
@@ -35,7 +36,8 @@ sealed class ReadAction: Action() {
     class StopDownloadAction: ReadAction()
     data class LoadNewUrlAction(val newUrl: String): ReadAction()
     class FetchAllPermanentAndDisplay : ReadAction()
-    class FetchCourseInfoAndDisplay(var courseContext: CourseContext): ReadAction()
+    data class FetchCourseInfoAndDisplay(var courseContext: CourseContext): ReadAction()
+    class FetchAllCoursesAndDisplay: ReadAction()
 }
 
 sealed class WriteAction: Action() {
