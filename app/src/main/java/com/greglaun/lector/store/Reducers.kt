@@ -1,6 +1,7 @@
 package com.greglaun.lector.store
 
 import com.greglaun.lector.data.cache.BasicArticleContext
+import com.greglaun.lector.data.cache.SavedArticleCache
 import com.greglaun.lector.ui.speak.hasNext
 import com.greglaun.lector.ui.speak.hasPrevious
 import com.greglaun.lector.ui.speak.next
@@ -111,7 +112,7 @@ fun reduceUpdateArticleFreshnessState(action: UpdateAction.UpdateArticleFreshnes
     return currentState
 }
 
-fun reduceFetchAllPermanentAndDisplay(action: ReadAction.FetchAllPermanentAndDisplay, state: State): State {
+fun handleFetchAllPermanentAndDisplay(action: ReadAction.FetchAllPermanentAndDisplay, state: State): State {
     val newState = state.updateReadingListScreen(ReadingListScreen(
             articles = Lce.Loading))
     return newState.updateNavigation(Navigation.MY_READING_LIST)

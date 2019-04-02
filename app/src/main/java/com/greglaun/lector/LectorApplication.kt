@@ -17,9 +17,8 @@ import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.net.DownloadCompletionScheduler
 import com.greglaun.lector.data.whitelist.CacheEntryClassifier
 import com.greglaun.lector.store.Store
-import com.greglaun.lector.store.sideeffect.fetch.FetchSideEffect
-import com.greglaun.lector.store.sideeffect.finisher.DownloadFinisher
 import com.greglaun.lector.store.sideeffect.persistence.PersistenceSideEffect
+import com.greglaun.lector.store.sideeffect.finisher.DownloadFinisher
 
 class LectorApplication: Application() {
     private var RESPONSE_SOURCE_INSTANCE: ResponseSource? = null
@@ -44,8 +43,7 @@ class LectorApplication: Application() {
     }
 
     fun prepareStore() {
-        AppStore.sideEffects.add(PersistenceSideEffect(AppStore))
-        AppStore.sideEffects.add(FetchSideEffect(AppStore,
+        AppStore.sideEffects.add(PersistenceSideEffect(AppStore,
                 responseSource(),
                 courseSource(),
                 courseDownloader()))

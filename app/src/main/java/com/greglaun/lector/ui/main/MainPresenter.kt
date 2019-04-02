@@ -62,11 +62,6 @@ class MainPresenter(val view : MainContract.View,
                 GlobalScope.launch {
                 store.dispatch(ReadAction.FetchCourseInfoAndDisplay(
                         store.state.currentArticleScreen.currentCourse))
-//                    // todo(unidirectional): courseSource
-//                    courseSource.getArticlesForCourse(currentCourse.id!!).let {
-//                        displayArticleList(it,
-//                                currentCourse.courseName)
-//                    }
                 }
             }
             Navigation.MY_READING_LIST -> {
@@ -160,10 +155,9 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun saveArticle() {
-        // todo(unidirectional)
-        val requestContextCopy = store.state.currentArticleScreen.articleState.title
-        // todo(unidirectional): responseSource
-        responseSource.markPermanent(requestContextCopy)
+        GlobalScope.launch{
+            store.dispatch(WriteAction.SaveArticle(store.state.currentArticleScreen.articleState))
+        }
     }
 
     override suspend fun courseDetailsRequested(courseContext: CourseContext) {

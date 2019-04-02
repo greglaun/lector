@@ -37,3 +37,7 @@ sealed class ReadAction: Action() {
     class FetchAllPermanentAndDisplay : ReadAction()
     class FetchCourseInfoAndDisplay(var courseContext: CourseContext): ReadAction()
 }
+
+sealed class WriteAction: Action() {
+    data class SaveArticle(val articleState: AbstractArticleState): WriteAction()
+}

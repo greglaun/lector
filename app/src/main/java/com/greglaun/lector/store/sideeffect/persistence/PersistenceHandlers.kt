@@ -1,4 +1,4 @@
-package com.greglaun.lector.store.sideeffect.fetch
+package com.greglaun.lector.store.sideeffect.persistence
 
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
@@ -8,9 +8,9 @@ import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.ArticleStateSource
 
-suspend fun fetchCourseDetails(action: ReadAction.FetchCourseDetailsAction,
-                               courseDownloader: CourseDownloader,
-                               actionDispatcher: suspend (Action) -> Unit) {
+suspend fun handleFetchCourseDetails(action: ReadAction.FetchCourseDetailsAction,
+                                     courseDownloader: CourseDownloader,
+                                     actionDispatcher: suspend (Action) -> Unit) {
     val courseName = action.courseContext.courseName
     val detailsMap = courseDownloader.fetchCourseDetails(listOf(courseName))
     detailsMap?.let {
@@ -76,7 +76,7 @@ private suspend fun autoPlayNext(store: Store, responseSource: ResponseSource,
     store.dispatch(UpdateAction.NewArticleAction(nextArticleState))
 }
 
-suspend fun reduceFetchAllPermanentAndDisplay(responseSource: ResponseSource,
+suspend fun handleFetchAllPermanentAndDisplay(responseSource: ResponseSource,
                                               actionDispatcher: suspend (Action) -> Unit) {
     // todo(i18n): Better handling of error strings.
     var readingListLce: Lce<List<ArticleContext>> = Lce.Error("Unable to download reading list.")
@@ -86,9 +86,9 @@ suspend fun reduceFetchAllPermanentAndDisplay(responseSource: ResponseSource,
     actionDispatcher.invoke(UpdateAction.UpdateReadingListAction(readingListLce))
 }
 
-suspend fun reduceFetchCourseInfoAndDisplay(action: ReadAction.FetchCourseInfoAndDisplay,
+suspend fun handleFetchCourseInfoAndDisplay(action: ReadAction.FetchCourseInfoAndDisplay,
                                             courseSource: CourseSource,
-                                              actionDispatcher: suspend (Action) -> Unit) {
+                                            actionDispatcher: suspend (Action) -> Unit) {
     action.courseContext.id?.let {
         // todo(i18n): Better handling of error strings.
         var courseArticleLce: Lce<List<ArticleContext>> = Lce.Error("Unable to download reading list.")
@@ -97,4 +97,10 @@ suspend fun reduceFetchCourseInfoAndDisplay(action: ReadAction.FetchCourseInfoAn
         }
         actionDispatcher.invoke(UpdateAction.UpdateCourseInfo(courseArticleLce))
     }
+}
+
+suspend fun handleSaveArticle(action: WriteAction.SaveArticle,
+                              responseSource: ResponseSource) {
+        val requestContextCopy = action.articleState.title
+        responseSource.markPermanent(requestContextCopy)
 }
