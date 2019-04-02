@@ -140,6 +140,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun onBackPressed() {
+        // todo(unidirectional)
         if (readingListRecyclerView.visibility == VISIBLE) {
             val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
             if (title != DEFAULT_READING_LIST) {
@@ -357,6 +358,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_browse_courses -> {
+                // todo(unidirectional)
                 startActivity(Intent(this, CourseBrowserActivity::class.java))
                 return true
             }
@@ -379,6 +381,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_settings -> {
+                // todo(unidirectional)
                 startActivity(Intent(this, SettingsActivity::class.java))
                 return true
             }
@@ -491,7 +494,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     fun onPlayAllPressed(view: View) {
         runOnUiThread {
-            var title = LECTOR_UNIVERSE
+            var title = LECTOR_UNIVERSE // todo(unidirectional): use from store
             val viewText = findViewById<TextView>(R.id.reading_list_title).text
             if (viewText != null) {
                 title = viewText.toString()

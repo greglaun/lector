@@ -218,14 +218,6 @@ class MainPresenter(val view : MainContract.View,
 
     override suspend fun onDisplayCourses() {
         store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
-
-        // todo(unidirectional): courseSource
-//        courseSource.getCourses()?.let {
-//            courseList.addAll(it)
-//        }
-//        courseList.clear()
-//        view.onCoursesChanged()
-//        view.displayCourses()
     }
 
     override suspend fun onRewindOne() {
