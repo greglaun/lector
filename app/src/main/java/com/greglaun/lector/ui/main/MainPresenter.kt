@@ -1,11 +1,15 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.*
+import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.data.cache.contextToUrl
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 import okhttp3.Response
 
@@ -58,10 +62,7 @@ class MainPresenter(val view : MainContract.View,
             }
 
             Navigation.BROWSE_COURSES -> {
-                GlobalScope.launch {
-                store.dispatch(ReadAction.FetchCourseInfoAndDisplay(
-                        store.state.currentArticleScreen.currentCourse))
-                }
+                view.navigateBrowseCourses()
             }
             Navigation.MY_READING_LIST -> {
                 val lce = state.readingListScreen.articles
@@ -216,7 +217,11 @@ class MainPresenter(val view : MainContract.View,
         view.displayCourses()
     }
 
-    override suspend fun onDisplayCourses() {
+    override suspend fun onDisplaySavedCourses() {
+        store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
+    }
+
+    override suspend fun onBrowseCourses() {
         store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
     }
 

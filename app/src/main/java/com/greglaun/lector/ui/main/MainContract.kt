@@ -26,6 +26,8 @@ interface MainContract {
         fun onCoursesChanged()
         fun displayCourses()
         fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
+
+        fun navigateBrowseCourses()
     }
 
     interface Presenter : LectorPresenter<View> {
@@ -44,7 +46,8 @@ interface MainContract {
         fun responseSource(): ResponseSource
         fun courseSource(): CourseSource
         suspend fun loadFromContext(articleContext: ArticleContext)
-        suspend fun onDisplayCourses()
+        suspend fun onDisplaySavedCourses()
+        suspend fun onBrowseCourses()
         fun deleteRequested(courseContext: CourseContext)
         suspend fun courseDetailsRequested(courseContext: CourseContext)
         fun setHandsomeBritish(shouldBeBritish: Boolean)

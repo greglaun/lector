@@ -10,7 +10,6 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
@@ -324,6 +323,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     /*
+     * Navigation
+     */
+
+    override fun navigateBrowseCourses() {
+        startActivity(Intent(this, CourseBrowserActivity::class.java))
+    }
+
+    /*
      *  Options menu
      */
 
@@ -358,13 +365,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_browse_courses -> {
-                // todo(unidirectional)
-                startActivity(Intent(this, CourseBrowserActivity::class.java))
+                GlobalScope.launch {
+                    mainPresenter.onBrowseCourses()
+                }
                 return true
             }
             R.id.action_my_courses -> {
                 GlobalScope.launch {
-                    mainPresenter.onDisplayCourses()
+                    mainPresenter.onDisplaySavedCourses()
                 }
                 return true
             }
@@ -492,9 +500,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    fun onPlayAllPressed(view: View) {
+    fun onPlayAllPressed() {
         runOnUiThread {
-            var title = LECTOR_UNIVERSE // todo(unidirectional): use from store
+            var title = LECTOR_UNIVERSE
             val viewText = findViewById<TextView>(R.id.reading_list_title).text
             if (viewText != null) {
                 title = viewText.toString()

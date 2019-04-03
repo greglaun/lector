@@ -95,19 +95,20 @@ suspend fun handleFetchAlCoursesAndDisplay(courseSource: CourseSource,
     courseSource.getCourses()?.let {
         courseListLce = Lce.Success(it)
     }
-    actionDispatcher.invoke(UpdateAction.UpdateCourseListAction(courseListLce))
+    actionDispatcher.invoke(UpdateAction.UpdateCourseBrowseList(courseListLce))
 }
 
-suspend fun handleFetchCourseInfoAndDisplay(action: ReadAction.FetchCourseInfoAndDisplay,
-                                            courseSource: CourseSource,
-                                            actionDispatcher: suspend (Action) -> Unit) {
+suspend fun handleFetchArticlesForCourseAndDisplay(
+        action: ReadAction.FetchArticlesForCourseAndDisplay,
+        courseSource: CourseSource,
+        actionDispatcher: suspend (Action) -> Unit) {
     action.courseContext.id?.let {
         // todo(i18n): Better handling of error strings.
-        var courseArticleLce: Lce<List<ArticleContext>> = Lce.Error("Unable to download reading list.")
+        var courseArticlesList: Lce<List<ArticleContext>> = Lce.Error("Unable to download reading list.")
         courseSource.getArticlesForCourse(it)?.let {articleList ->
-            courseArticleLce = Lce.Success(articleList)
+            courseArticlesList = Lce.Success(articleList)
         }
-        actionDispatcher.invoke(UpdateAction.UpdateCourseInfo(courseArticleLce))
+        actionDispatcher.invoke(UpdateAction.UpdateArticlesForCourse(courseArticlesList))
     }
 }
 

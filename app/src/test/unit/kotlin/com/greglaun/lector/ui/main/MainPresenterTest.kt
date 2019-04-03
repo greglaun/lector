@@ -137,7 +137,7 @@ class MainPresenterTest {
     @Test
     fun onDisplayCourses() {
         runBlocking {
-            mainPresenter.onDisplayCourses()
+            mainPresenter.onDisplaySavedCourses()
             verify(mockView, times(1)).displayCourses()
         }
     }

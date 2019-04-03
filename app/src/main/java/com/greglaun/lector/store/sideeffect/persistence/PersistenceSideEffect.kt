@@ -1,6 +1,5 @@
 package com.greglaun.lector.store.sideeffect.persistence
 
-import androidx.annotation.RequiresPermission
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseSource
@@ -29,8 +28,12 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                 handleFetchAllPermanentAndDisplay(responseSource) {
                     store.dispatch(it)
                 }
-            is ReadAction.FetchCourseInfoAndDisplay ->
-                handleFetchCourseInfoAndDisplay(action, courseSource) {
+            is ReadAction.FetchAllCoursesAndDisplay -> handleFetchAlCoursesAndDisplay(
+                    courseSource) {
+                store.dispatch(it)
+            }
+            is ReadAction.FetchArticlesForCourseAndDisplay ->
+                handleFetchArticlesForCourseAndDisplay(action, courseSource) {
                     store.dispatch(it)
                 }
             is UpdateAction.ArticleOverAction -> handleArticleOver(
