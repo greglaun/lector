@@ -176,4 +176,3 @@ fun reduceSetIsSlow(action: PreferenceAction.SetIsSlow, state: State): State {
             state.preferences.speechRate
     ))
 }
-

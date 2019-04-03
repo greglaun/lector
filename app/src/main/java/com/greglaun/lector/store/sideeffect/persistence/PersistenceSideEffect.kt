@@ -6,6 +6,7 @@ import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.ArticleStateSource
 import com.greglaun.lector.ui.speak.JSoupArticleStateSource
+import java.util.*
 
 class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource,
                             val courseSource: CourseSource,
@@ -14,6 +15,8 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                               responseSource)): SideEffect {
 
 
+    val session_history: Stack<String> = Stack()
+
     override suspend fun handle(action: Action) {
         when (action) {
             is ReadAction.FetchCourseDetailsAction ->
@@ -21,7 +24,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
             is ReadAction.LoadNewUrlAction -> loadNewUrl(
                     action,
                     responseSource,
-                    articleStateSource)  {
+                    articleStateSource, session_history)  {
                 store.dispatch(it)
             }
             is ReadAction.FetchAllPermanentAndDisplay ->
@@ -43,6 +46,9 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                     articleStateSource) {
                 store.dispatch(it)
             }
+            is UpdateAction.MaybeGoBack -> handleMaybeGoBack(action, session_history) {
+                store.dispatch(it)
+            }
             is WriteAction.SaveArticle -> handleSaveArticle(action, responseSource)
             is WriteAction.DeleteArticle -> handleDeleteArticle(action, responseSource)
             is WriteAction.DeleteCourse -> handleDeleteCourse(action, courseSource)
@@ -50,4 +56,5 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                     responseSource)
         }
     }
+
 }

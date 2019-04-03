@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.os.IBinder
 import android.preference.PreferenceManager
+import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
@@ -28,6 +29,8 @@ import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.store.DEFAULT_READING_LIST
 import com.greglaun.lector.store.LECTOR_UNIVERSE
+import com.greglaun.lector.store.Navigation
+import com.greglaun.lector.store.UpdateAction
 import com.greglaun.lector.ui.course.CourseBrowserActivity
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.NoOpTtsPresenter
@@ -140,18 +143,30 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onBackPressed() {
         // todo(unidirectional)
-        if (readingListRecyclerView.visibility == VISIBLE) {
-            val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
-            if (title != DEFAULT_READING_LIST) {
-                unHideCourseListView()
-            } else if (webView.visibility != VISIBLE) {
-                unhideWebView()
+        val navigation = LectorApplication.AppStore.state.navigation
+        when (navigation) {
+            Navigation.CURRENT_ARTICLE -> {
+                GlobalScope.launch {
+                    mainPresenter.maybeGoBack()
+                }
             }
-        } else if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            onPause()
+            else -> GlobalScope.launch {
+                LectorApplication.AppStore.dispatch(UpdateAction.UpdateNavigationAction(
+                        Navigation.CURRENT_ARTICLE))
+            }
         }
+//        if (readingListRecyclerView.visibility == VISIBLE) {
+//            val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
+//            if (title != DEFAULT_READING_LIST) {
+//                unHideCourseListView()
+//            } else if (webView.visibility != VISIBLE) {
+//                unhideWebView()
+//            }
+//        } else if (webView.canGoBack()) {
+//            webView.goBack()
+//        } else {
+//            onPause()
+//        }
     }
 
     /*

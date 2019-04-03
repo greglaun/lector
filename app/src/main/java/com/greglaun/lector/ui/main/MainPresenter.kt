@@ -127,6 +127,10 @@ class MainPresenter(val view : MainContract.View,
         return courseSource
     }
 
+    override suspend fun maybeGoBack() {
+        store.dispatch(UpdateAction.MaybeGoBack())
+    }
+
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
             ttsPresenter.startSpeaking({

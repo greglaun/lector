@@ -53,6 +53,7 @@ interface MainContract {
         fun setHandsomeBritish(shouldBeBritish: Boolean)
         fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
         suspend fun onPageDownloadFinished(urlString: String)
+        suspend fun maybeGoBack()
 
         // Preferences
         fun setSpeechRate(speechRate: Float)

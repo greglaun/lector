@@ -9,6 +9,7 @@ import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.ArticleStateSource
+import java.util.*
 
 suspend fun handleFetchCourseDetails(action: ReadAction.FetchCourseDetailsAction,
                                      courseDownloader: CourseDownloader,
@@ -28,10 +29,14 @@ suspend fun handleFetchCourseDetails(action: ReadAction.FetchCourseDetailsAction
 suspend fun loadNewUrl(action: ReadAction.LoadNewUrlAction,
                        responseSource: ResponseSource,
                        articleStateSource: ArticleStateSource,
+                       history: Stack<String>,
                        actionDispatcher: suspend (Action) -> Unit) {
     articleStateSource.getArticle(action.newUrl)?.also {
         if (!responseSource.contains(it.title)) {
             responseSource.add(it.title)
+        }
+        if (action.addToHistory) {
+            history.push(action.newUrl)
         }
         actionDispatcher(UpdateAction.NewArticleAction(it))
     }
@@ -131,4 +136,14 @@ suspend fun handleDeleteCourse(action: WriteAction.DeleteCourse,
 suspend fun handeMarkDownloadFinished(action: WriteAction.MarkDownloadFinished,
                                       responseSource: ResponseSource) {
     responseSource.markFinished(urlToContext(action.urlString))
+}
+
+suspend fun handleMaybeGoBack(action: UpdateAction.MaybeGoBack, history: Stack<String>,
+                              actionDispatcher: suspend (Action) -> Unit) {
+    if (history.size < 2) {
+        return
+    }
+    history.pop()
+    val previous = history.pop()
+    actionDispatcher.invoke(ReadAction.LoadNewUrlAction(previous, false))
 }
