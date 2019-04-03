@@ -82,7 +82,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         readingListView = findViewById(R.id.ll_reading_list)
 
         webView = findViewById(R.id.webview) as WebView
-        webView.webViewClient = WikiWebViewClient(mainPresenter, {
+        webView.webViewClient = WikiWebViewClient(LectorApplication.AppStore,
+                (application as LectorApplication).responseSource(), {
             val intent = Intent(Intent.ACTION_VIEW, it.url)
             startActivity(intent)
             false
@@ -102,7 +103,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         downloaderWebView = findViewById(R.id.downloader_webview) as WebView
         (application as LectorApplication).addDownloadCompletionSideEffect(
-                WebviewDownloadTool(downloaderWebView, mainPresenter, this))
+                WebviewDownloadTool(downloaderWebView, LectorApplication.AppStore,
+                        (application as LectorApplication).responseSource(), this))
 
         readingListViewManager = LinearLayoutManager(this)
         courseListViewManager = LinearLayoutManager(this)
@@ -220,21 +222,21 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
 
-        webView.webViewClient = WikiWebViewClient(mainPresenter, {
-            val intent = Intent(Intent.ACTION_VIEW, it.url)
-            startActivity(intent)
-            false
-        },{
-            handleOnLoadCallbacks(it)
-            expandCollapsableElements()
-            // todo(javascript): How to avoid having to do this for slow-loading pages?
-            GlobalScope.launch {
-                Thread.sleep(1000)
-                runOnUiThread {
-                    expandCollapsableElements()
-                }
-            }
-        })
+//        webView.webViewClient = WikiWebViewClient(mainPresenter, {
+//            val intent = Intent(Intent.ACTION_VIEW, it.url)
+//            startActivity(intent)
+//            false
+//        },{
+//            handleOnLoadCallbacks(it)
+//            expandCollapsableElements()
+//            // todo(javascript): How to avoid having to do this for slow-loading pages?
+//            GlobalScope.launch {
+//                Thread.sleep(1000)
+//                runOnUiThread {
+//                    expandCollapsableElements()
+//                }
+//            }
+//        })
 
         sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
         PreferenceManager.getDefaultSharedPreferences(this)

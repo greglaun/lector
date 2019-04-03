@@ -10,8 +10,6 @@ import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.Request
-import okhttp3.Response
 
 class MainPresenter(val view : MainContract.View,
                     val store: Store,
@@ -147,23 +145,23 @@ class MainPresenter(val view : MainContract.View,
         view.enablePlayButton()
     }
 
-    override suspend fun onUrlChanged(urlString: String) {
-        GlobalScope.launch {
-            store.dispatch(ReadAction.LoadNewUrlAction(urlString))
-        }
-    }
+//    override suspend fun onUrlChanged(urlString: String) {
+//        GlobalScope.launch {
+//            store.dispatch(ReadAction.LoadNewUrlAction(urlString))
+//        }
+//    }
 
     override suspend fun loadFromContext(articleContext: ArticleContext) {
-        onUrlChanged(contextToUrl(articleContext.contextString))
+        store.dispatch(ReadAction.LoadNewUrlAction(contextToUrl(articleContext.contextString)))
     }
 
-    override suspend fun onRequest(url: String): Response? {
-        // todo(unidirectional): How should we handle this? Should this be an exception to the rule?
-        val currentContext = store.state.currentArticleScreen.articleState.title
-        return responseSource.getWithContext(Request.Builder()
-                .url(url)
-                .build(), currentContext!!)
-    }
+//    override suspend fun onRequest(url: String): Response? {
+//        // todo(unidirectional): How should we handle this? Should this be an exception to the rule?
+//        val currentContext = store.state.currentArticleScreen.articleState.title
+//        return responseSource.getWithContext(Request.Builder()
+//                .url(url)
+//                .build(), currentContext!!)
+//    }
 
     override suspend fun saveArticle() {
         GlobalScope.launch{
@@ -256,16 +254,16 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onPageDownloadFinished(urlString: String) {
-        GlobalScope.launch {
-            store.dispatch(WriteAction.MarkDownloadFinished(urlString))
-        }
-
+//        GlobalScope.launch {
+//            store.dispatch(WriteAction.MarkDownloadFinished(urlString))
+//        }
     }
 
     override fun playAllPressed(title: String) {
         if (readingList.size > 0) {
             GlobalScope.launch {
-                onUrlChanged(contextToUrl(readingList[0].contextString))
+                store.dispatch(ReadAction.LoadNewUrlAction(
+                        contextToUrl(readingList[0].contextString)))
                 onPlayButtonPressed()
             }
         }

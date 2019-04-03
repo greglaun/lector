@@ -38,8 +38,6 @@ interface MainContract {
         fun stopSpeakingAndEnablePlayButton()
         suspend fun saveArticle()
         fun deleteRequested(articleContext: ArticleContext)
-        suspend fun onUrlChanged(url : String)
-        suspend fun onRequest(url : String): Response?
         suspend fun onDisplayReadingList()
         suspend fun onRewindOne()
         suspend fun onForwardOne()

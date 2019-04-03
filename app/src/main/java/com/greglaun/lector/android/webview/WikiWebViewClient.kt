@@ -5,14 +5,17 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.android.okHttpToWebView
-import com.greglaun.lector.store.Action
-import com.greglaun.lector.store.SideEffect
-import com.greglaun.lector.ui.main.MainContract
+import com.greglaun.lector.data.cache.ResponseSource
+import com.greglaun.lector.store.ReadAction
+import com.greglaun.lector.store.Store
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.Request
+import okhttp3.Response
 
-class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
+class WikiWebViewClient(val store: Store,
+                        val responseSource: ResponseSource,
                         val onNonWikiUrl: (WebResourceRequest) -> Boolean,
                         val onPageDone: (urlString: String?) -> Unit):
         WebViewClient() {
@@ -20,7 +23,7 @@ class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         if (request.url.authority.endsWith("wikipedia.org")) {
             GlobalScope.launch {
-                mainPresenter.onUrlChanged(request.url.toString())
+                store.dispatch(ReadAction.LoadNewUrlAction(request.url.toString()))
             }
             return true
         }
@@ -34,7 +37,7 @@ class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
             WebResourceResponse? {
         if (request.url.authority.endsWith("wikipedia.org")) {
             return runBlocking {
-                val response = mainPresenter.onRequest(request.url.toString())
+                val response = onRequest(request.url.toString())
                 if (response == null) {
                     null
                 } else {
@@ -48,5 +51,12 @@ class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
         onPageDone(url)
+    }
+
+    private suspend fun onRequest(url: String): Response? {
+        val currentContext = store.state.currentArticleScreen.articleState.title
+        return responseSource.getWithContext(Request.Builder()
+                .url(url)
+                .build(), currentContext!!)
     }
 }
