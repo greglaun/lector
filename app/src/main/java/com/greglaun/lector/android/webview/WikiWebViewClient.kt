@@ -27,7 +27,8 @@ class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
         return onNonWikiUrl(request)
     }
 
-    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest):
+            WebResourceResponse? {
         if (request.url.authority.endsWith("wikipedia.org")) {
             return runBlocking {
                 val response = mainPresenter.onRequest(request.url.toString())

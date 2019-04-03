@@ -46,7 +46,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                     articleStateSource) {
                 store.dispatch(it)
             }
-            is UpdateAction.MaybeGoBack -> handleMaybeGoBack(action, session_history) {
+            is UpdateAction.MaybeGoBack -> handleMaybeGoBack(session_history) {
                 store.dispatch(it)
             }
             is WriteAction.SaveArticle -> handleSaveArticle(action, responseSource)

@@ -138,8 +138,7 @@ suspend fun handeMarkDownloadFinished(action: WriteAction.MarkDownloadFinished,
     responseSource.markFinished(urlToContext(action.urlString))
 }
 
-suspend fun handleMaybeGoBack(action: UpdateAction.MaybeGoBack, history: Stack<String>,
-                              actionDispatcher: suspend (Action) -> Unit) {
+suspend fun handleMaybeGoBack(history: Stack<String>, actionDispatcher: suspend (Action) -> Unit) {
     if (history.size < 2) {
         return
     }
