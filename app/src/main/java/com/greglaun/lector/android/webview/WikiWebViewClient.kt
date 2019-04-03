@@ -5,6 +5,8 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.greglaun.lector.android.okHttpToWebView
+import com.greglaun.lector.store.Action
+import com.greglaun.lector.store.SideEffect
 import com.greglaun.lector.ui.main.MainContract
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -14,6 +16,7 @@ class WikiWebViewClient(val mainPresenter: MainContract.Presenter,
                         val onNonWikiUrl: (WebResourceRequest) -> Boolean,
                         val onPageDone: (urlString: String?) -> Unit):
         WebViewClient() {
+
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         if (request.url.authority.endsWith("wikipedia.org")) {
             GlobalScope.launch {

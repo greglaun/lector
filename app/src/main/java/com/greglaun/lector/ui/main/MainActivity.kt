@@ -155,18 +155,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                         Navigation.CURRENT_ARTICLE))
             }
         }
-//        if (readingListRecyclerView.visibility == VISIBLE) {
-//            val title = findViewById<TextView>(R.id.reading_list_title).text.toString()
-//            if (title != DEFAULT_READING_LIST) {
-//                unHideCourseListView()
-//            } else if (webView.visibility != VISIBLE) {
-//                unhideWebView()
-//            }
-//        } else if (webView.canGoBack()) {
-//            webView.goBack()
-//        } else {
-//            onPause()
-//        }
     }
 
     /*
