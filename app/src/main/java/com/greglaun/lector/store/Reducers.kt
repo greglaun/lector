@@ -1,7 +1,6 @@
 package com.greglaun.lector.store
 
 import com.greglaun.lector.data.cache.BasicArticleContext
-import com.greglaun.lector.data.cache.SavedArticleCache
 import com.greglaun.lector.ui.speak.hasNext
 import com.greglaun.lector.ui.speak.hasPrevious
 import com.greglaun.lector.ui.speak.next
@@ -123,8 +122,9 @@ fun reduceUpdateReadingList(action: UpdateAction.UpdateReadingListAction, state:
             articles = action.readingListLce))
 }
 
-fun reduceUpdateCourseList(action: UpdateAction.UpdateCourseListAction, state: State): State {
-    return state.updateCourseBrowserScreen(CourseBrowserScreen(action.courseListLce))
+fun reduceUpdateCourseBrowseList(action: UpdateAction.UpdateCourseBrowseList, state: State): State {
+    val newState = state.updateCourseBrowserScreen(CourseBrowserScreen(action.courseListLce))
+    return newState.updateNavigation(Navigation.BROWSE_COURSES)
 }
 
 fun reduceSetHandsomeBritish(action: PreferenceAction.SetHandsomeBritish, state: State): State {
@@ -176,4 +176,3 @@ fun reduceSetIsSlow(action: PreferenceAction.SetIsSlow, state: State): State {
             state.preferences.speechRate
     ))
 }
-

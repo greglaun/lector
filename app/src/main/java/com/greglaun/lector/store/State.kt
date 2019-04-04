@@ -5,6 +5,7 @@ import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.ui.speak.AbstractArticleState
 import com.greglaun.lector.ui.speak.EmptyArticleState
+import java.util.*
 
 val DEFAULT_READING_LIST = "All Articles"
 val LECTOR_UNIVERSE = ""
@@ -60,7 +61,6 @@ data class State(
         val changed: List<Changed> = listOf(Changed.NONE),
         val speakerState: SpeakerState = SpeakerState.NOT_READY,
         val preferenceChanged: Boolean = false
-
 )
 
 fun State.updateArticleScreen(newArticleScreen: CurrentArticleScreen,

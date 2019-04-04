@@ -18,8 +18,9 @@ sealed class UpdateAction: Action() {
                                             val isNew: Boolean = false): UpdateAction()
     data class UpdateReadingListAction(val readingListLce: Lce<List<ArticleContext>>):
             UpdateAction()
-    data class UpdateCourseListAction(val courseListLce: Lce<List<CourseContext>>): UpdateAction()
-    data class UpdateCourseInfo(val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()
+    data class UpdateCourseBrowseList(val courseListLce: Lce<List<CourseContext>>): UpdateAction()
+    data class UpdateArticlesForCourse(val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()
+    class MaybeGoBack: UpdateAction()
     class FastForwardOne: UpdateAction()
     class RewindOne: UpdateAction()
     class ArticleOverAction: UpdateAction()
@@ -34,9 +35,9 @@ sealed class ReadAction: Action() {
     data class FetchCourseDetailsAction(val courseContext: CourseContext) : ReadAction()
     class StartDownloadAction: ReadAction()
     class StopDownloadAction: ReadAction()
-    data class LoadNewUrlAction(val newUrl: String): ReadAction()
+    data class LoadNewUrlAction(val newUrl: String, val addToHistory: Boolean = true): ReadAction()
     class FetchAllPermanentAndDisplay : ReadAction()
-    data class FetchCourseInfoAndDisplay(var courseContext: CourseContext): ReadAction()
+    data class FetchArticlesForCourseAndDisplay(var courseContext: CourseContext): ReadAction()
     class FetchAllCoursesAndDisplay: ReadAction()
 }
 

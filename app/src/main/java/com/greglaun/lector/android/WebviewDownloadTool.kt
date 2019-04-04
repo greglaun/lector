@@ -3,19 +3,22 @@ package com.greglaun.lector.android
 import android.app.Activity
 import android.webkit.WebView
 import com.greglaun.lector.android.webview.WikiWebViewClient
+import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.contextToUrl
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.net.DownloadTool
+import com.greglaun.lector.store.Store
 import com.greglaun.lector.ui.main.MainContract
 
-class WebviewDownloadTool(val webView: WebView, mainPresenter: MainContract.Presenter,
+class WebviewDownloadTool(val webView: WebView, store: Store,
+                          responseSource: ResponseSource,
                           val activity: Activity):
         DownloadTool {
 
     var downloadCallbacks: HashMap<String, (() -> Unit)?> = HashMap()
 
     init {
-        webView.webViewClient = WikiWebViewClient(mainPresenter, {
+        webView.webViewClient = WikiWebViewClient(store, responseSource, {
             false
         }, { it ->
             it?.let {

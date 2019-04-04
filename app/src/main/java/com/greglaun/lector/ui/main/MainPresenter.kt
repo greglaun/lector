@@ -1,34 +1,25 @@
 package com.greglaun.lector.ui.main
 
-import com.greglaun.lector.data.cache.*
+import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.contextToUrl
 import com.greglaun.lector.data.course.CourseContext
-import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.store.*
-import com.greglaun.lector.ui.speak.*
-import kotlinx.coroutines.*
-import okhttp3.Request
-import okhttp3.Response
+import com.greglaun.lector.ui.speak.ArticleState
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainPresenter(val view : MainContract.View,
-                    val store: Store,
-                    val ttsPresenter: TTSContract.Presenter,
-                    val responseSource: ResponseSource,
-                    val courseSource: CourseSource)
+                    val store: Store)
     : MainContract.Presenter, StateHandler {
-    private var articleStateSource: ArticleStateSource? = null
 
     override val readingList = mutableListOf<ArticleContext>()
     override val courseList = mutableListOf<CourseContext>()
 
-    private var autoPlay = true
-    private var autoDelete = true
-
     private var isActivityRunning = false
 
     override fun onAttach() {
-        ttsPresenter.attach(ttsPresenter.ttsView(), store)
         // todo(unidirectional): presenter should not have references to these
-        articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
 
         isActivityRunning = true
@@ -58,10 +49,7 @@ class MainPresenter(val view : MainContract.View,
             }
 
             Navigation.BROWSE_COURSES -> {
-                GlobalScope.launch {
-                store.dispatch(ReadAction.FetchCourseInfoAndDisplay(
-                        store.state.currentArticleScreen.currentCourse))
-                }
+                view.navigateBrowseCourses()
             }
             Navigation.MY_READING_LIST -> {
                 val lce = state.readingListScreen.articles
@@ -116,48 +104,12 @@ class MainPresenter(val view : MainContract.View,
         return view
     }
 
-    // todo(unidirectional): Delete
-    override fun responseSource(): ResponseSource {
-        return responseSource
-    }
-
-    // todo(unidirectional): Delete
-    override fun courseSource(): CourseSource {
-        return courseSource
-    }
-
-    override fun onPlayButtonPressed() {
-        GlobalScope.launch {
-            ttsPresenter.startSpeaking({
-            GlobalScope.launch {
-                store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
-            }
-        })}
-    }
-
-    override fun stopSpeakingAndEnablePlayButton() {
-        runBlocking {
-            store.dispatch(SpeakerAction.StopSpeakingAction())
-        }
-        view.enablePlayButton()
-    }
-
-    override suspend fun onUrlChanged(urlString: String) {
-        GlobalScope.launch {
-            store.dispatch(ReadAction.LoadNewUrlAction(urlString))
-        }
+    override suspend fun maybeGoToPreviousArticle() {
+        store.dispatch(UpdateAction.MaybeGoBack())
     }
 
     override suspend fun loadFromContext(articleContext: ArticleContext) {
-        onUrlChanged(contextToUrl(articleContext.contextString))
-    }
-
-    override suspend fun onRequest(url: String): Response? {
-        // todo(unidirectional): How should we handle this? Should this be an exception to the rule?
-        val currentContext = store.state.currentArticleScreen.articleState.title
-        return responseSource.getWithContext(Request.Builder()
-                .url(url)
-                .build(), currentContext!!)
+        store.dispatch(ReadAction.LoadNewUrlAction(contextToUrl(articleContext.contextString)))
     }
 
     override suspend fun saveArticle() {
@@ -216,65 +168,39 @@ class MainPresenter(val view : MainContract.View,
         view.displayCourses()
     }
 
-    override suspend fun onDisplayCourses() {
+    override suspend fun onDisplaySavedCourses() {
         store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
     }
 
-    override suspend fun onRewindOne() {
-        ttsPresenter.backOne()
+    override suspend fun onBrowseCourses() {
+        store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
     }
 
-    override suspend fun onForwardOne() {
-        ttsPresenter.forwardOne()
-    }
-
-    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
-        GlobalScope.launch {
-            ttsPresenter.stopSpeaking()
-            store.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
-        }
-    }
-
-    override fun setSpeechRate(speechRate: Float) {
-        GlobalScope.launch {
-            ttsPresenter.stopSpeaking()
-            store.dispatch(PreferenceAction.SetSpeechRate(speechRate))
-        }
-    }
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
         view.evaluateJavascript(js, callback)
     }
 
-    override suspend fun onPageDownloadFinished(urlString: String) {
-        GlobalScope.launch {
-            store.dispatch(WriteAction.MarkDownloadFinished(urlString))
-        }
-
-    }
-
     override fun playAllPressed(title: String) {
         if (readingList.size > 0) {
             GlobalScope.launch {
-                onUrlChanged(contextToUrl(readingList[0].contextString))
-                onPlayButtonPressed()
+                store.dispatch( ReadAction.LoadNewUrlAction(
+                        contextToUrl(readingList[0].contextString)))
+                store.dispatch(SpeakerAction.SpeakAction())
             }
         }
     }
 
-    override fun setAutoPlay(autoPlayIn: Boolean) {
-        autoPlay = autoPlayIn
-    }
-
-    override fun setAutoDelete(autoDeleteIn: Boolean) {
-        autoDelete = autoDeleteIn
-    }
-
-    private fun updatePosition(): AbstractArticleState {
-        if (store.state.currentArticleScreen.articleState.hasNext()) {
-            return store.state.currentArticleScreen.articleState.next()!!
-        } else {
-            return store.state.currentArticleScreen.articleState
+    override fun setAutoPlay(autoPlay: Boolean) {
+        GlobalScope.launch {
+            store.dispatch(PreferenceAction.SetAutoPlay(autoPlay))
         }
     }
+
+    override fun setAutoDelete(autoDelete: Boolean) {
+        GlobalScope.launch {
+            store.dispatch(PreferenceAction.SetAutoPlay(autoDelete))
+        }
+    }
+
 }

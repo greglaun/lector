@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import com.greglaun.lector.ui.main.MainContract
+import com.greglaun.lector.ui.speak.TTSContract
 
-class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter):
+class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter,
+                                     val ttsPresenter: TTSContract.Presenter):
         SharedPreferences.OnSharedPreferenceChangeListener, LectorPreferenceManager {
     val AUTOPLAY_DEFAULT = true
     val AUTODELETE_DEFAULT = true
@@ -15,12 +17,12 @@ class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter):
             when(key) {
                 "british_voice" -> {
                     sharedPreferences.getBoolean(key, false)?.let {
-                        mainPresenter.setHandsomeBritish(it)
+                        ttsPresenter.setHandsomeBritish(it)
                     }
                 }
                 "tts_speed" -> {
                     sharedPreferences.getInt(key, 100).let{
-                        mainPresenter.setSpeechRate(it.toFloat())
+                        ttsPresenter.setSpeechRate(it.toFloat())
                     }
                 }
                 "auto_play" -> {
@@ -42,11 +44,11 @@ class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter):
 
         val shouldBeBritish = sharedPreferences.getBoolean("british_voice", false)
         if (shouldBeBritish) {
-            mainPresenter.setHandsomeBritish(shouldBeBritish)
+            ttsPresenter.setHandsomeBritish(shouldBeBritish)
         }
 
         val speechRate = sharedPreferences.getInt("tts_speed", 100)
-        mainPresenter.setSpeechRate(speechRate.toFloat())
+        ttsPresenter.setSpeechRate(speechRate.toFloat())
 
         val autoPlay = sharedPreferences.getBoolean("auto_play", AUTOPLAY_DEFAULT)
         mainPresenter.setAutoPlay(autoPlay)
