@@ -116,11 +116,6 @@ class MainPresenter(val view : MainContract.View,
     }
 
     // todo(unidirectional): Delete
-    override fun responseSource(): ResponseSource {
-        return responseSource
-    }
-
-    // todo(unidirectional): Delete
     override fun courseSource(): CourseSource {
         return courseSource
     }
@@ -145,23 +140,9 @@ class MainPresenter(val view : MainContract.View,
         view.enablePlayButton()
     }
 
-//    override suspend fun onUrlChanged(urlString: String) {
-//        GlobalScope.launch {
-//            store.dispatch(ReadAction.LoadNewUrlAction(urlString))
-//        }
-//    }
-
     override suspend fun loadFromContext(articleContext: ArticleContext) {
         store.dispatch(ReadAction.LoadNewUrlAction(contextToUrl(articleContext.contextString)))
     }
-
-//    override suspend fun onRequest(url: String): Response? {
-//        // todo(unidirectional): How should we handle this? Should this be an exception to the rule?
-//        val currentContext = store.state.currentArticleScreen.articleState.title
-//        return responseSource.getWithContext(Request.Builder()
-//                .url(url)
-//                .build(), currentContext!!)
-//    }
 
     override suspend fun saveArticle() {
         GlobalScope.launch{
@@ -254,9 +235,6 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onPageDownloadFinished(urlString: String) {
-//        GlobalScope.launch {
-//            store.dispatch(WriteAction.MarkDownloadFinished(urlString))
-//        }
     }
 
     override fun playAllPressed(title: String) {

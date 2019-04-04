@@ -41,7 +41,6 @@ interface MainContract {
         suspend fun onDisplayReadingList()
         suspend fun onRewindOne()
         suspend fun onForwardOne()
-        fun responseSource(): ResponseSource
         fun courseSource(): CourseSource
         suspend fun loadFromContext(articleContext: ArticleContext)
         suspend fun onDisplaySavedCourses()

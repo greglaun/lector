@@ -217,7 +217,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         bindableTtsService.attach(androidAudioView, LectorApplication.AppStore)
         mainPresenter = MainPresenter(this, LectorApplication.AppStore,
                 bindableTtsService,
-                mainPresenter.responseSource(), mainPresenter.courseSource())
+                (application as LectorApplication).responseSource(),
+                (application as LectorApplication).courseSource())
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
