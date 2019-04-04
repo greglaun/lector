@@ -4,7 +4,7 @@ import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.cache.contextToUrl
 import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.store.*
-import com.greglaun.lector.ui.speak.*
+import com.greglaun.lector.ui.speak.ArticleState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -15,9 +15,6 @@ class MainPresenter(val view : MainContract.View,
 
     override val readingList = mutableListOf<ArticleContext>()
     override val courseList = mutableListOf<CourseContext>()
-
-    private var autoPlay = true
-    private var autoDelete = true
 
     private var isActivityRunning = false
 
@@ -107,7 +104,7 @@ class MainPresenter(val view : MainContract.View,
         return view
     }
 
-    override suspend fun maybeGoBack() {
+    override suspend fun maybeGoToPreviousArticle() {
         store.dispatch(UpdateAction.MaybeGoBack())
     }
 
@@ -187,19 +184,23 @@ class MainPresenter(val view : MainContract.View,
     override fun playAllPressed(title: String) {
         if (readingList.size > 0) {
             GlobalScope.launch {
-                store.dispatch(ReadAction.LoadNewUrlAction(
+                store.dispatch( ReadAction.LoadNewUrlAction(
                         contextToUrl(readingList[0].contextString)))
                 store.dispatch(SpeakerAction.SpeakAction())
             }
         }
     }
 
-    override fun setAutoPlay(autoPlayIn: Boolean) {
-        autoPlay = autoPlayIn
+    override fun setAutoPlay(autoPlay: Boolean) {
+        GlobalScope.launch {
+            store.dispatch(PreferenceAction.SetAutoPlay(autoPlay))
+        }
     }
 
-    override fun setAutoDelete(autoDeleteIn: Boolean) {
-        autoDelete = autoDeleteIn
+    override fun setAutoDelete(autoDelete: Boolean) {
+        GlobalScope.launch {
+            store.dispatch(PreferenceAction.SetAutoPlay(autoDelete))
+        }
     }
 
 }

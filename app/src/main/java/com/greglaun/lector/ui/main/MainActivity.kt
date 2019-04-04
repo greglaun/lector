@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         when (navigation) {
             Navigation.CURRENT_ARTICLE -> {
                 GlobalScope.launch {
-                    mainPresenter.maybeGoBack()
+                    mainPresenter.maybeGoToPreviousArticle()
                 }
             }
             else -> GlobalScope.launch {

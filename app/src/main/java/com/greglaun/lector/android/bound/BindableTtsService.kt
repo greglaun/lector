@@ -63,7 +63,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         }
         if (state.speakerState != SpeakerState.SPEAKING &&
                 state.speakerState != SpeakerState.SPEAKING_NEW_UTTERANCE) {
-          stopImmediately()
+            ttsView?.stopImmediately()
         }
         if (state.speakerState == SpeakerState.SPEAKING_NEW_UTTERANCE) {
             startSpeaking(state)
@@ -101,9 +101,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         store?.stateHandlers?.remove(this)
     }
 
-    override fun stopImmediately() {
-       ttsView?.stopImmediately()
-    }
     override suspend fun onForwardOne() {
         store?.let {
             store!!.dispatch(UpdateAction.FastForwardOne())
@@ -121,7 +118,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
             }
         }
     }
-    
+
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.

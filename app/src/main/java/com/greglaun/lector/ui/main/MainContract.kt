@@ -32,13 +32,17 @@ interface MainContract {
 
         suspend fun saveArticle()
         fun deleteRequested(articleContext: ArticleContext)
+        fun deleteRequested(courseContext: CourseContext)
+
         suspend fun onDisplayReadingList()
-        suspend fun loadFromContext(articleContext: ArticleContext)
         suspend fun onDisplaySavedCourses()
         suspend fun onBrowseCourses()
-        fun deleteRequested(courseContext: CourseContext)
         suspend fun courseDetailsRequested(courseContext: CourseContext)
-        suspend fun maybeGoBack()
+
+        suspend fun loadFromContext(articleContext: ArticleContext)
+
+        suspend fun maybeGoToPreviousArticle()
+
         fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
 
         // Preferences

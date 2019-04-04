@@ -15,17 +15,13 @@ interface TTSContract {
     interface Presenter {
         fun attach(ttsView: TTSContract.AudioView?,
                    store: Store)
-//        fun ttsView(): AudioView?
-        fun stopImmediately()
 
         fun onPlayButtonPressed()
         fun onPauseButtonPressed()
 
-//        suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
-//        suspend fun stopSpeaking()
-
         suspend fun onRewindOne()
         suspend fun onForwardOne()
+
         fun setHandsomeBritish(shouldBeBritish: Boolean)
         fun setSpeechRate(speechRate: Float)
     }
