@@ -34,24 +34,19 @@ interface MainContract {
         val readingList: MutableList<ArticleContext>
         val courseList: MutableList<CourseContext>
 
-        fun onPlayButtonPressed()
         fun stopSpeakingAndEnablePlayButton()
         suspend fun saveArticle()
         fun deleteRequested(articleContext: ArticleContext)
         suspend fun onDisplayReadingList()
-        suspend fun onRewindOne()
-        suspend fun onForwardOne()
         suspend fun loadFromContext(articleContext: ArticleContext)
         suspend fun onDisplaySavedCourses()
         suspend fun onBrowseCourses()
         fun deleteRequested(courseContext: CourseContext)
         suspend fun courseDetailsRequested(courseContext: CourseContext)
-        fun setHandsomeBritish(shouldBeBritish: Boolean)
-        fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
         suspend fun maybeGoBack()
+        fun evaluateJavascript(js: String, callback: ((String) -> Unit)?)
 
         // Preferences
-        fun setSpeechRate(speechRate: Float)
         fun setAutoPlay(autoPlay: Boolean)
         fun setAutoDelete(autoDelete: Boolean)
         fun playAllPressed(title: String)

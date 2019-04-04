@@ -6,7 +6,6 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.os.IBinder
 import android.preference.PreferenceManager
-import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
@@ -27,13 +26,12 @@ import com.greglaun.lector.android.webview.WikiWebViewClient
 import com.greglaun.lector.data.LruCallbackList
 import com.greglaun.lector.data.cache.ArticleContext
 import com.greglaun.lector.data.course.CourseContext
-import com.greglaun.lector.store.DEFAULT_READING_LIST
 import com.greglaun.lector.store.LECTOR_UNIVERSE
 import com.greglaun.lector.store.Navigation
 import com.greglaun.lector.store.UpdateAction
 import com.greglaun.lector.ui.course.CourseBrowserActivity
 import com.greglaun.lector.ui.speak.ArticleState
-import com.greglaun.lector.ui.speak.NoOpTtsPresenter
+import com.greglaun.lector.ui.speak.TTSContract
 import com.greglaun.lector.ui.speak.currentIndex
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -54,7 +52,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var courseListViewManager: RecyclerView.LayoutManager
 
     private val onLoadedCallbacks = LruCallbackList<String>()
-    lateinit var mainPresenter : MainContract.Presenter
+    lateinit var mainPresenter: MainContract.Presenter
+    var ttsPresenter: TTSContract.Presenter? = null
+
     var playMenuItem : MenuItem? = null
     var pauseMenuItem : MenuItem? = null
 
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mainPresenter = MainPresenter(this, LectorApplication.AppStore, NoOpTtsPresenter())
+        mainPresenter = MainPresenter(this, LectorApplication.AppStore)
         readingListView = findViewById(R.id.ll_reading_list)
 
         webView = findViewById(R.id.webview) as WebView
@@ -86,10 +86,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             false
         },{
             handleOnLoadCallbacks(it)
-
             expandCollapsableElements()
-
-
             // todo(javascript): How to avoid having to do this for slow-loading pages?
             GlobalScope.launch {
                 Thread.sleep(1000)
@@ -107,11 +104,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         readingListViewManager = LinearLayoutManager(this)
         courseListViewManager = LinearLayoutManager(this)
 
-        sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
-        sharedPreferenceListener?.setFromPreferences(this)
-
-        renewReadingListRecycler(mainPresenter as MainPresenter)
-        renewCourseListRecycler(mainPresenter as MainPresenter)
+        setUpReadingListRecycler(mainPresenter as MainPresenter)
+        setUpCourseListRecycler(mainPresenter as MainPresenter)
 
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
@@ -211,15 +205,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         // todo(concurrency): This should be called on the UI thread. Should we lock?
         val androidAudioView = AndroidAudioView(androidTts)
         androidTts.setOnUtteranceProgressListener(androidAudioView)
-        mainPresenter.onDetach()
-        bindableTtsService.attach(androidAudioView, LectorApplication.AppStore)
-        mainPresenter = MainPresenter(this, LectorApplication.AppStore,
-                bindableTtsService)
-        renewReadingListRecycler(mainPresenter as MainPresenter)
-        renewCourseListRecycler(mainPresenter as MainPresenter)
-        mainPresenter.onAttach()
 
-        sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
+        ttsPresenter = bindableTtsService
+        ttsPresenter?.attach(androidAudioView, LectorApplication.AppStore)
+
+        sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter, ttsPresenter!!)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
         sharedPreferenceListener?.setFromPreferences(this)
@@ -229,7 +219,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
      * Recycler setup
      */
 
-    private fun renewReadingListRecycler(mainPresenter: MainPresenter) {
+    private fun setUpReadingListRecycler(mainPresenter: MainPresenter) {
         readingListViewAdapter = ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
             GlobalScope.launch {
                 mainPresenter.loadFromContext(it)
@@ -246,7 +236,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    private fun renewCourseListRecycler(mainPresenter: MainPresenter) {
+    private fun setUpCourseListRecycler(mainPresenter: MainPresenter) {
         courseListViewAdapter = CourseListAdapter(mainPresenter.courseList, { it: CourseContext ->
             GlobalScope.launch {
                 mainPresenter.courseDetailsRequested(it)
@@ -331,7 +321,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_play -> {
-                mainPresenter.onPlayButtonPressed()
+                ttsPresenter?.onPlayButtonPressed()
                 return true
             }
             R.id.action_pause -> {
@@ -364,13 +354,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
             R.id.action_forward -> {
                 GlobalScope.launch {
-                    mainPresenter.onForwardOne()
+                    ttsPresenter?.onForwardOne()
                 }
                 return true
             }
             R.id.action_rewind -> {
                 GlobalScope.launch {
-                    mainPresenter.onRewindOne()
+                    ttsPresenter?.onRewindOne()
                 }
                 return true
             }

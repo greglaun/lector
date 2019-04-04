@@ -10,9 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class MainPresenter(val view : MainContract.View,
-                    val store: Store,
-
-                    val ttsPresenter: TTSContract.Presenter)
+                    val store: Store)
     : MainContract.Presenter, StateHandler {
 
     override val readingList = mutableListOf<ArticleContext>()
@@ -24,7 +22,6 @@ class MainPresenter(val view : MainContract.View,
     private var isActivityRunning = false
 
     override fun onAttach() {
-        ttsPresenter.attach(ttsPresenter.ttsView(), store)
         // todo(unidirectional): presenter should not have references to these
         store.stateHandlers.add(this)
 
@@ -114,15 +111,6 @@ class MainPresenter(val view : MainContract.View,
         store.dispatch(UpdateAction.MaybeGoBack())
     }
 
-    override fun onPlayButtonPressed() {
-        GlobalScope.launch {
-            ttsPresenter.startSpeaking({
-            GlobalScope.launch {
-                store.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
-            }
-        })}
-    }
-
     override fun stopSpeakingAndEnablePlayButton() {
         runBlocking {
             store.dispatch(SpeakerAction.StopSpeakingAction())
@@ -198,27 +186,6 @@ class MainPresenter(val view : MainContract.View,
         store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
     }
 
-    override suspend fun onRewindOne() {
-        ttsPresenter.backOne()
-    }
-
-    override suspend fun onForwardOne() {
-        ttsPresenter.forwardOne()
-    }
-
-    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
-        GlobalScope.launch {
-            ttsPresenter.stopSpeaking()
-            store.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
-        }
-    }
-
-    override fun setSpeechRate(speechRate: Float) {
-        GlobalScope.launch {
-            ttsPresenter.stopSpeaking()
-            store.dispatch(PreferenceAction.SetSpeechRate(speechRate))
-        }
-    }
 
     override fun evaluateJavascript(js: String, callback: ((String) -> Unit)?) {
         view.evaluateJavascript(js, callback)
@@ -229,7 +196,7 @@ class MainPresenter(val view : MainContract.View,
             GlobalScope.launch {
                 store.dispatch(ReadAction.LoadNewUrlAction(
                         contextToUrl(readingList[0].contextString)))
-                onPlayButtonPressed()
+                store.dispatch(SpeakerAction.SpeakAction())
             }
         }
     }
@@ -242,11 +209,4 @@ class MainPresenter(val view : MainContract.View,
         autoDelete = autoDeleteIn
     }
 
-    private fun updatePosition(): AbstractArticleState {
-        if (store.state.currentArticleScreen.articleState.hasNext()) {
-            return store.state.currentArticleScreen.articleState.next()!!
-        } else {
-            return store.state.currentArticleScreen.articleState
-        }
-    }
 }

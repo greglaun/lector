@@ -8,6 +8,8 @@ import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Presenter,
         StateHandler {
@@ -24,6 +26,36 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         this.store = store
     }
 
+    override fun onPlayButtonPressed() {
+        GlobalScope.launch {
+            startSpeaking({
+                GlobalScope.launch {
+                    store?.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
+                }
+            })}
+    }
+
+    override suspend fun onRewindOne() {
+        backOne()
+    }
+
+    override suspend fun onForwardOne() {
+        forwardOne()
+    }
+
+    override fun setHandsomeBritish(shouldBeBritish: Boolean) {
+        GlobalScope.launch {
+            stopSpeaking()
+            store?.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
+        }
+    }
+
+    override fun setSpeechRate(speechRate: Float) {
+        GlobalScope.launch {
+            stopSpeaking()
+            store?.dispatch(PreferenceAction.SetSpeechRate(speechRate))
+        }
+    }
 
     override suspend fun handle(state: State) {
         handleState(state)
@@ -124,6 +156,14 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override fun onBind(intent: Intent): IBinder {
         return binder
+    }
+
+    private fun updatePosition(): AbstractArticleState {
+        if (store?.state?.currentArticleScreen?.articleState!!.hasNext()) {
+            return store?.state?.currentArticleScreen!!.articleState?.next()!!
+        } else {
+            return store?.state?.currentArticleScreen!!.articleState
+        }
     }
 }
 
