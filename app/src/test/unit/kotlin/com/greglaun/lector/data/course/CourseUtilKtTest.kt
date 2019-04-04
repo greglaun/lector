@@ -21,6 +21,6 @@ class CourseUtilKtTest {
         assertTrue(detailsMap.containsKey("Ice Cream"))
         assertTrue(detailsMap.containsKey("Furry Friends"))
         assertTrue(detailsMap.get("Ice Cream")!!.
-                articleNames.contains("https://en.wikipedia.org/wiki/Cold-stimulus_headache"))
+                articleNames.contains("Cold-stimulus headache"))
     }
 }
