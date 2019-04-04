@@ -15,7 +15,7 @@ interface TTSContract {
     interface Presenter {
         fun attach(ttsView: TTSContract.AudioView?,
                    store: Store)
-        fun ttsView(): AudioView?
+//        fun ttsView(): AudioView?
         fun stopImmediately()
 
         fun onPlayButtonPressed()

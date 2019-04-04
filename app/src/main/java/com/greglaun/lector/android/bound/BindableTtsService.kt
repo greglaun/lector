@@ -29,11 +29,8 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-            startSpeaking({
-                GlobalScope.launch {
-                    store?.dispatch(UpdateAction.UpdateArticleAction(updatePosition()))
-                }
-            })}
+            store?.dispatch(SpeakerAction.SpeakAction())
+        }
     }
 
     override fun onPauseButtonPressed() {
@@ -44,14 +41,13 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         GlobalScope.launch {
-            stopSpeaking()
+            store?.dispatch(SpeakerAction.StopSpeakingAction())
             store?.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
         }
     }
 
     override fun setSpeechRate(speechRate: Float) {
         GlobalScope.launch {
-            stopSpeaking()
             store?.dispatch(PreferenceAction.SetSpeechRate(speechRate))
         }
     }
@@ -126,17 +122,9 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         }
     }
 
-    private suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
-        store?.dispatch(SpeakerAction.SpeakAction())
-    }
-
-    private suspend fun stopSpeaking() {
-        store?.dispatch(SpeakerAction.StopSpeakingAction())
-    }
-
-    override fun ttsView(): TTSContract.AudioView? {
-        return ttsView
-    }
+//    override fun ttsView(): TTSContract.AudioView? {
+//        return ttsView
+//    }
 
     /**
      * Class used for the client Binder.  Because we know this service always
