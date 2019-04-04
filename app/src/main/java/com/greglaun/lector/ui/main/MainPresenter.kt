@@ -115,11 +115,6 @@ class MainPresenter(val view : MainContract.View,
         return view
     }
 
-    // todo(unidirectional): Delete
-    override fun courseSource(): CourseSource {
-        return courseSource
-    }
-
     override suspend fun maybeGoBack() {
         store.dispatch(UpdateAction.MaybeGoBack())
     }

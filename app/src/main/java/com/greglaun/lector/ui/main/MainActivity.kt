@@ -89,7 +89,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             false
         },{
             handleOnLoadCallbacks(it)
+
             expandCollapsableElements()
+
+
             // todo(javascript): How to avoid having to do this for slow-loading pages?
             GlobalScope.launch {
                 Thread.sleep(1000)
