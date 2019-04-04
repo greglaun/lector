@@ -223,22 +223,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
 
-//        webView.webViewClient = WikiWebViewClient(mainPresenter, {
-//            val intent = Intent(Intent.ACTION_VIEW, it.url)
-//            startActivity(intent)
-//            false
-//        },{
-//            handleOnLoadCallbacks(it)
-//            expandCollapsableElements()
-//            // todo(javascript): How to avoid having to do this for slow-loading pages?
-//            GlobalScope.launch {
-//                Thread.sleep(1000)
-//                runOnUiThread {
-//                    expandCollapsableElements()
-//                }
-//            }
-//        })
-
         sharedPreferenceListener = LectorPreferenceChangeListener(mainPresenter)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
