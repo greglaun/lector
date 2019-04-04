@@ -111,13 +111,6 @@ class MainPresenter(val view : MainContract.View,
         store.dispatch(UpdateAction.MaybeGoBack())
     }
 
-    override fun stopSpeakingAndEnablePlayButton() {
-        runBlocking {
-            store.dispatch(SpeakerAction.StopSpeakingAction())
-        }
-        view.enablePlayButton()
-    }
-
     override suspend fun loadFromContext(articleContext: ArticleContext) {
         store.dispatch(ReadAction.LoadNewUrlAction(contextToUrl(articleContext.contextString)))
     }

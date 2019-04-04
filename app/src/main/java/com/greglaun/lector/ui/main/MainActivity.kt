@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onDestroy() {
         super.onDestroy()
-        mainPresenter.stopSpeakingAndEnablePlayButton()
+        ttsPresenter?.onPauseButtonPressed()
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(sharedPreferenceListener)
         unregisterReceiver(noisyAudioStreamReceiver)
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
-                mainPresenter?.stopSpeakingAndEnablePlayButton()
+                ttsPresenter?.onPauseButtonPressed()
             }
         }
     }
@@ -325,7 +325,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             R.id.action_pause -> {
-                mainPresenter.stopSpeakingAndEnablePlayButton()
+                ttsPresenter?.onPauseButtonPressed()
                 return true
             }
             R.id.action_save -> {

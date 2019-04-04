@@ -55,7 +55,7 @@ class MainPresenterTest {
 
     @Test
     fun stopSpeakingAndEnablePlayButton() {
-        mainPresenter.stopSpeakingAndEnablePlayButton()
+        mainPresenter.onPauseButtonPressed()
         runBlocking {
             verify(mockTts, times(1)).stopSpeaking()
         }

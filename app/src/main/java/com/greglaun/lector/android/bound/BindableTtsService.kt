@@ -10,6 +10,7 @@ import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Presenter,
         StateHandler {
@@ -35,12 +36,10 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
             })}
     }
 
-    override suspend fun onRewindOne() {
-        backOne()
-    }
-
-    override suspend fun onForwardOne() {
-        forwardOne()
+    override fun onPauseButtonPressed() {
+        runBlocking {
+            store?.dispatch(SpeakerAction.StopSpeakingAction())
+        }
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
@@ -75,7 +74,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         }
     }
 
-   suspend fun startSpeaking(state: State) {
+   private suspend fun startSpeaking(state: State) {
         val articleState = state.currentArticleScreen.articleState
         articleState.current()?.let {text ->
             ttsView?.speak(cleanUtterance(text),
@@ -109,7 +108,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     override fun stopImmediately() {
        ttsView?.stopImmediately()
     }
-    override suspend fun forwardOne() {
+    override suspend fun onForwardOne() {
         store?.let {
             store!!.dispatch(UpdateAction.FastForwardOne())
             if (store!!.state.currentArticleScreen.articleState.hasNext()) {
@@ -118,7 +117,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         }
     }
 
-    override suspend fun backOne() {
+    override suspend fun onRewindOne() {
         store?.let {
             store!!.dispatch(UpdateAction.RewindOne())
             if (store!!.state.currentArticleScreen.articleState.hasPrevious()) {
@@ -127,11 +126,11 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         }
     }
 
-    override suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
+    private suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?) {
         store?.dispatch(SpeakerAction.SpeakAction())
     }
 
-    override suspend fun stopSpeaking() {
+    private suspend fun stopSpeaking() {
         store?.dispatch(SpeakerAction.StopSpeakingAction())
     }
 

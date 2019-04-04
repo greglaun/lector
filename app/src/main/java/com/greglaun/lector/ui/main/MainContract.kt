@@ -1,14 +1,10 @@
 package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.data.cache.ArticleContext
-import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.course.CourseContext
-import com.greglaun.lector.data.course.CourseSource
-import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.ui.base.LectorPresenter
 import com.greglaun.lector.ui.base.LectorView
 import com.greglaun.lector.ui.speak.ArticleState
-import okhttp3.Response
 
 interface MainContract {
     interface View : LectorView {
@@ -34,7 +30,6 @@ interface MainContract {
         val readingList: MutableList<ArticleContext>
         val courseList: MutableList<CourseContext>
 
-        fun stopSpeakingAndEnablePlayButton()
         suspend fun saveArticle()
         fun deleteRequested(articleContext: ArticleContext)
         suspend fun onDisplayReadingList()

@@ -17,12 +17,13 @@ interface TTSContract {
                    store: Store)
         fun ttsView(): AudioView?
         fun stopImmediately()
-        suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
-        suspend fun stopSpeaking()
-        suspend fun forwardOne()
-        suspend fun backOne()
 
         fun onPlayButtonPressed()
+        fun onPauseButtonPressed()
+
+//        suspend fun startSpeaking(onPositionUpdate: ((AbstractArticleState) -> Unit)?)
+//        suspend fun stopSpeaking()
+
         suspend fun onRewindOne()
         suspend fun onForwardOne()
         fun setHandsomeBritish(shouldBeBritish: Boolean)
