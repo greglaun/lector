@@ -1,10 +1,8 @@
 package com.greglaun.lector.ui.main
 
 import com.greglaun.lector.data.cache.ArticleContext
-import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.contextToUrl
 import com.greglaun.lector.data.course.CourseContext
-import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
 import kotlinx.coroutines.GlobalScope
@@ -13,11 +11,9 @@ import kotlinx.coroutines.runBlocking
 
 class MainPresenter(val view : MainContract.View,
                     val store: Store,
-                    val ttsPresenter: TTSContract.Presenter,
-                    val responseSource: ResponseSource,
-                    val courseSource: CourseSource)
+
+                    val ttsPresenter: TTSContract.Presenter)
     : MainContract.Presenter, StateHandler {
-    private var articleStateSource: ArticleStateSource? = null
 
     override val readingList = mutableListOf<ArticleContext>()
     override val courseList = mutableListOf<CourseContext>()
@@ -30,7 +26,6 @@ class MainPresenter(val view : MainContract.View,
     override fun onAttach() {
         ttsPresenter.attach(ttsPresenter.ttsView(), store)
         // todo(unidirectional): presenter should not have references to these
-        articleStateSource = JSoupArticleStateSource(responseSource)
         store.stateHandlers.add(this)
 
         isActivityRunning = true

@@ -75,10 +75,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mainPresenter = MainPresenter(this, LectorApplication.AppStore, NoOpTtsPresenter(),
-                (application as LectorApplication).responseSource(),
-                (application as LectorApplication).courseSource())
-
+        mainPresenter = MainPresenter(this, LectorApplication.AppStore, NoOpTtsPresenter())
         readingListView = findViewById(R.id.ll_reading_list)
 
         webView = findViewById(R.id.webview) as WebView
@@ -217,9 +214,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         mainPresenter.onDetach()
         bindableTtsService.attach(androidAudioView, LectorApplication.AppStore)
         mainPresenter = MainPresenter(this, LectorApplication.AppStore,
-                bindableTtsService,
-                (application as LectorApplication).responseSource(),
-                (application as LectorApplication).courseSource())
+                bindableTtsService)
         renewReadingListRecycler(mainPresenter as MainPresenter)
         renewCourseListRecycler(mainPresenter as MainPresenter)
         mainPresenter.onAttach()
