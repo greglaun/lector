@@ -96,9 +96,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 runOnUiThread {
                     expandCollapsableElements()
                 }
-                it?.let {
-                    mainPresenter.onPageDownloadFinished(it)
-                }
             }
         })
 

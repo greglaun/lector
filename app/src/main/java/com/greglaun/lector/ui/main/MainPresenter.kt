@@ -234,9 +234,6 @@ class MainPresenter(val view : MainContract.View,
         view.evaluateJavascript(js, callback)
     }
 
-    override suspend fun onPageDownloadFinished(urlString: String) {
-    }
-
     override fun playAllPressed(title: String) {
         if (readingList.size > 0) {
             GlobalScope.launch {
