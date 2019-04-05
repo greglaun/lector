@@ -33,6 +33,7 @@ class MainPresenter(val view : MainContract.View,
         runBlocking {
             store.dispatch(ReadAction.StopDownloadAction())
         }
+        isActivityRunning = false
         store.stateHandlers.remove(this)
     }
 

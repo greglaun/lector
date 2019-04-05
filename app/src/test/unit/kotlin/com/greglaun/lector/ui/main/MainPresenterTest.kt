@@ -4,6 +4,8 @@ import com.greglaun.lector.LectorApplication
 import com.greglaun.lector.data.cache.ResponseSourceImpl
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseSource
+import com.greglaun.lector.store.ReadAction
+import com.greglaun.lector.store.Store
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.TTSContract
 import kotlinx.coroutines.runBlocking
@@ -19,8 +21,9 @@ class MainPresenterTest {
 
     val responseSource = mock(ResponseSourceImpl::class.java)
     val courseSource = mock(CourseSource::class.java)
+    val mockStore = mock(Store::class.java)
 
-    val mainPresenter = MainPresenter(mockView, LectorApplication.AppStore)
+    val mainPresenter = MainPresenter(mockView, mockStore)
 
     val testDir = File("testDir")
 
@@ -33,8 +36,10 @@ class MainPresenterTest {
 
 //    @Test
 //    fun onAttach() {
-//        mainPresenter.onAttach()
-//        verify(mockTts, times(1)).deprecatedOnStart(mainPresenter)
+//        runBlocking {
+//            mainPresenter.onAttach()
+//            verify(mockStore, times(1)).dispatch(ReadAction.StartDownloadAction())
+//        }
 //    }
 //
 //    @Test
