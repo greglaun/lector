@@ -6,8 +6,7 @@ import com.greglaun.lector.ui.speak.hasPrevious
 import com.greglaun.lector.ui.speak.next
 import com.greglaun.lector.ui.speak.previous
 
-fun reduceUpdateArticleAction(action: UpdateAction.UpdateArticleAction, currentState: State,
-                              isNew: Boolean = false): State {
+fun reduceUpdateArticleAction(action: UpdateAction.UpdateArticleAction, currentState: State): State {
     val oldSpeakerState = currentState.speakerState
     val newSpeakerState =
             if (oldSpeakerState == SpeakerState.NOT_READY) SpeakerState.READY else oldSpeakerState

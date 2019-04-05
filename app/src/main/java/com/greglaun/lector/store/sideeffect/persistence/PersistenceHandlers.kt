@@ -90,7 +90,7 @@ suspend fun handleFetchAllPermanentAndDisplay(responseSource: ResponseSource,
     responseSource.getAllPermanent()?.let {
         readingListLce = Lce.Success(it)
     }
-    actionDispatcher.invoke(UpdateAction.UpdateReadingListAction(readingListLce))
+    actionDispatcher.invoke(UpdateAction.UpdateReadingListAction(readingListLce = readingListLce))
 }
 
 suspend fun handleFetchAlCoursesAndDisplay(courseSource: CourseSource,
