@@ -1,5 +1,6 @@
 package com.greglaun.lector.store
 
+import com.greglaun.lector.data.course.ConcreteCourseContext
 import com.greglaun.lector.data.course.extractCourseMap
 import com.greglaun.lector.data.course.toCourseDetailsMap
 import com.greglaun.lector.ui.speak.ArticleState
@@ -15,6 +16,22 @@ class ReducersKtTest {
     @Before
     fun setUp() {
         articleState = ArticleState("a title", listOf("one", "two", "three"))
+    }
+
+    fun doNothing() {
+        var newState = reduceFastForwardOne(
+                UpdateAction.FastForwardOne(),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
@@ -158,57 +175,264 @@ class ReducersKtTest {
 
     @Test
     fun testReduceFetchCourseDetailsAction() {
+        var newState = reduceFetchCourseDetailsAction(
+                ReadAction.FetchCourseDetailsAction(
+                        ConcreteCourseContext(0L, "A name", 0)),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen.currentReadingList,
+                State().readingListScreen.currentReadingList)
+        assertEquals(newState.readingListScreen.articles,
+                Lce.Loading)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceUpdateSpeakerState() {
-    }
+        var newState = reduceUpdateSpeakerState(
+                UpdateAction.UpdateSpeakerStateAction(SpeakerState.SPEAKING),
+                State())
 
-    @Test
-    fun testReduceStopSpeakingAction() {
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, SpeakerState.SPEAKING)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceSpeakAction() {
+        var newState = reduceSpeakAction(
+                SpeakerAction.SpeakAction(),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, SpeakerState.SPEAKING_NEW_UTTERANCE)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+    }
+
+    @Test
+    fun testReduceStopSpeakingAction() {
+
+        var newState = reduceStopSpeakingAction(
+                SpeakerAction.StopSpeakingAction(),
+                State())
+        assertEquals(newState.speakerState, SpeakerState.NOT_READY)
+
+        newState = reduceSpeakAction(
+                SpeakerAction.SpeakAction(),
+                State())
+
+        assertEquals(newState.speakerState, SpeakerState.SPEAKING_NEW_UTTERANCE)
+
+        newState = reduceStopSpeakingAction(
+                SpeakerAction.StopSpeakingAction(),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, SpeakerState.NOT_READY)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceArticleOverAction() {
+        var newState = reduceSpeakAction(
+                SpeakerAction.SpeakAction(),
+                State())
+
+
+        newState = reduceArticleOverAction(
+                UpdateAction.ArticleOverAction(),
+                newState)
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, SpeakerState.READY)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceUpdateArticleFreshnessState() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceFetchAllPermanentAndDisplay() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceUpdateReadingList() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+
     }
 
     @Test
     fun testReduceUpdateCourseBrowseList() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+
     }
 
     @Test
     fun testReduceSetHandsomeBritish() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+
     }
 
     @Test
     fun testReduceSetSpeechRate() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+
     }
 
     @Test
     fun testReduceSetAutoPlay() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceSetAutoDelete() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceSetIsSlow() {
+        //        var newState = reduceFastForwardOne(
+//                UpdateAction.FastForwardOne(),
+//                State())
+//
+//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+//        assertEquals(newState.readingListScreen, State().readingListScreen)
+//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+//        assertEquals(newState.navigation, State().navigation)
+//        assertEquals(newState.preferences, State().preferences)
+//        assertEquals(newState.background, State().background)
+//        assertEquals(newState.changed, State().changed)
+//        assertEquals(newState.speakerState, State().speakerState)
+//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 }
