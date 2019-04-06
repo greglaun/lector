@@ -1,14 +1,15 @@
 package com.greglaun.lector.store
 
+import com.greglaun.lector.data.cache.BasicArticleContext
 import com.greglaun.lector.data.course.ConcreteCourseContext
+import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.data.course.extractCourseMap
 import com.greglaun.lector.data.course.toCourseDetailsMap
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.next
-import org.junit.Test
-
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Test
 
 class ReducersKtTest {
     var articleState: ArticleState? = null
@@ -16,22 +17,6 @@ class ReducersKtTest {
     @Before
     fun setUp() {
         articleState = ArticleState("a title", listOf("one", "two", "three"))
-    }
-
-    fun doNothing() {
-        var newState = reduceFastForwardOne(
-                UpdateAction.FastForwardOne(),
-                State())
-
-        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-        assertEquals(newState.readingListScreen, State().readingListScreen)
-        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-        assertEquals(newState.navigation, State().navigation)
-        assertEquals(newState.preferences, State().preferences)
-        assertEquals(newState.background, State().background)
-        assertEquals(newState.changed, State().changed)
-        assertEquals(newState.speakerState, State().speakerState)
-        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
@@ -175,14 +160,15 @@ class ReducersKtTest {
 
     @Test
     fun testReduceFetchCourseDetailsAction() {
+        val courseContext = ConcreteCourseContext(0L, "A name", 0)
+
         var newState = reduceFetchCourseDetailsAction(
-                ReadAction.FetchCourseDetailsAction(
-                        ConcreteCourseContext(0L, "A name", 0)),
+                ReadAction.FetchCourseDetailsAction(courseContext),
                 State())
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
         assertEquals(newState.readingListScreen.currentReadingList,
-                State().readingListScreen.currentReadingList)
+                courseContext.courseName)
         assertEquals(newState.readingListScreen.articles,
                 Lce.Loading)
         assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
@@ -263,7 +249,6 @@ class ReducersKtTest {
                 SpeakerAction.SpeakAction(),
                 State())
 
-
         newState = reduceArticleOverAction(
                 UpdateAction.ArticleOverAction(),
                 newState)
@@ -281,158 +266,189 @@ class ReducersKtTest {
 
     @Test
     fun testReduceUpdateArticleFreshnessState() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        var newState = reduceUpdateArticleFreshnessState(
+                UpdateAction.UpdateArticleFreshnessAction(
+                        State().currentArticleScreen.articleState as ArticleState),
+                State())
+
+        assertEquals(newState.currentArticleScreen.articleState,
+                State().currentArticleScreen.articleState)
+        assertEquals(newState.currentArticleScreen.currentCourse,
+                State().currentArticleScreen.currentCourse)
+        assertEquals(newState.currentArticleScreen.newArticle, false)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceFetchAllPermanentAndDisplay() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        var newState = reduceFetchAllPermanentAndDisplay(
+                ReadAction.FetchAllPermanentAndDisplay(),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen.currentReadingList,
+                State().readingListScreen.currentReadingList)
+        assertEquals(newState.readingListScreen.articles, Lce.Loading)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, Navigation.MY_READING_LIST)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceUpdateReadingList() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        val readingListLce = Lce.Success(listOf(
+                BasicArticleContext(1L, "Blah", "", true)))
 
+        var newState = reduceUpdateReadingList(
+                UpdateAction.UpdateReadingListAction(readingListLce = readingListLce),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen.currentReadingList,
+                State().readingListScreen.currentReadingList)
+        assertEquals(newState.readingListScreen.articles, readingListLce)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceUpdateCourseBrowseList() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        val courseListLce = Lce.Success(listOf(EmptyCourseContext()))
 
+        var newState = reduceUpdateCourseBrowseList(
+                UpdateAction.UpdateCourseBrowseList(courseListLce),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen.availableCourses,
+                courseListLce)
+        assertEquals(newState.navigation, Navigation.BROWSE_COURSES)
+        assertEquals(newState.preferences, State().preferences)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, State().preferenceChanged)
     }
 
     @Test
     fun testReduceSetHandsomeBritish() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        var newState = reduceSetHandsomeBritish(
+                PreferenceAction.SetHandsomeBritish(true),
+                State())
 
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences.autoDelete, State().preferences.autoDelete)
+        assertEquals(newState.preferences.speechRate, State().preferences.speechRate)
+        assertEquals(newState.preferences.autoPlay, State().preferences.autoPlay)
+        assertEquals(newState.preferences.isBritish, true)
+        assertEquals(newState.preferences.isSlow, State().preferences.isSlow)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, true)
     }
 
     @Test
     fun testReduceSetSpeechRate() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        var newState = reduceSetSpeechRate(
+                PreferenceAction.SetSpeechRate(123.1f),
+                State())
 
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences.autoDelete, State().preferences.autoDelete)
+        assertEquals(newState.preferences.speechRate, 123.1f)
+        assertEquals(newState.preferences.autoPlay, State().preferences.autoPlay)
+        assertEquals(newState.preferences.isBritish, State().preferences.isBritish)
+        assertEquals(newState.preferences.isSlow, State().preferences.isSlow)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, true)
     }
 
     @Test
     fun testReduceSetAutoPlay() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        var newState = reduceSetAutoPlay(
+                PreferenceAction.SetAutoPlay(false),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences.autoDelete, State().preferences.autoDelete)
+        assertEquals(newState.preferences.speechRate, State().preferences.speechRate)
+        assertEquals(newState.preferences.autoPlay, false)
+        assertEquals(newState.preferences.isBritish, State().preferences.isBritish)
+        assertEquals(newState.preferences.isSlow, State().preferences.isSlow)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, true)
     }
 
     @Test
     fun testReduceSetAutoDelete() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        var newState = reduceSetAutoDelete(
+                PreferenceAction.SetAutoDelete(false),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences.autoPlay, State().preferences.autoPlay)
+        assertEquals(newState.preferences.autoDelete, false)
+        assertEquals(newState.preferences.speechRate, State().preferences.speechRate)
+        assertEquals(newState.preferences.isBritish, State().preferences.isBritish)
+        assertEquals(newState.preferences.isSlow, State().preferences.isSlow)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, true)
     }
 
     @Test
     fun testReduceSetIsSlow() {
-        //        var newState = reduceFastForwardOne(
-//                UpdateAction.FastForwardOne(),
-//                State())
-//
-//        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
-//        assertEquals(newState.readingListScreen, State().readingListScreen)
-//        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
-//        assertEquals(newState.navigation, State().navigation)
-//        assertEquals(newState.preferences, State().preferences)
-//        assertEquals(newState.background, State().background)
-//        assertEquals(newState.changed, State().changed)
-//        assertEquals(newState.speakerState, State().speakerState)
-//        assertEquals(newState.preferenceChanged, State().preferenceChanged)
+        var newState = reduceSetIsSlow(
+                PreferenceAction.SetIsSlow(true),
+                State())
+
+        assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
+        assertEquals(newState.readingListScreen, State().readingListScreen)
+        assertEquals(newState.courseBrowserScreen, State().courseBrowserScreen)
+        assertEquals(newState.navigation, State().navigation)
+        assertEquals(newState.preferences.autoDelete, State().preferences.autoDelete)
+        assertEquals(newState.preferences.speechRate, State().preferences.speechRate)
+        assertEquals(newState.preferences.autoPlay, State().preferences.autoPlay)
+        assertEquals(newState.preferences.isBritish, State().preferences.isBritish)
+        assertEquals(newState.preferences.isSlow, true)
+        assertEquals(newState.background, State().background)
+        assertEquals(newState.changed, State().changed)
+        assertEquals(newState.speakerState, State().speakerState)
+        assertEquals(newState.preferenceChanged, true)
     }
 }
