@@ -13,4 +13,6 @@
     <string name="settings">Settings</string>
     <string name="browse_courses">Browse Courses</string>
     <string name="play_all">Play All</string>
+    <string name="course_icon">Course icon</string>
+    <string name="save_course_button">Save Course</string>
 </resources>
