@@ -10,6 +10,7 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
@@ -476,7 +477,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    fun onPlayAllPressed() {
+    fun onPlayAllPressed(view: View) {
         runOnUiThread {
             var title = LECTOR_UNIVERSE
             val viewText = findViewById<TextView>(R.id.reading_list_title).text

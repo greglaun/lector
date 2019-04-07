@@ -31,7 +31,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                 handleFetchAllPermanentAndDisplay(responseSource) {
                     store.dispatch(it)
                 }
-            is ReadAction.FetchAllCoursesAndDisplay -> handleFetchAlCoursesAndDisplay(
+            is ReadAction.FetchAllCoursesAndDisplay -> handleFetchAllCoursesAndDisplay(
                     courseSource) {
                 store.dispatch(it)
             }
@@ -40,7 +40,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                     store.dispatch(it)
                 }
             is UpdateAction.ArticleOverAction -> handleArticleOver(
-                    store,
+                    store.state,
                     responseSource,
                     courseSource,
                     articleStateSource) {
@@ -52,7 +52,7 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
             is WriteAction.SaveArticle -> handleSaveArticle(action, responseSource)
             is WriteAction.DeleteArticle -> handleDeleteArticle(action, responseSource)
             is WriteAction.DeleteCourse -> handleDeleteCourse(action, courseSource)
-            is WriteAction.MarkDownloadFinished -> handeMarkDownloadFinished(action,
+            is WriteAction.MarkDownloadFinished -> handleMarkDownloadFinished(action,
                     responseSource)
         }
     }
