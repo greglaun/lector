@@ -48,22 +48,12 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
-def ARROW_VERSION = "0.7.3"
 def MOCKITO_VERSION = "2.25.0"
 def JACKSON_VERSION = "2.9.7"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
     implementation 'org.jsoup:jsoup:1.10.3'
-
-    // Arrow
-    implementation "io.arrow-kt:arrow-core:$ARROW_VERSION"
-    implementation "io.arrow-kt:arrow-syntax:$ARROW_VERSION"
-    implementation "io.arrow-kt:arrow-typeclasses:$ARROW_VERSION"
-    implementation "io.arrow-kt:arrow-data:$ARROW_VERSION"
-    implementation "io.arrow-kt:arrow-instances-core:$ARROW_VERSION"
-    implementation "io.arrow-kt:arrow-instances-data:$ARROW_VERSION"
-    kapt    "io.arrow-kt:arrow-annotations-processor:$ARROW_VERSION"
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2-eap13'
@@ -72,8 +62,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
     // Room
-    implementation "androidx.room:room-runtime:2.0.0-alpha1"
-    kapt "androidx.room:room-compiler:2.0.0-alpha1" // use kapt for Kotlin
+    implementation "androidx.room:room-runtime:2.1.0-alpha06"
+    kapt "androidx.room:room-compiler:2.1.0-alpha06" // use kapt for Kotlin
 
     // Jackson
     implementation "com.fasterxml.jackson.core:jackson-core:$JACKSON_VERSION"
@@ -81,10 +71,10 @@ dependencies {
 
     // Testing
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.0'
-    androidTestImplementation 'androidx.test:rules:1.1.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.0.0'
-    androidTestImplementation 'androidx.test:core:1.0.0'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test:rules:1.1.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+    androidTestImplementation 'androidx.test:core:1.1.0'
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
     testImplementation "org.mockito:mockito-core:$MOCKITO_VERSION"
 
