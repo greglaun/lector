@@ -42,28 +42,28 @@ suspend fun loadNewUrl(action: ReadAction.LoadNewUrlAction,
     }
 }
 
-suspend fun handleArticleOver(store: Store,
+suspend fun handleArticleOver(state: State,
                               responseSource: ResponseSource,
                               courseSource: CourseSource,
                               articleStateSource: ArticleStateSource,
                               actionDispatcher: suspend (Action) -> Unit) {
-    if (store.state.preferences.autoPlay) {
-        autoPlayNext(store, responseSource, courseSource, articleStateSource, actionDispatcher)
+    if (state.preferences.autoPlay) {
+        autoPlayNext(state, responseSource, courseSource, articleStateSource, actionDispatcher)
         actionDispatcher(SpeakerAction.SpeakAction())
     }
 
-    if (store.state.preferences.autoDelete) {
-        responseSource.delete(store.state.currentArticleScreen.articleState.title)
+    if (state.preferences.autoDelete) {
+        responseSource.delete(state.currentArticleScreen.articleState.title)
     }
 }
 
-private suspend fun autoPlayNext(store: Store, responseSource: ResponseSource,
+private suspend fun autoPlayNext(state: State, responseSource: ResponseSource,
                                  courseSource: CourseSource,
                                  articleStateSource: ArticleStateSource,
                                  actionDispatcher: suspend (Action) -> Unit) {
     val nextArticle: ArticleContext?
-    val currentArticle = store.state.currentArticleScreen.articleState
-    val currentCourse = store.state.currentArticleScreen.currentCourse
+    val currentArticle = state.currentArticleScreen.articleState
+    val currentCourse = state.currentArticleScreen.currentCourse
     if (currentCourse == EmptyCourseContext()) {// Not in a course
         nextArticle = responseSource.getNextArticle(currentArticle.title)
     } else {
@@ -78,9 +78,8 @@ private suspend fun autoPlayNext(store: Store, responseSource: ResponseSource,
     if (nextArticleState == null) {
         actionDispatcher(SpeakerAction.StopSpeakingAction())
         return
-
     }
-    store.dispatch(UpdateAction.NewArticleAction(nextArticleState))
+    actionDispatcher.invoke(UpdateAction.NewArticleAction(nextArticleState))
 }
 
 suspend fun handleFetchAllPermanentAndDisplay(responseSource: ResponseSource,
@@ -90,11 +89,11 @@ suspend fun handleFetchAllPermanentAndDisplay(responseSource: ResponseSource,
     responseSource.getAllPermanent()?.let {
         readingListLce = Lce.Success(it)
     }
-    actionDispatcher.invoke(UpdateAction.UpdateReadingListAction(readingListLce))
+    actionDispatcher.invoke(UpdateAction.UpdateReadingListAction(readingListLce = readingListLce))
 }
 
-suspend fun handleFetchAlCoursesAndDisplay(courseSource: CourseSource,
-                                              actionDispatcher: suspend (Action) -> Unit) {
+suspend fun handleFetchAllCoursesAndDisplay(courseSource: CourseSource,
+                                            actionDispatcher: suspend (Action) -> Unit) {
     // todo(i18n): Better handling of error strings.
     var courseListLce: Lce<List<CourseContext>> = Lce.Error("Unable to download courses.")
     courseSource.getCourses()?.let {
@@ -119,8 +118,8 @@ suspend fun handleFetchArticlesForCourseAndDisplay(
 
 suspend fun handleSaveArticle(action: WriteAction.SaveArticle,
                               responseSource: ResponseSource) {
-        val requestContextCopy = action.articleState.title
-        responseSource.markPermanent(requestContextCopy)
+        val title = action.articleState.title
+        responseSource.markPermanent(title)
 }
 
 suspend fun handleDeleteArticle(action: WriteAction.DeleteArticle,
@@ -133,8 +132,8 @@ suspend fun handleDeleteCourse(action: WriteAction.DeleteCourse,
     courseSource.delete(action.courseContext.courseName)
 }
 
-suspend fun handeMarkDownloadFinished(action: WriteAction.MarkDownloadFinished,
-                                      responseSource: ResponseSource) {
+suspend fun handleMarkDownloadFinished(action: WriteAction.MarkDownloadFinished,
+                                       responseSource: ResponseSource) {
     responseSource.markFinished(urlToContext(action.urlString))
 }
 

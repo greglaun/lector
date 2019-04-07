@@ -16,7 +16,8 @@ sealed class UpdateAction: Action() {
     data class UpdateSpeakerStateAction(val speakerState: SpeakerState): UpdateAction()
     data class UpdateArticleFreshnessAction(val articleState: ArticleState,
                                             val isNew: Boolean = false): UpdateAction()
-    data class UpdateReadingListAction(val readingListLce: Lce<List<ArticleContext>>):
+    data class UpdateReadingListAction(val readingListName: String = DEFAULT_READING_LIST,
+            val readingListLce: Lce<List<ArticleContext>>):
             UpdateAction()
     data class UpdateCourseBrowseList(val courseListLce: Lce<List<CourseContext>>): UpdateAction()
     data class UpdateArticlesForCourse(val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()

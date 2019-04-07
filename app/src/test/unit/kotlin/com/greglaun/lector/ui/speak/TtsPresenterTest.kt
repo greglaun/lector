@@ -7,87 +7,87 @@ import org.junit.Test
 import org.mockito.Mockito.*
 
 class TtsPresenterTest {
-    var ttsPresenter: TtsPresenter? = null
-    var stateMachine: DeprecatedTtsStateMachine? = null
-    var audioView: TTSContract.AudioView? = null
-    val articleState = ArticleState("MyTitle", listOf("some", "paragraphs"))
-
-    @Before
-    fun setUp() {
-        audioView = mock(TTSContract.AudioView::class.java)
-        stateMachine = mock(DeprecatedTtsStateMachine::class.java)
-        ttsPresenter = TtsPresenter(audioView!!, stateMachine!!, LectorApplication.AppStore)
-    }
-
-    @Test
-    fun onStart() {
-        val stateListener = mock(TtsStateListener::class.java)
-        ttsPresenter!!.deprecatedOnStart(stateListener)
-        verify(stateMachine, times(1))!!.attach(
-                ttsPresenter!!,
-                stateListener, LectorApplication.AppStore)
-    }
-
-    @Test
-    fun onStop() {
-        ttsPresenter!!.deprecatedOnStop()
-        verify(stateMachine, times(1))!!.detach()
-    }
-
-    @Test
-    fun speakInLoop() {
-        runBlocking {
-            ttsPresenter!!.startSpeaking(null)
-            verify(stateMachine, times(1))!!
-                    .actionSpeakInLoop(null)
-        }
-    }
-
-    @Test
-    fun stopSpeechViewImmediately() {
-        ttsPresenter!!.stopSpeechViewImmediately()
-        verify(audioView, times(1))!!.stopImmediately()
-    }
-
-    @Test
-    fun onUrlChanged() {
-        runBlocking {
-            ttsPresenter!!.deprecatedOnArticleChanged(articleState)
-            verify(stateMachine, times(1))!!.updateArticle(articleState)
-        }
-    }
-
-    @Test
-    fun stopSpeaking() {
-        runBlocking {
-            ttsPresenter!!.stopSpeaking()
-        }
-        runBlocking {
-            verify(stateMachine, times(1))!!.actionStopSpeaking()
-        }
-    }
-
-    @Test
-    fun onArticleChanged() {
-        val articleState = ArticleState("Test", listOf("A", "B"))
-        runBlocking {
-            ttsPresenter!!.deprecatedOnArticleChanged(articleState)
-            verify(stateMachine, times(1))!!.updateArticle(articleState)
-        }
-    }
-
-    @Test
-    fun setHandsomeBritish() {
-        ttsPresenter!!.deprecatedHandsomeBritish(true)
-        verify(audioView, times(1))!!.setHandsomeBritish(true)
-
-        ttsPresenter!!.deprecatedHandsomeBritish(false)
-        verify(audioView, times(1))!!.setHandsomeBritish(false)
-    }
-
-    @Test
-    fun setSpeechRate() {
-        ttsPresenter!!.deprecatedSetSpeechRate(12f)
-        verify(audioView, times(1))!!.setSpeechRate(12f)
-    }
+//    var ttsPresenter: TtsPresenter? = null
+//    var stateMachine: DeprecatedTtsStateMachine? = null
+//    var audioView: TTSContract.AudioView? = null
+//    val articleState = ArticleState("MyTitle", listOf("some", "paragraphs"))
+//
+//    @Before
+//    fun setUp() {
+//        audioView = mock(TTSContract.AudioView::class.java)
+//        stateMachine = mock(DeprecatedTtsStateMachine::class.java)
+//        ttsPresenter = TtsPresenter(audioView!!, stateMachine!!, LectorApplication.AppStore)
+//    }
+//
+//    @Test
+//    fun onStart() {
+//        val stateListener = mock(TtsStateListener::class.java)
+//        ttsPresenter!!.deprecatedOnStart(stateListener)
+//        verify(stateMachine, times(1))!!.attach(
+//                ttsPresenter!!,
+//                stateListener, LectorApplication.AppStore)
+//    }
+//
+//    @Test
+//    fun onStop() {
+//        ttsPresenter!!.deprecatedOnStop()
+//        verify(stateMachine, times(1))!!.detach()
+//    }
+//
+//    @Test
+//    fun speakInLoop() {
+//        runBlocking {
+//            ttsPresenter!!.startSpeaking(null)
+//            verify(stateMachine, times(1))!!
+//                    .actionSpeakInLoop(null)
+//        }
+//    }
+//
+//    @Test
+//    fun stopSpeechViewImmediately() {
+//        ttsPresenter!!.stopSpeechViewImmediately()
+//        verify(audioView, times(1))!!.stopImmediately()
+//    }
+//
+//    @Test
+//    fun onUrlChanged() {
+//        runBlocking {
+//            ttsPresenter!!.deprecatedOnArticleChanged(articleState)
+//            verify(stateMachine, times(1))!!.updateArticle(articleState)
+//        }
+//    }
+//
+//    @Test
+//    fun stopSpeaking() {
+//        runBlocking {
+//            ttsPresenter!!.stopSpeaking()
+//        }
+//        runBlocking {
+//            verify(stateMachine, times(1))!!.actionStopSpeaking()
+//        }
+//    }
+//
+//    @Test
+//    fun onArticleChanged() {
+//        val articleState = ArticleState("Test", listOf("A", "B"))
+//        runBlocking {
+//            ttsPresenter!!.deprecatedOnArticleChanged(articleState)
+//            verify(stateMachine, times(1))!!.updateArticle(articleState)
+//        }
+//    }
+//
+//    @Test
+//    fun setHandsomeBritish() {
+//        ttsPresenter!!.deprecatedHandsomeBritish(true)
+//        verify(audioView, times(1))!!.setHandsomeBritish(true)
+//
+//        ttsPresenter!!.deprecatedHandsomeBritish(false)
+//        verify(audioView, times(1))!!.setHandsomeBritish(false)
+//    }
+//
+//    @Test
+//    fun setSpeechRate() {
+//        ttsPresenter!!.deprecatedSetSpeechRate(12f)
+//        verify(audioView, times(1))!!.setSpeechRate(12f)
+//    }
 }
