@@ -41,6 +41,11 @@ android {
             buildConfigField "String", "BASE_URL_LOCAL", System.env.LECTOR_BASE_URL_LOCAL ?: "\"$lectorUrlLocal\""
         }
     }
+    android {
+        lintOptions {
+            warningsAsErrors true
+        }
+    }
 }
 
 configurations {
