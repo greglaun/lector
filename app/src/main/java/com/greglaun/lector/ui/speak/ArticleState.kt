@@ -2,7 +2,7 @@ package com.greglaun.lector.ui.speak
 
 import com.greglaun.lector.data.cache.utteranceId
 
-val DEFAULT_ARTICLE = "MAIN_PAGE"
+const val DEFAULT_ARTICLE = "MAIN_PAGE"
 
 // todo(cleanup): Remove storage of utteranceId? It was originally here to guard against changes to
 // todo(continued): the ordering of the paragraphs. But that is probably not a concern anymore.
@@ -37,7 +37,7 @@ fun AbstractArticleState.next(): ArticleState? {
         return null
     }
     val nextIndex = currentPosition.index + 1
-    val nextUtteranceId = utteranceId(paragraphs.get(nextIndex))
+    val nextUtteranceId = utteranceId(paragraphs[nextIndex])
     return ArticleState(title, paragraphs, ArticlePosition(nextIndex, nextUtteranceId))
 }
 
@@ -58,7 +58,7 @@ fun AbstractArticleState.current(): String? {
     if (currentIndex() < 0 || currentIndex() >= paragraphs.size) {
         return null
     }
-    return paragraphs.get(currentIndex())
+    return paragraphs[currentIndex()]
 }
 
 fun AbstractArticleState.scrubTo(index: Int): ArticleState {
@@ -76,8 +76,8 @@ fun AbstractArticleState.scrubTo(positionHash: String): ArticleState {
     val matches = paragraphs.withIndex().filter{
         utteranceId(it.value) == positionHash
     }.map {it.index}
-    if (matches == null || matches.size == 0) {
+    if (matches.isEmpty()) {
         return this as ArticleState
     }
-    return this.scrubTo(matches.get(0))
+    return this.scrubTo(matches[0])
 }

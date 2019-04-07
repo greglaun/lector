@@ -3,7 +3,7 @@ package com.greglaun.lector.data
 import java.util.*
 
 class LruCallbackList<T>(val size: Int = 4) {
-    val ll = LinkedList<Pair<T, suspend (T) -> Unit>>()
+    private val ll = LinkedList<Pair<T, suspend (T) -> Unit>>()
 
     fun push(pair: Pair<T, suspend (T) -> Unit>) {
         if (ll.size >= size) {
@@ -17,7 +17,7 @@ class LruCallbackList<T>(val size: Int = 4) {
             return null
         }
         val matches = ll.filter { it.first == key}
-        if (matches == null || matches.isEmpty()) {
+        if (matches.isEmpty()) {
             return null
         }
         return matches[0].second

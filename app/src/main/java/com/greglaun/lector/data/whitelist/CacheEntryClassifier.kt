@@ -10,7 +10,7 @@ interface CacheEntryClassifier<T>: UnfinishedDownloadSource {
     suspend fun delete(element: T)
     suspend fun update(from: T, to: T)
     suspend fun getAllTemporary(): List<ArticleContext>
-    suspend fun getAllPermanent(): List<ArticleContext>
+    suspend fun getAllPermanent(): List<ArticleContext>?
     suspend fun markTemporary(element: T)
     suspend fun markPermanent(element: T)
     suspend fun isTemporary(element: T): Boolean

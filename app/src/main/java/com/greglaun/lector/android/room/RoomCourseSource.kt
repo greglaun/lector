@@ -7,11 +7,11 @@ import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.course.ThinCourseDetails
 
 class RoomCourseSource(var db: LectorDatabase) : CourseSource {
-    override suspend fun getCourses(): List<CourseContext> {
+    override suspend fun getCourses(): List<CourseContext>? {
         return db.courseContextDao().getAll()
     }
 
-    override suspend fun getArticlesForCourse(courseId: Long): List<ArticleContext> {
+    override suspend fun getArticlesForCourse(courseId: Long): List<ArticleContext>? {
         return db.courseArticleJoinDao().getArticlesWithCourseId(courseId)
     }
 
@@ -38,8 +38,8 @@ class RoomCourseSource(var db: LectorDatabase) : CourseSource {
         }
         val courseContext = db.courseContextDao().get(courseName)
         val maxOccupied = db.courseArticleJoinDao().getMaxOccupiedPosition(
-                    courseContext.id!!) ?: -1L
-        val courseArticleJoin = CourseArticleJoin(courseContext.id!!,
+                    courseContext!!.id!!) ?: -1L
+        val courseArticleJoin = CourseArticleJoin(courseContext!!.id!!,
                 articleContext.id!!, maxOccupied + 1)
         val existingEntry = db.courseArticleJoinDao().get(courseContext.id!!,
                 articleContext.id!!)

@@ -25,13 +25,13 @@ class MainPresenter(val view : MainContract.View,
         isActivityRunning = true
         handleState(store.state)
         GlobalScope.launch {
-            store.dispatch(ReadAction.StartDownloadAction())
+            store.dispatch(ReadAction.StartDownloadAction)
         }
     }
 
     override fun onDetach() {
         runBlocking {
-            store.dispatch(ReadAction.StopDownloadAction())
+            store.dispatch(ReadAction.StopDownloadAction)
         }
         isActivityRunning = false
         store.stateHandlers.remove(this)
@@ -106,7 +106,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun maybeGoToPreviousArticle() {
-        store.dispatch(UpdateAction.MaybeGoBack())
+        store.dispatch(UpdateAction.MaybeGoBack)
     }
 
     override suspend fun loadFromContext(articleContext: ArticleContext) {
@@ -152,7 +152,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onDisplayReadingList() {
-        store.dispatch(ReadAction.FetchAllPermanentAndDisplay())
+        store.dispatch(ReadAction.FetchAllPermanentAndDisplay)
     }
 
     private fun displayReadingList(articleList: List<ArticleContext>, title: String? = null) {
@@ -170,11 +170,11 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onDisplaySavedCourses() {
-        store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
+        store.dispatch(ReadAction.FetchAllCoursesAndDisplay)
     }
 
     override suspend fun onBrowseCourses() {
-        store.dispatch(ReadAction.FetchAllCoursesAndDisplay())
+        store.dispatch(ReadAction.FetchAllCoursesAndDisplay)
     }
 
 
@@ -187,7 +187,7 @@ class MainPresenter(val view : MainContract.View,
             GlobalScope.launch {
                 store.dispatch( ReadAction.LoadNewUrlAction(
                         contextToUrl(readingList[0].contextString)))
-                store.dispatch(SpeakerAction.SpeakAction())
+                store.dispatch(SpeakerAction.SpeakAction)
             }
         }
     }

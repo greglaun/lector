@@ -10,10 +10,10 @@ import androidx.room.Update
 interface CourseContextDao {
 
     @Query("SELECT * from roomcoursecontext")
-    fun getAll(): List<RoomCourseContext>
+    fun getAll(): List<RoomCourseContext>?
 
     @Query("SELECT * FROM roomcoursecontext WHERE courseName = :courseName")
-    fun get(courseName: String): RoomCourseContext
+    fun get(courseName: String): RoomCourseContext?
 
     @Query("DELETE from roomcoursecontext WHERE courseName = :courseName")
     fun delete(courseName: String)

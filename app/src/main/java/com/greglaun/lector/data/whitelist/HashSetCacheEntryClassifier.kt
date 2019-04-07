@@ -2,16 +2,15 @@ package com.greglaun.lector.data.whitelist
 
 import com.greglaun.lector.data.cache.*
 
-// A deterministic probabilistic set for testing
 class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
-    val hashMap = HashMap<String, BasicArticleContext>()
+    private val hashMap = HashMap<String, BasicArticleContext>()
 
     override suspend fun contains(element: String): Boolean {
         return hashMap.contains(element)
     }
 
     override suspend fun add(element : String): Long {
-        hashMap.put(element, BasicArticleContext.fromString(element))
+        hashMap[element] = BasicArticleContext.fromString(element)
         return 1L
     }
 
@@ -22,7 +21,7 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
     override suspend fun update(from: String, to: String) {
         if (hashMap.contains(from)) {
             hashMap.remove(from)
-            hashMap.put(to, BasicArticleContext.fromString(to))
+            hashMap[to] = BasicArticleContext.fromString(to)
         }
     }
 
@@ -37,14 +36,14 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
     }
 
     override suspend fun markTemporary(element: String) {
-        val originalEntry = hashMap.get(element)
+        val originalEntry = hashMap[element]
         originalEntry?.let {
             hashMap.put(element, originalEntry.makeTemporary())
         }
     }
 
     override suspend fun markPermanent(element: String) {
-        val originalEntry = hashMap.get(element)
+        val originalEntry = hashMap[element]
         originalEntry?.let {
             hashMap.put(element, originalEntry.makePermanent())
         }
@@ -52,7 +51,7 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
 
     override suspend fun isTemporary(element: String): Boolean {
         if (hashMap.containsKey(element)) {
-            return hashMap.get(element)!!.temporary
+            return hashMap[element]!!.temporary
         }
         return true
     }
@@ -68,11 +67,11 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
     }
 
     override suspend fun getArticleContext(context: String): ArticleContext? {
-        return hashMap.get(context)
+        return hashMap[context]
     }
 
     override suspend fun updatePosition(currentRequestContext: String, position: String) {
-        val originalEntry = hashMap.get(currentRequestContext)
+        val originalEntry = hashMap[currentRequestContext]
         originalEntry?.let {
             hashMap.put(currentRequestContext, originalEntry.updatePosition(position))
         }
@@ -88,10 +87,10 @@ class HashSetCacheEntryClassifier: CacheEntryClassifier<String> {
         return result.toList().map { it.contextString }
     }
 
-    override suspend fun markFinished(element: String) {
-        val originalEntry = hashMap.get(element)
+    override suspend fun markFinished(urlString: String) {
+        val originalEntry = hashMap[urlString]
         originalEntry?.let {
-            hashMap.put(element, originalEntry.markDownloadComplete())
+            hashMap.put(urlString, originalEntry.markDownloadComplete())
         }
     }
 

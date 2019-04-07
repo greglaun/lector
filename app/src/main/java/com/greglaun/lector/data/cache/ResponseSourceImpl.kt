@@ -80,7 +80,7 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.isTemporary(element)
     }
 
-    override suspend fun getAllPermanent(): List<ArticleContext> {
+    override suspend fun getAllPermanent(): List<ArticleContext>? {
         return cacheEntryClassifier.getAllPermanent()
     }
 

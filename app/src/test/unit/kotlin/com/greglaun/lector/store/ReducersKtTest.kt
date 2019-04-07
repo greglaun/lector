@@ -79,7 +79,7 @@ class ReducersKtTest {
         var newState = reduceUpdateArticleAction(UpdateAction.UpdateArticleAction(articleState!!),
                 State())
         newState = reduceFastForwardOne(
-                UpdateAction.FastForwardOne(), newState)
+                newState)
 
         assertEquals(newState.currentArticleScreen.articleState, articleState!!.next())
         assertEquals(newState.currentArticleScreen.currentCourse,
@@ -100,9 +100,9 @@ class ReducersKtTest {
         var newState = reduceUpdateArticleAction(UpdateAction.UpdateArticleAction(articleState!!),
                 State())
         newState = reduceFastForwardOne(
-                UpdateAction.FastForwardOne(), newState)
+                newState)
         newState = reduceRewindOne(
-                UpdateAction.RewindOne(), newState)
+                newState)
 
 
         assertEquals(newState.currentArticleScreen.articleState.currentPosition.index,
@@ -200,7 +200,6 @@ class ReducersKtTest {
     @Test
     fun testReduceSpeakAction() {
         var newState = reduceSpeakAction(
-                SpeakerAction.SpeakAction(),
                 State())
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
@@ -218,18 +217,15 @@ class ReducersKtTest {
     fun testReduceStopSpeakingAction() {
 
         var newState = reduceStopSpeakingAction(
-                SpeakerAction.StopSpeakingAction(),
                 State())
         assertEquals(newState.speakerState, SpeakerState.NOT_READY)
 
         newState = reduceSpeakAction(
-                SpeakerAction.SpeakAction(),
                 State())
 
         assertEquals(newState.speakerState, SpeakerState.SPEAKING_NEW_UTTERANCE)
 
         newState = reduceStopSpeakingAction(
-                SpeakerAction.StopSpeakingAction(),
                 State())
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
@@ -246,11 +242,9 @@ class ReducersKtTest {
     @Test
     fun testReduceArticleOverAction() {
         var newState = reduceSpeakAction(
-                SpeakerAction.SpeakAction(),
                 State())
 
         newState = reduceArticleOverAction(
-                UpdateAction.ArticleOverAction(),
                 newState)
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
@@ -289,7 +283,6 @@ class ReducersKtTest {
     @Test
     fun testReduceFetchAllPermanentAndDisplay() {
         var newState = reduceFetchAllPermanentAndDisplay(
-                ReadAction.FetchAllPermanentAndDisplay(),
                 State())
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)

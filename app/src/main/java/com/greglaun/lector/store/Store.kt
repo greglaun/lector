@@ -51,25 +51,24 @@ abstract class Store {
     }
 
     private fun reduce(action: Action, currentState: State): State {
-        val newState = when (action) {
+        return when (action) {
             is UpdateAction.NewArticleAction -> reduceNewArticleAction(action, state)
             is UpdateAction.UpdateArticleAction -> reduceUpdateArticleAction(action, state)
             is UpdateAction.UpdateNavigationAction -> reduceUpdateNavigationAction(action, state)
-            is UpdateAction.FastForwardOne -> reduceFastForwardOne(action, state)
-            is UpdateAction.RewindOne -> reduceRewindOne(action, state)
+            is UpdateAction.FastForwardOne -> reduceFastForwardOne(state)
+            is UpdateAction.RewindOne -> reduceRewindOne(state)
             is UpdateAction.UpdateCourseDetailsAction ->
                 reduceUpdateCourseDetailsAction(action, state)
-            is UpdateAction.ArticleOverAction -> reduceArticleOverAction(action, state)
+            is UpdateAction.ArticleOverAction -> reduceArticleOverAction(state)
             is UpdateAction.UpdateSpeakerStateAction -> reduceUpdateSpeakerState(action, state)
             is UpdateAction.UpdateArticleFreshnessAction ->
                 reduceUpdateArticleFreshnessState(action, state)
             is UpdateAction.UpdateReadingListAction -> reduceUpdateReadingList(action, state)
             is UpdateAction.UpdateCourseBrowseList -> reduceUpdateCourseBrowseList(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
-            is ReadAction.FetchAllPermanentAndDisplay -> reduceFetchAllPermanentAndDisplay(action,
-                    state)
-            is SpeakerAction.SpeakAction -> reduceSpeakAction(action, state)
-            is SpeakerAction.StopSpeakingAction -> reduceStopSpeakingAction(action, state)
+            is ReadAction.FetchAllPermanentAndDisplay -> reduceFetchAllPermanentAndDisplay(state)
+            is SpeakerAction.SpeakAction -> reduceSpeakAction(state)
+            is SpeakerAction.StopSpeakingAction -> reduceStopSpeakingAction(state)
             is PreferenceAction.SetHandsomeBritish -> reduceSetHandsomeBritish(action, state)
             is PreferenceAction.SetSpeechRate -> reduceSetSpeechRate(action, state)
             is PreferenceAction.SetAutoPlay -> reduceSetAutoPlay(action, state)
@@ -82,6 +81,5 @@ abstract class Store {
 //            is NavigationAction -> NavigationReducer.reduce(action, currentState)
             else -> return currentState
         }
-        return newState
     }
 }

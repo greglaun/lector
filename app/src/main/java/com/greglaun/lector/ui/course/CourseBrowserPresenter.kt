@@ -8,11 +8,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class CourseBrowserPresenter(val view: CourseBrowserContract.View,
-                             val courseDownloader: CourseDownloader,
-                             val courseSource: CourseSource)
+                             private val courseDownloader: CourseDownloader,
+                             private val courseSource: CourseSource)
     : CourseBrowserContract.Presenter {
     override val courseMetadatalist = mutableListOf<CourseMetadata>()
-    var currentDetails: ThinCourseDetails? = null
+    private var currentDetails: ThinCourseDetails? = null
 
     override fun onAttach() {}
 
@@ -24,12 +24,10 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
 
     override suspend fun beginCourseDownload() {
         courseDownloader.downloadCourseMetadata()?.let {
-            it?.let {
-                courseMetadatalist.clear()
-                courseMetadatalist.addAll(it)
-                view.onCourseListChanged()
-                view.showCourses(it)
-            }
+            courseMetadatalist.clear()
+            courseMetadatalist.addAll(it)
+            view.onCourseListChanged()
+            view.showCourses(it)
         }
     }
 
@@ -41,10 +39,8 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
 
     override suspend fun onCourseDetailSelected(courseMetadata: CourseMetadata) {
         courseDownloader.fetchCourseDetails(courseMetadata)?.let {
-            it?.let {
-                currentDetails = it
-                view.showCourseDetails(it)
-            }
+            currentDetails = it
+            view.showCourseDetails(it)
         }
     }
 
@@ -56,11 +52,9 @@ class CourseBrowserPresenter(val view: CourseBrowserContract.View,
     }
 
     override suspend fun onCoursesSaved(courseMetadata: List<CourseMetadata>) {
-            courseMetadata.forEach {
-                courseDownloader.fetchCourseDetails(it)?.also {
-                    it?.let {
-                        courseSource.addCourseDetails(it)
-                }
+            courseMetadata.forEach { metadata ->
+                courseDownloader.fetchCourseDetails(metadata)?.also {
+                    courseSource.addCourseDetails(it)
             }
         }
     }

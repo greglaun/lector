@@ -37,8 +37,8 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
                 RoomCourseSource(LectorDatabase.getInstance(applicationContext)!!))
 
         courseBrowserViewManager = GridLayoutManager(this, 2)
-        courseBrowserViewAdapter = courseBrowserAdapter(courseBrowserPresenter.courseMetadatalist)
-        { it: CourseMetadata ->
+        courseBrowserViewAdapter = CourseBrowserAdapter(courseBrowserPresenter.courseMetadatalist)
+        {
             GlobalScope.launch {
                 courseBrowserPresenter.onCourseDetailSelected(it)
             }
@@ -88,10 +88,10 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
 
     override fun showCourseDetails(courseDetails: ThinCourseDetails) {
         val detailName = findViewById<TextView>(R.id.details_name)
-        detailName.setText(courseDetails.name)
+        detailName.text = courseDetails.name
         val listView = findViewById<ListView>(R.id.article_list)
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1,
-                courseDetails.articleNames.map {it ->
+                courseDetails.articleNames.map {
                     urlToContext(it)
                 })
         listView.adapter = adapter
@@ -100,7 +100,7 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
         }
     }
 
-    fun onSaveDetailsPressed(view: View) {
+    fun onSaveDetailsPressed(@Suppress("UNUSED_PARAMETER") view: View) {
         courseBrowserPresenter.onSaveDetailsPressed()
     }
 
@@ -124,12 +124,12 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
     (Boolean) -> Unit) {
         AlertDialog.Builder(this)
                 .setMessage(message)
-                .setNegativeButton(android.R.string.no, { dialogInterface: DialogInterface, i: Int ->
+                .setNegativeButton(android.R.string.no) { _: DialogInterface, _: Int ->
                     onConfirmed(false)
-                })
-                .setPositiveButton(android.R.string.yes, { dialogInterface: DialogInterface, i: Int ->
+                }
+                .setPositiveButton(android.R.string.yes) { _: DialogInterface, _: Int ->
                     onConfirmed(true)
-                }).create().show()
+                }.create().show()
     }
 
     override fun showToast(message: String) {

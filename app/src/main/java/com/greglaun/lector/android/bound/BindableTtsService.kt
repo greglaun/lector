@@ -29,19 +29,19 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-            store?.dispatch(SpeakerAction.SpeakAction())
+            store?.dispatch(SpeakerAction.SpeakAction)
         }
     }
 
     override fun onPauseButtonPressed() {
         runBlocking {
-            store?.dispatch(SpeakerAction.StopSpeakingAction())
+            store?.dispatch(SpeakerAction.StopSpeakingAction)
         }
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         GlobalScope.launch {
-            store?.dispatch(SpeakerAction.StopSpeakingAction())
+            store?.dispatch(SpeakerAction.StopSpeakingAction)
             store?.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
         }
     }
@@ -77,10 +77,10 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
                     utteranceId(text)) {
                         if (it == utteranceId(text)) {
                             if (articleState!!.hasNext()) {
-                                store?.dispatch(UpdateAction.FastForwardOne())
+                                store?.dispatch(UpdateAction.FastForwardOne)
 
                             } else {
-                                store?.dispatch(UpdateAction.ArticleOverAction())
+                                store?.dispatch(UpdateAction.ArticleOverAction)
                             }
                         }
             }
@@ -103,7 +103,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override suspend fun onForwardOne() {
         store?.let {
-            store!!.dispatch(UpdateAction.FastForwardOne())
+            store!!.dispatch(UpdateAction.FastForwardOne)
             if (store!!.state.currentArticleScreen.articleState.hasNext()) {
                 ttsView?.stopImmediately()
             }
@@ -112,7 +112,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override suspend fun onRewindOne() {
         store?.let {
-            store!!.dispatch(UpdateAction.RewindOne())
+            store!!.dispatch(UpdateAction.RewindOne)
             if (store!!.state.currentArticleScreen.articleState.hasPrevious()) {
                 ttsView?.stopImmediately()
             }

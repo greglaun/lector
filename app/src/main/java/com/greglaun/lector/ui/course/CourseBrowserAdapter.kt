@@ -3,19 +3,18 @@ package com.greglaun.lector.ui.course
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.greglaun.lector.R
 import com.greglaun.lector.data.course.CourseMetadata
 
 
-class courseBrowserAdapter(val courseBrowser: MutableList<CourseMetadata>,
+class CourseBrowserAdapter(private val courseBrowser: MutableList<CourseMetadata>,
                            private val onItemClicked: (CourseMetadata) -> Unit) :
-        RecyclerView.Adapter<courseBrowserAdapter.CourseBrowserViewHolder>() {
+        RecyclerView.Adapter<CourseBrowserAdapter.CourseBrowserViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): courseBrowserAdapter.CourseBrowserViewHolder {
+                                    viewType: Int): CourseBrowserAdapter.CourseBrowserViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
                 R.layout.adapter_course_browse, parent, false)
         return CourseBrowserViewHolder(view)
@@ -32,10 +31,8 @@ class courseBrowserAdapter(val courseBrowser: MutableList<CourseMetadata>,
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = courseBrowser.size
 
-    inner class CourseBrowserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val view = view
+    inner class CourseBrowserViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView = view.findViewById(R.id.textView) as TextView
-        val imageView: ImageView = view.findViewById(R.id.imgView) as ImageView
     }
 
 }

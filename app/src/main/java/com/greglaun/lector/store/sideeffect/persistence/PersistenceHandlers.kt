@@ -18,7 +18,7 @@ suspend fun handleFetchCourseDetails(action: ReadAction.FetchCourseDetailsAction
     val detailsMap = courseDownloader.fetchCourseDetails(listOf(courseName))
     detailsMap?.let {
         if (detailsMap.containsKey(courseName)) {
-            val details = detailsMap.get(courseName)
+            val details = detailsMap[courseName]
             details?.let {
                 actionDispatcher(UpdateAction.UpdateCourseDetailsAction(details))
             }
@@ -49,7 +49,7 @@ suspend fun handleArticleOver(state: State,
                               actionDispatcher: suspend (Action) -> Unit) {
     if (state.preferences.autoPlay) {
         autoPlayNext(state, responseSource, courseSource, articleStateSource, actionDispatcher)
-        actionDispatcher(SpeakerAction.SpeakAction())
+        actionDispatcher(SpeakerAction.SpeakAction)
     }
 
     if (state.preferences.autoDelete) {
@@ -64,19 +64,19 @@ private suspend fun autoPlayNext(state: State, responseSource: ResponseSource,
     val nextArticle: ArticleContext?
     val currentArticle = state.currentArticleScreen.articleState
     val currentCourse = state.currentArticleScreen.currentCourse
-    if (currentCourse == EmptyCourseContext()) {// Not in a course
-        nextArticle = responseSource.getNextArticle(currentArticle.title)
+    nextArticle = if (currentCourse == EmptyCourseContext()) {  // Not in a course
+        responseSource.getNextArticle(currentArticle.title)
     } else {
-        nextArticle = courseSource.getNextInCourse(
+        courseSource.getNextInCourse(
                 currentCourse.courseName, currentArticle.title)
     }
     if (nextArticle == null) {
-        actionDispatcher(SpeakerAction.StopSpeakingAction())
+        actionDispatcher(SpeakerAction.StopSpeakingAction)
         return
     }
     val nextArticleState = articleStateSource.getArticle(nextArticle)
     if (nextArticleState == null) {
-        actionDispatcher(SpeakerAction.StopSpeakingAction())
+        actionDispatcher(SpeakerAction.StopSpeakingAction)
         return
     }
     actionDispatcher.invoke(UpdateAction.NewArticleAction(nextArticleState))
