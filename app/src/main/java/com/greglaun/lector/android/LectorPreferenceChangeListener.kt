@@ -6,17 +6,17 @@ import android.preference.PreferenceManager
 import com.greglaun.lector.ui.main.MainContract
 import com.greglaun.lector.ui.speak.TTSContract
 
-class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter,
-                                     val ttsPresenter: TTSContract.Presenter):
-        SharedPreferences.OnSharedPreferenceChangeListener, LectorPreferenceManager {
-    val AUTOPLAY_DEFAULT = true
-    val AUTODELETE_DEFAULT = true
+const val AUTOPLAY_DEFAULT = true
+const val AUTODELETE_DEFAULT = true
 
+class LectorPreferenceChangeListener(private val mainPresenter: MainContract.Presenter,
+                                     private val ttsPresenter: TTSContract.Presenter):
+        SharedPreferences.OnSharedPreferenceChangeListener, LectorPreferenceManager {
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key != null && sharedPreferences != null) {
             when(key) {
                 "british_voice" -> {
-                    sharedPreferences.getBoolean(key, false)?.let {
+                    sharedPreferences.getBoolean(key, false).let {
                         ttsPresenter.setHandsomeBritish(it)
                     }
                 }
@@ -26,12 +26,12 @@ class LectorPreferenceChangeListener(val mainPresenter: MainContract.Presenter,
                     }
                 }
                 "auto_play" -> {
-                    sharedPreferences.getBoolean(key, false)?.let {
+                    sharedPreferences.getBoolean(key, false).let {
                         mainPresenter.setAutoPlay(it)
                     }
                 }
                 "auto_delete" -> {
-                    sharedPreferences.getBoolean(key, false)?.let {
+                    sharedPreferences.getBoolean(key, false).let {
                         mainPresenter.setAutoDelete(it)
                     }
                 }

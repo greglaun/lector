@@ -11,10 +11,10 @@ open class NetworkCache(val httpClient : OkHttpClient)
     : ComposableCache<Request, Response> {
 
     override suspend fun get(key: Request): Response? {
-        try {
-            return httpClient.newCall(key).execute()
+        return try {
+            httpClient.newCall(key).execute()
         } catch (e: Exception) {
-            return null
+            null
         }
     }
 

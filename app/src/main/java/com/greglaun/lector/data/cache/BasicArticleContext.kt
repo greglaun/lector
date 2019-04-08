@@ -46,7 +46,7 @@ fun BasicArticleContext.makePermanent(): BasicArticleContext {
 }
 
 fun BasicArticleContext.markDownloadComplete(): BasicArticleContext {
-    return BasicArticleContext(this.id, this.contextString, position, false,
-            true)
+    return BasicArticleContext(this.id, this.contextString, position, temporary = false,
+            downloadComplete = true)
 }
 

@@ -23,8 +23,8 @@ interface ComposableCache<Key : Any, Value : Any> {
             }
 
             override suspend fun set(key: Key, value: Value) {
-                    listOf(this@ComposableCache.set(key, value),
-                            b.set(key, value)).forEach { it }
+                this@ComposableCache.set(key, value)
+                b.set(key, value)
             }
         }
     }

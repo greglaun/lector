@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.utteranceId
 import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.*
@@ -22,26 +21,26 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
     // todo(error_handling): Remove ugly null assertions in this file
     override fun attach(ttsView: TTSContract.AudioView?,
                         store: Store) {
-        store?.stateHandlers?.add(this)
+        store.stateHandlers.add(this)
         this.ttsView = ttsView
         this.store = store
     }
 
     override fun onPlayButtonPressed() {
         GlobalScope.launch {
-            store?.dispatch(SpeakerAction.SpeakAction())
+            store?.dispatch(SpeakerAction.SpeakAction)
         }
     }
 
     override fun onPauseButtonPressed() {
         runBlocking {
-            store?.dispatch(SpeakerAction.StopSpeakingAction())
+            store?.dispatch(SpeakerAction.StopSpeakingAction)
         }
     }
 
     override fun setHandsomeBritish(shouldBeBritish: Boolean) {
         GlobalScope.launch {
-            store?.dispatch(SpeakerAction.StopSpeakingAction())
+            store?.dispatch(SpeakerAction.StopSpeakingAction)
             store?.dispatch(PreferenceAction.SetHandsomeBritish(shouldBeBritish))
         }
     }
@@ -76,11 +75,11 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
             ttsView?.speak(cleanUtterance(text),
                     utteranceId(text)) {
                         if (it == utteranceId(text)) {
-                            if (articleState!!.hasNext()) {
-                                store?.dispatch(UpdateAction.FastForwardOne())
+                            if (articleState.hasNext()) {
+                                store?.dispatch(UpdateAction.FastForwardOne)
 
                             } else {
-                                store?.dispatch(UpdateAction.ArticleOverAction())
+                                store?.dispatch(UpdateAction.ArticleOverAction)
                             }
                         }
             }
@@ -88,7 +87,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
         }
    }
 
-    fun handlePreferenceChanged(state: State) {
+    private fun handlePreferenceChanged(state: State) {
         ttsView?.setHandsomeBritish(state.preferences.isBritish)
         if (state.preferences.isSlow) {
             ttsView?.setSpeechRate(1.0f)
@@ -103,7 +102,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override suspend fun onForwardOne() {
         store?.let {
-            store!!.dispatch(UpdateAction.FastForwardOne())
+            store!!.dispatch(UpdateAction.FastForwardOne)
             if (store!!.state.currentArticleScreen.articleState.hasNext()) {
                 ttsView?.stopImmediately()
             }
@@ -112,7 +111,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override suspend fun onRewindOne() {
         store?.let {
-            store!!.dispatch(UpdateAction.RewindOne())
+            store!!.dispatch(UpdateAction.RewindOne)
             if (store!!.state.currentArticleScreen.articleState.hasPrevious()) {
                 ttsView?.stopImmediately()
             }
@@ -125,10 +124,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
      */
     inner class LocalBinder : Binder() {
         // Return this instance of LocalService so clients can call public methods
-        fun getService(responseSource: ResponseSource): BindableTtsService {
-            if (responseSource == null) {
-                throw RuntimeException("Must have a valid responseSource.")
-            }
+        fun getService(): BindableTtsService {
             delegateStateMachine = TtsActorStateMachine()
             return this@BindableTtsService
         }
@@ -136,14 +132,6 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override fun onBind(intent: Intent): IBinder {
         return binder
-    }
-
-    private fun updatePosition(): AbstractArticleState {
-        if (store?.state?.currentArticleScreen?.articleState!!.hasNext()) {
-            return store?.state?.currentArticleScreen!!.articleState?.next()!!
-        } else {
-            return store?.state?.currentArticleScreen!!.articleState
-        }
     }
 }
 

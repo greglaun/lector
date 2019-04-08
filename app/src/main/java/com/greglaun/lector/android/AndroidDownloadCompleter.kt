@@ -4,10 +4,10 @@ import com.greglaun.lector.data.net.DownloadCompleter
 import com.greglaun.lector.data.net.DownloadTool
 import com.greglaun.lector.data.net.InternetChecker
 
-class AndroidDownloadCompleter(val internetChecker: InternetChecker,
-                               val downloadTool: DownloadTool)
+class AndroidDownloadCompleter(private val internetChecker: InternetChecker,
+                               private val downloadTool: DownloadTool)
     : DownloadCompleter {
-    val articlesToDownload = mutableSetOf<String>()
+    private val articlesToDownload = mutableSetOf<String>()
 
     override fun addUrlsFOrDownload(urlStrings: List<String>) {
         urlStrings.forEach {

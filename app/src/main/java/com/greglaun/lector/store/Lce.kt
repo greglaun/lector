@@ -11,7 +11,7 @@ sealed class Lce<out T> {
     }
 
     data class Error(val message: String) : Lce<Nothing>() {
-        constructor(t: Throwable) : this(t.message ?: "")
+//        constructor(t: Throwable) : this(t.message ?: "")
 
         override fun <R> map(f: (Nothing) -> R): Lce<R> = this
     }

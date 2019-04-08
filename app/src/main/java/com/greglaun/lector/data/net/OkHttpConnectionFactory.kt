@@ -5,7 +5,7 @@ import okhttp3.OkHttpClient
 import java.io.File
 
 object OkHttpConnectionFactory {
-    private val CACHE_SIZE = (64 * 1024 * 1024).toLong()
+    private const val CACHE_SIZE = (64 * 1024 * 1024).toLong()
 
     fun createClient(cacheDirectory: File,
                      cacheSize : Long = CACHE_SIZE): OkHttpClient {

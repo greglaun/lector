@@ -4,7 +4,10 @@ import com.greglaun.lector.data.cache.utteranceId
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
-val displayStyleRegex = Regex("\\{(\\\\displaystyle.*?)\\}")
+const val CLOSING_BRACE = "\\}"  // Work around lint warning about redundant escape.
+const val REGEX_PATTERN = "\\{(\\\\displaystyle.*?)$CLOSING_BRACE"
+val displayStyleRegex = Regex(REGEX_PATTERN)
+
 
 fun removeUnwanted(doc: Document): Document {
     // TODO: Pull these out as XML strings.
@@ -29,7 +32,7 @@ fun articleStateFromHtml(html: String): ArticleState {
     doc = removeUnwanted(doc)
     val title = retrieveTitle(doc.title())
     // todo(html): Also get lists and block quotes
-    val paragraphs = doc!!.select("p").map { it ->
+    val paragraphs = doc.select("p").map {
         it.text()!!
     }
     return ArticleState(title, paragraphs)
@@ -44,7 +47,7 @@ fun fastForward(inState: ArticleState, position: String): ArticleState {
     if (position == utteranceId(returnArticle.current()!!)) {
         return returnArticle
     }
-    while (returnArticle.hasNext() && position != utteranceId(returnArticle!!.current()!!)) {
+    while (returnArticle.hasNext() && position != utteranceId(returnArticle.current()!!)) {
         returnArticle = returnArticle.next()!!
     }
     if (position != utteranceId(returnArticle.current()!!)) {

@@ -7,18 +7,18 @@ import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 class DownloadCompletionScheduler(
-        val downloadCompleter: DownloadCompleter,
-        val unfinishedDownloadSource: UnfinishedDownloadSource) {
+        private val downloadCompleter: DownloadCompleter,
+        private val unfinishedDownloadSource: UnfinishedDownloadSource,
+        var isRunning: Boolean = false) {
 
-    var fixedRateTimer: Timer? = null
-    var isRunning: Boolean = false
+    private var fixedRateTimer: Timer? = null
 
     fun startDownloads() {
         fixedRateTimer = fixedRateTimer(name = "download-finish-timer",
                 initialDelay = 100, period = 15 * 1000, daemon = true) {
             runBlocking {
                 downloadCompleter.addUrlsFOrDownload(unfinishedDownloadSource.getUnfinished())
-                downloadCompleter.downloadNextUrl { it ->
+                downloadCompleter.downloadNextUrl {
                     GlobalScope.launch {
                         unfinishedDownloadSource.markFinished(it)
                     }

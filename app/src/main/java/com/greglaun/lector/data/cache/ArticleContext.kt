@@ -1,6 +1,6 @@
 package com.greglaun.lector.data.cache
 
-val POSITION_BEGINNING: String = ""
+const val POSITION_BEGINNING: String = ""
 interface ArticleContext {
     val id: Long?
     val contextString: String

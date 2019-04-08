@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream
 
 
 class ResponseSerializerKtTest {
-    val testUrlString = "https://en.wikipedia.org/robots.txt"
+    private val testUrlString = "https://en.wikipedia.org/robots.txt"
 
     @Test
     fun serializeDeserialize() {

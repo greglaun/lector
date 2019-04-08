@@ -9,7 +9,7 @@ import java.io.File
 // A composition of caches that first looks for saved articles, and if that fails, calls out to the
 // network. Also uses the DiskLruCache from OkHttp
 class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, String>,
-                         val cacheEntryClassifier: CacheEntryClassifier<String>):
+                         private val cacheEntryClassifier: CacheEntryClassifier<String>):
         ResponseSource {
     companion object {
         fun createResponseSource(savedArticleCache : SavedArticleCache<Request, Response, String>,
@@ -52,12 +52,12 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         cacheEntryClassifier.update(from, to)
     }
 
-    override suspend fun markTemporary(keyContext: String) {
-        return cacheEntryClassifier.markTemporary(keyContext)
+    override suspend fun markTemporary(element: String) {
+        return cacheEntryClassifier.markTemporary(element)
     }
 
-    override suspend fun markPermanent(keyContext: String) {
-        return cacheEntryClassifier.markPermanent(keyContext)
+    override suspend fun markPermanent(element: String) {
+        return cacheEntryClassifier.markPermanent(element)
     }
 
     override suspend fun garbageCollectTemporary() {
@@ -72,7 +72,7 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return articleCache.garbageCollectTemporary(classifier)
     }
 
-    override suspend fun getAllTemporary(): List<ArticleContext> {
+    override suspend fun getAllTemporary(): List<ArticleContext>? {
         return cacheEntryClassifier.getAllTemporary()
     }
 
@@ -80,7 +80,7 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.isTemporary(element)
     }
 
-    override suspend fun getAllPermanent(): List<ArticleContext> {
+    override suspend fun getAllPermanent(): List<ArticleContext>? {
         return cacheEntryClassifier.getAllPermanent()
     }
 
@@ -88,16 +88,16 @@ class ResponseSourceImpl(val articleCache: ContextAwareCache<Request, Response, 
         return cacheEntryClassifier.getArticleContext(context)
     }
 
-    override suspend fun updatePosition(context: String, position: String) {
-        return cacheEntryClassifier.updatePosition(context, position)
+    override suspend fun updatePosition(currentRequestContext: String, position: String) {
+        return cacheEntryClassifier.updatePosition(currentRequestContext, position)
     }
 
     override suspend fun getUnfinished(): List<String> {
         return cacheEntryClassifier.getUnfinished()
     }
 
-    override suspend fun markFinished(element: String) {
-        return cacheEntryClassifier.markFinished(element)
+    override suspend fun markFinished(urlString: String) {
+        return cacheEntryClassifier.markFinished(urlString)
     }
 
     override suspend fun getNextArticle(context: String): ArticleContext? {

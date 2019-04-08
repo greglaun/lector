@@ -14,8 +14,8 @@ import java.io.File
 class SavedArticleCacheTest {
 
     companion object {
-        val dogUrlString = "https://www.wikipedia.org/wiki/Dog"
-        val catUrlString = "https://www.wikipedia.org/wiki/Cat"
+        const val dogUrlString = "https://www.wikipedia.org/wiki/Dog"
+        const val catUrlString = "https://www.wikipedia.org/wiki/Cat"
 
         val savedArticleCache = HashMapSavedArticleCache()
         val testDir = File("testDir")
@@ -35,7 +35,7 @@ class SavedArticleCacheTest {
         val request = Request.Builder()
                 .url(dogUrlString)
                 .build()
-        var networkResponse : Response? = null
+        var networkResponse: Response?
         var cachedResponse : Response? = null
 
         // Cache saved article cache should be empty

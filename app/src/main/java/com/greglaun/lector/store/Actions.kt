@@ -20,26 +20,28 @@ sealed class UpdateAction: Action() {
             val readingListLce: Lce<List<ArticleContext>>):
             UpdateAction()
     data class UpdateCourseBrowseList(val courseListLce: Lce<List<CourseContext>>): UpdateAction()
-    data class UpdateArticlesForCourse(val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()
-    class MaybeGoBack: UpdateAction()
-    class FastForwardOne: UpdateAction()
-    class RewindOne: UpdateAction()
-    class ArticleOverAction: UpdateAction()
+    data class UpdateArticlesForCourse(
+            val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()
+
+    object MaybeGoBack : UpdateAction()
+    object FastForwardOne : UpdateAction()
+    object RewindOne : UpdateAction()
+    object ArticleOverAction : UpdateAction()
 }
 
 sealed class SpeakerAction: Action() {
-    class StopSpeakingAction: SpeakerAction()
-    class SpeakAction: SpeakerAction()
+    object StopSpeakingAction : SpeakerAction()
+    object SpeakAction : SpeakerAction()
 }
 
 sealed class ReadAction: Action() {
     data class FetchCourseDetailsAction(val courseContext: CourseContext) : ReadAction()
-    class StartDownloadAction: ReadAction()
-    class StopDownloadAction: ReadAction()
+    object StartDownloadAction : ReadAction()
+    object StopDownloadAction : ReadAction()
     data class LoadNewUrlAction(val newUrl: String, val addToHistory: Boolean = true): ReadAction()
-    class FetchAllPermanentAndDisplay : ReadAction()
+    object FetchAllPermanentAndDisplay : ReadAction()
     data class FetchArticlesForCourseAndDisplay(var courseContext: CourseContext): ReadAction()
-    class FetchAllCoursesAndDisplay: ReadAction()
+    object FetchAllCoursesAndDisplay : ReadAction()
 }
 
 sealed class WriteAction: Action() {

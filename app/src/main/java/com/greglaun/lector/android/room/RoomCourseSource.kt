@@ -7,24 +7,18 @@ import com.greglaun.lector.data.course.CourseSource
 import com.greglaun.lector.data.course.ThinCourseDetails
 
 class RoomCourseSource(var db: LectorDatabase) : CourseSource {
-    override suspend fun getCourses(): List<CourseContext> {
+    override suspend fun getCourses(): List<CourseContext>? {
         return db.courseContextDao().getAll()
     }
 
-    override suspend fun getArticlesForCourse(courseId: Long): List<ArticleContext> {
+    override suspend fun getArticlesForCourse(courseId: Long): List<ArticleContext>? {
         return db.courseArticleJoinDao().getArticlesWithCourseId(courseId)
     }
 
     override suspend fun getNextInCourse(courseName: String,
                                          articleName: String): ArticleContext? {
-        val courseContext = db.courseContextDao().get(courseName)
-        if (courseContext == null) {
-            return null
-        }
-        val articleContext = db.articleContextDao().get(articleName)
-        if (articleContext == null) {
-            return null
-        }
+        val courseContext = db.courseContextDao().get(courseName) ?: return null
+        val articleContext = db.articleContextDao().get(articleName) ?: return null
         return db.courseArticleJoinDao().getNextInCourse(courseContext.id!!, articleContext.id!!)
     }
 
@@ -38,7 +32,7 @@ class RoomCourseSource(var db: LectorDatabase) : CourseSource {
         }
         val courseContext = db.courseContextDao().get(courseName)
         val maxOccupied = db.courseArticleJoinDao().getMaxOccupiedPosition(
-                    courseContext.id!!) ?: -1L
+                    courseContext!!.id!!) ?: -1L
         val courseArticleJoin = CourseArticleJoin(courseContext.id!!,
                 articleContext.id!!, maxOccupied + 1)
         val existingEntry = db.courseArticleJoinDao().get(courseContext.id!!,
@@ -54,13 +48,12 @@ class RoomCourseSource(var db: LectorDatabase) : CourseSource {
 
     override suspend fun add(courseContext: CourseContext): Long {
         val existingEntry = db.courseContextDao().get(courseContext.courseName)
-        if (existingEntry == null) {
+        return if (existingEntry == null) {
             val roomCourse = RoomCourseContext(null, courseName = courseContext.courseName,
                     position = courseContext.position)
-            val newId = db.courseContextDao().insert(roomCourse)
-            return newId
+            db.courseContextDao().insert(roomCourse)
         } else {
-            return existingEntry.id!!
+            existingEntry.id!!
         }
     }
 

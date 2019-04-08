@@ -1,5 +1,6 @@
 package com.greglaun.lector.ui.main
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.*
 import android.media.AudioManager
@@ -25,8 +26,6 @@ import com.greglaun.lector.android.*
 import com.greglaun.lector.android.bound.BindableTtsService
 import com.greglaun.lector.android.webview.WikiWebViewClient
 import com.greglaun.lector.data.LruCallbackList
-import com.greglaun.lector.data.cache.ArticleContext
-import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.store.LECTOR_UNIVERSE
 import com.greglaun.lector.store.Navigation
 import com.greglaun.lector.store.UpdateAction
@@ -38,7 +37,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), MainContract.View {
-    val TAG: String = MainActivity::class.java.simpleName
+    private val tag: String = MainActivity::class.java.simpleName
     private lateinit var webView: WebView
     private lateinit var downloaderWebView: WebView
 
@@ -53,16 +52,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var courseListViewManager: RecyclerView.LayoutManager
 
     private val onLoadedCallbacks = LruCallbackList<String>()
-    lateinit var mainPresenter: MainContract.Presenter
+    private lateinit var mainPresenter: MainContract.Presenter
     var ttsPresenter: TTSContract.Presenter? = null
 
-    var playMenuItem : MenuItem? = null
-    var pauseMenuItem : MenuItem? = null
+    private lateinit var playMenuItem : MenuItem
+    private lateinit var pauseMenuItem : MenuItem
 
     private val intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
     private val noisyAudioStreamReceiver = BecomingNoisyReceiver()
 
-    private lateinit var bindableTtsService: BindableTtsService
+    private var bindableTtsService: BindableTtsService? = null
     private var bindableTtsServiceIsBound: Boolean = false
 
     private var sharedPreferenceListener: LectorPreferenceChangeListener? = null
@@ -79,7 +78,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         mainPresenter = MainPresenter(this, LectorApplication.AppStore)
         readingListView = findViewById(R.id.ll_reading_list)
 
-        webView = findViewById(R.id.webview) as WebView
+        webView = findViewById(R.id.webview)
         webView.webViewClient = WikiWebViewClient(LectorApplication.AppStore,
                 (application as LectorApplication).responseSource(), {
             val intent = Intent(Intent.ACTION_VIEW, it.url)
@@ -97,7 +96,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
         })
 
-        downloaderWebView = findViewById(R.id.downloader_webview) as WebView
+        downloaderWebView = findViewById(R.id.downloader_webview)
         (application as LectorApplication).addDownloadCompletionSideEffect(
                 WebviewDownloadTool(downloaderWebView, LectorApplication.AppStore,
                         (application as LectorApplication).responseSource(), this))
@@ -108,13 +107,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         setUpReadingListRecycler(mainPresenter as MainPresenter)
         setUpCourseListRecycler(mainPresenter as MainPresenter)
 
+        onCreateSetupWebview()
+
+        registerReceiver(noisyAudioStreamReceiver, intentFilter)
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun onCreateSetupWebview() {
         webView.settings.javaScriptEnabled = true
         webView.loadUrl("https://en.m.wikipedia.org/wiki/Main_Page")
         Intent(this, BindableTtsService::class.java).also { intent ->
             bindService(intent, bindableTtsConnection, Context.BIND_AUTO_CREATE)
         }
-
-        registerReceiver(noisyAudioStreamReceiver, intentFilter)
     }
 
     override fun onDestroy() {
@@ -162,8 +166,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as BindableTtsService.LocalBinder
-            bindableTtsService = binder.getService(
-                    (application as LectorApplication).responseSource())
+            bindableTtsService = binder.getService()
             bindableTtsServiceIsBound = true
             checkTts()
         }
@@ -195,7 +198,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     private fun onBadTts() {
-        Log.d(TAG, "Null Tts")
+        Log.d(tag, "Null Tts")
     }
 
     /*
@@ -221,11 +224,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
      */
 
     private fun setUpReadingListRecycler(mainPresenter: MainPresenter) {
-        readingListViewAdapter = ReadingListAdapter(mainPresenter.readingList, { it: ArticleContext ->
+        readingListViewAdapter = ReadingListAdapter(mainPresenter.readingList, {
             GlobalScope.launch {
                 mainPresenter.loadFromContext(it)
             }
-        }, { it: ArticleContext ->
+        }, {
             mainPresenter.deleteRequested(it)
         }
         )
@@ -238,11 +241,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     private fun setUpCourseListRecycler(mainPresenter: MainPresenter) {
-        courseListViewAdapter = CourseListAdapter(mainPresenter.courseList, { it: CourseContext ->
+        courseListViewAdapter = CourseListAdapter(mainPresenter.courseList, {
             GlobalScope.launch {
                 mainPresenter.courseDetailsRequested(it)
             }
-        }, { it: CourseContext ->
+        }, {
             mainPresenter.deleteRequested(it)
         }
         )
@@ -314,7 +317,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.action_menu, menu)
-        playMenuItem = menu.findItem(R.id.action_play)
+        this.playMenuItem = menu.findItem(R.id.action_play)
         pauseMenuItem = menu.findItem(R.id.action_pause)
         return super.onCreateOptionsMenu(menu)
     }
@@ -438,7 +441,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    fun handleOnLoadCallbacks(urlString: String?) {
+    private fun handleOnLoadCallbacks(urlString: String?) {
         urlString?.also {
             val callback = onLoadedCallbacks.get(urlString)
             GlobalScope.launch {
@@ -453,15 +456,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun enablePlayButton() {
         runOnUiThread {
-            playMenuItem?.setVisible(true) // show play button
-            pauseMenuItem?.setVisible(false) // hide the pause button
+            playMenuItem.isVisible = true // show play button
+            pauseMenuItem.isVisible = false // hide the pause button
         }
     }
 
     override fun enablePauseButton() {
         runOnUiThread {
-            playMenuItem?.setVisible(false) // hide play button
-            pauseMenuItem?.setVisible(true) // show the pause button
+            playMenuItem.isVisible = false // hide play button
+            pauseMenuItem.isVisible = true // show the pause button
         }
     }
 
@@ -477,7 +480,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
-    fun onPlayAllPressed(view: View) {
+    fun onPlayAllPressed(@Suppress("UNUSED_PARAMETER") view: View) {
         runOnUiThread {
             var title = LECTOR_UNIVERSE
             val viewText = findViewById<TextView>(R.id.reading_list_title).text
@@ -493,16 +496,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
      * LectorView functions
      */
 
-    override fun confirmMessage(message: String, yesButton: String, noButton: String, onConfirmed: (Boolean) -> Unit) {
-        AlertDialog.Builder(this)
-                .setMessage(message)
-                .setNegativeButton(android.R.string.no, { dialogInterface: DialogInterface, i: Int ->
-                    onConfirmed(false)
-                })
-                .setPositiveButton(android.R.string.yes, { dialogInterface: DialogInterface, i: Int ->
-                    onConfirmed(true)
-                }).create().show()
-    }
+    override fun confirmMessage(message: String, yesButton: String,
+                                noButton: String, onConfirmed: (Boolean) -> Unit) =
+            AlertDialog.Builder(this)
+                    .setMessage(message)
+                    .setNegativeButton(android.R.string.no) { _: DialogInterface, _: Int ->
+                        onConfirmed(false)
+                    }
+                    .setPositiveButton(android.R.string.yes) { _: DialogInterface, _: Int ->
+                        onConfirmed(true)
+                    }.create().show()
 
     override fun confirmMessage(resourceId: Int, yesButton: Int, noButton: String, onConfirmed: (Boolean) -> Unit) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

@@ -32,7 +32,7 @@ fun reduceUpdateNavigationAction(action: UpdateAction.UpdateNavigationAction,
     return currentState.updateNavigation(action.navigation)
 }
 
-fun reduceFastForwardOne(action: UpdateAction.FastForwardOne, currentState: State): State {
+fun reduceFastForwardOne(currentState: State): State {
     val articleState = currentState.currentArticleScreen.articleState
     if (articleState.hasNext()) {
         return currentState.updateArticleScreen(CurrentArticleScreen(
@@ -43,7 +43,7 @@ fun reduceFastForwardOne(action: UpdateAction.FastForwardOne, currentState: Stat
     return currentState
 }
 
-fun reduceRewindOne(action: UpdateAction.RewindOne, currentState: State): State {
+fun reduceRewindOne(currentState: State): State {
     val articleState = currentState.currentArticleScreen.articleState
     if (articleState.hasPrevious()) {
         return currentState.updateArticleScreen(CurrentArticleScreen(
@@ -60,7 +60,7 @@ fun reduceUpdateCourseDetailsAction(action: UpdateAction.UpdateCourseDetailsActi
             // We have details for the proper list
         currentState.updateReadingListScreen(
                 ReadingListScreen(currentState.readingListScreen.currentReadingList,
-                        Lce.Success(action.courseDetails.articleNames.map { it ->
+                        Lce.Success(action.courseDetails.articleNames.map {
                             BasicArticleContext.fromString(it)
                         })
                 )
@@ -82,20 +82,20 @@ fun reduceUpdateSpeakerState(action: UpdateAction.UpdateSpeakerStateAction,
     return currentState.updateSpeakerState(action.speakerState)
 }
 
-fun reduceStopSpeakingAction(action: Action, currentState: State): State {
-    when (currentState.speakerState) {
-        SpeakerState.SPEAKING -> return currentState.updateSpeakerState(SpeakerState.READY)
-        SpeakerState.SPEAKING_NEW_UTTERANCE -> return currentState.updateSpeakerState(SpeakerState.READY)
-        else -> return currentState // READY -> READY, NOT_READY -> NOT_READY
+fun reduceStopSpeakingAction(currentState: State): State {
+    return when (currentState.speakerState) {
+        SpeakerState.SPEAKING -> currentState.updateSpeakerState(SpeakerState.READY)
+        SpeakerState.SPEAKING_NEW_UTTERANCE -> currentState.updateSpeakerState(SpeakerState.READY)
+        else -> currentState // READY -> READY, NOT_READY -> NOT_READY
     }
 }
 
-fun reduceSpeakAction(action: SpeakerAction.SpeakAction, currentState: State): State {
+fun reduceSpeakAction(currentState: State): State {
     return currentState.updateSpeakerState(SpeakerState.SPEAKING_NEW_UTTERANCE)
 }
 
-fun reduceArticleOverAction(action: UpdateAction.ArticleOverAction, currentState: State): State {
-    return reduceStopSpeakingAction(action, currentState)
+fun reduceArticleOverAction(currentState: State): State {
+    return reduceStopSpeakingAction(currentState)
 }
 
 fun reduceUpdateArticleFreshnessState(action: UpdateAction.UpdateArticleFreshnessAction,
@@ -110,7 +110,7 @@ fun reduceUpdateArticleFreshnessState(action: UpdateAction.UpdateArticleFreshnes
     return currentState
 }
 
-fun reduceFetchAllPermanentAndDisplay(action: ReadAction.FetchAllPermanentAndDisplay, state: State): State {
+fun reduceFetchAllPermanentAndDisplay(state: State): State {
     val newState = state.updateReadingListScreen(ReadingListScreen(
             articles = Lce.Loading))
     return newState.updateNavigation(Navigation.MY_READING_LIST)

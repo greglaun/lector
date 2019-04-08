@@ -21,13 +21,13 @@ class WikiWebViewClient(val store: Store,
         WebViewClient() {
 
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-        if (request.url.authority.endsWith("wikipedia.org")) {
+        if (request.url.authority!!.endsWith("wikipedia.org")) {
             GlobalScope.launch {
                 store.dispatch(ReadAction.LoadNewUrlAction(request.url.toString()))
             }
             return true
         }
-        if (request.url.authority.endsWith("wikimedia.org")) {
+        if (request.url.authority!!.endsWith("wikimedia.org")) {
             return false
         }
         return onNonWikiUrl(request)
@@ -35,13 +35,13 @@ class WikiWebViewClient(val store: Store,
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest):
             WebResourceResponse? {
-        if (request.url.authority.endsWith("wikipedia.org")) {
+        if (request.url.authority!!.endsWith("wikipedia.org")) {
             return runBlocking {
                 val response = onRequest(request.url.toString())
                 if (response == null) {
                     null
                 } else {
-                    okHttpToWebView(response!!)
+                    okHttpToWebView(response)
                 }
             }
         }
@@ -57,6 +57,6 @@ class WikiWebViewClient(val store: Store,
         val currentContext = store.state.currentArticleScreen.articleState.title
         return responseSource.getWithContext(Request.Builder()
                 .url(url)
-                .build(), currentContext!!)
+                .build(), currentContext)
     }
 }

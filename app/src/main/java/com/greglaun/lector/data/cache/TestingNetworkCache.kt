@@ -11,18 +11,14 @@ class TestingNetworkCache(httpClient: OkHttpClient) : NetworkCache(httpClient) {
         if (disableNetwork) {
             return null
         }
-        try {
-            return httpClient.newCall(key).execute()
+        return try {
+            httpClient.newCall(key).execute()
         } catch (e: Exception) {
-            return null
+            null
         }
     }
 
     override suspend fun set(key: Request, value: Response) {
         // Do nothing
-    }
-
-    fun disableNetwork(shouldDisable: Boolean) {
-        disableNetwork = shouldDisable
     }
 }

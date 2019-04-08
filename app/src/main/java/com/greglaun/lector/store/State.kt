@@ -5,10 +5,9 @@ import com.greglaun.lector.data.course.CourseContext
 import com.greglaun.lector.data.course.EmptyCourseContext
 import com.greglaun.lector.ui.speak.AbstractArticleState
 import com.greglaun.lector.ui.speak.EmptyArticleState
-import java.util.*
 
-val DEFAULT_READING_LIST = "All Articles"
-val LECTOR_UNIVERSE = ""
+const val DEFAULT_READING_LIST = "All Articles"
+const val LECTOR_UNIVERSE = ""
 
 enum class Navigation {
     CURRENT_ARTICLE,
@@ -97,16 +96,16 @@ fun State.updateSpeakerState(speakerState: SpeakerState): State {
 }
 
 fun stripNew(speakerState: SpeakerState): SpeakerState {
-    when (speakerState) {
-        SpeakerState.SPEAKING_NEW_UTTERANCE -> return SpeakerState.SPEAKING
-        else -> return speakerState
+    return when (speakerState) {
+        SpeakerState.SPEAKING_NEW_UTTERANCE -> SpeakerState.SPEAKING
+        else -> speakerState
     }
 }
 
 fun maybeNew(speakerState: SpeakerState): SpeakerState {
-    when (speakerState) {
-        SpeakerState.SPEAKING -> return SpeakerState.SPEAKING_NEW_UTTERANCE
-        else -> return speakerState
+    return when (speakerState) {
+        SpeakerState.SPEAKING -> SpeakerState.SPEAKING_NEW_UTTERANCE
+        else -> speakerState
     }
 }
 
