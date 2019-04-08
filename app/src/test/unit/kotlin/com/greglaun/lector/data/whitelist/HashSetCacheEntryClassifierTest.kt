@@ -7,8 +7,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HashSetCacheEntryClassifierTest {
-    val classifier = HashSetCacheEntryClassifier()
-    val testString = "Potato"
+    private val classifier = HashSetCacheEntryClassifier()
+    private val testString = "Potato"
 
     @Test
     fun notContains() {

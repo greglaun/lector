@@ -8,26 +8,25 @@ import com.greglaun.lector.data.cache.contextToUrl
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.net.DownloadTool
 import com.greglaun.lector.store.Store
-import com.greglaun.lector.ui.main.MainContract
 
-class WebviewDownloadTool(val webView: WebView, store: Store,
+class WebviewDownloadTool(private val webView: WebView, store: Store,
                           responseSource: ResponseSource,
-                          val activity: Activity):
+                          private val activity: Activity):
         DownloadTool {
 
-    var downloadCallbacks: HashMap<String, (() -> Unit)?> = HashMap()
+    private var downloadCallbacks: HashMap<String, (() -> Unit)?> = HashMap()
 
     init {
         webView.webViewClient = WikiWebViewClient(store, responseSource, {
             false
-        }, { it ->
-            it?.let {
-                urlToContext(it).let {
-                    if (downloadCallbacks.containsKey(it)) {
+        }, { urlString ->
+            urlString?.let {
+                urlToContext(it).let { contextString ->
+                    if (downloadCallbacks.containsKey(contextString)) {
                         // todo: Find better solution to allow download to finish
                         Thread.sleep(1000) // Wait for download to actually finish. A hack.
-                        downloadCallbacks.get(it)?.invoke()
-                        downloadCallbacks.remove(it)
+                        downloadCallbacks[contextString]?.invoke()
+                        downloadCallbacks.remove(contextString)
                     }
                 }
             }
@@ -35,7 +34,7 @@ class WebviewDownloadTool(val webView: WebView, store: Store,
     }
 
     override fun downloadUrl(urlString: String, onDone: () -> Unit) {
-        downloadCallbacks.put(urlString, onDone)
+        downloadCallbacks[urlString] = onDone
         activity.runOnUiThread {
             webView.loadUrl(contextToUrl(urlString))
         }

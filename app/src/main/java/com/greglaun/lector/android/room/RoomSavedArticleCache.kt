@@ -19,7 +19,7 @@ class RoomSavedArticleCache(var db: LectorDatabase) :
     }
 
     override suspend fun setWithContext(key: Request, value: Response, keyContext: String) {
-        var articleId: Long? = null
+        var articleId: Long?
         try {
             articleId = db.articleContextDao().get(keyContext)?.id
             if (articleId == null) {

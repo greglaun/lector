@@ -16,15 +16,15 @@ import java.util.*
 
 class PersistenceHandlersKtTest {
 
-    val responseSource = mock(ResponseSourceImpl::class.java)
-    val courseSource = mock(CourseSource::class.java)
-    val articleStateSource = mock(ArticleStateSource::class.java)
-    val courseDownloader = mock(CourseDownloader::class.java)
-    val articleState = ArticleState("A name", listOf("One", "Two"))
-    val actionDispatcher: suspend (Action) -> Unit = {}
-    val courseContext = ConcreteCourseContext(0L, "Ice Cream", 0)
-    val articleContext = BasicArticleContext.fromString("Some article")
-
+    private val responseSource = mock(ResponseSourceImpl::class.java)!!
+    private val courseSource = mock(CourseSource::class.java)!!
+    private val articleStateSource = mock(ArticleStateSource::class.java)!!
+    private val courseDownloader = mock(CourseDownloader::class.java)!!
+    private val articleState = ArticleState("A name", listOf("One", "Two"))
+    private val actionDispatcher: suspend (Action) -> Unit = {}
+    private val courseContext = ConcreteCourseContext(0L, "Ice Cream", 0)
+    private val articleContext =
+            BasicArticleContext.fromString("Some article")
 
     @Test
     fun testHandleFetchCourseDetails() {
@@ -36,7 +36,7 @@ class PersistenceHandlersKtTest {
             handleFetchCourseDetails(ReadAction.FetchCourseDetailsAction(courseContext),
                     courseDownloader) {
                 assertEquals((it as UpdateAction.UpdateCourseDetailsAction).courseDetails,
-                        detailsMap.get(courseContext.courseName))
+                        detailsMap[courseContext.courseName])
             }
 
         }
@@ -77,7 +77,6 @@ class PersistenceHandlersKtTest {
     fun testLoadNewUrlMatch() {
         runBlocking {
             val history: Stack<String> = Stack()
-            var state = State()
             `when`(articleStateSource.getArticle(ArgumentMatchers.anyString())).thenReturn(
                     articleState)
             `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(

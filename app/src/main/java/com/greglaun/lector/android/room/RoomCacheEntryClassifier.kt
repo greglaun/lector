@@ -10,10 +10,11 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
 
     override suspend fun add(element: String): Long {
         val existingEntry = db.articleContextDao().get(element)
-        if (existingEntry == null) {
-            return db.articleContextDao().insert(RoomArticleContext(null, contextString = element))
+        return if (existingEntry == null) {
+            db.articleContextDao().insert(
+                    RoomArticleContext(null, contextString = element))!!
         } else {
-            return existingEntry.id!!
+            existingEntry.id!!
         }
     }
 
@@ -29,7 +30,7 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         }
     }
 
-    override suspend fun getAllTemporary(): List<ArticleContext> {
+    override suspend fun getAllTemporary(): List<ArticleContext>? {
         return db.articleContextDao().getAllTemporary()
     }
 
@@ -65,8 +66,8 @@ class RoomCacheEntryClassifier(val db: LectorDatabase): CacheEntryClassifier<Str
         return unfinished
     }
 
-    override suspend fun markFinished(element: String) {
-        db.articleContextDao().markFinished(element)
+    override suspend fun markFinished(urlString: String) {
+        db.articleContextDao().markFinished(urlString)
     }
 
     override suspend fun getNextArticle(context: String): ArticleContext? {

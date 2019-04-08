@@ -12,7 +12,7 @@ import org.junit.Before
 import org.junit.Test
 
 class ReducersKtTest {
-    var articleState: ArticleState? = null
+    private var articleState: ArticleState? = null
 
     @Before
     fun setUp() {
@@ -124,7 +124,7 @@ class ReducersKtTest {
     fun testReduceUpdateCourseDetailsAction() {
         val json = "[{\"name\":\"Ice Cream\",\"articles\":\"https://en.wikipedia.org/wiki/Ice_cream\\r\\nhttps://en.wikipedia.org/wiki/Cold-stimulus_headache\\r\\nhttps://en.wikipedia.org/wiki/Ice_cream_social\\r\\nhttps://en.wikipedia.org/wiki/Soft_serve\\r\\nhttps://en.wikipedia.org/wiki/Strawberry_ice_cream\\r\\nhttps://en.wikipedia.org/wiki/Chocolate_ice_cream\\r\\nhttps://en.wikipedia.org/wiki/Neapolitan_ice_cream\\r\\nhttps://en.wikipedia.org/wiki/Vanilla_ice_cream\"},{\"name\":\"Furry Friends\",\"articles\":\"https://en.wikipedia.org/wiki/Dog\\r\\nhttps://en.wikipedia.org/wiki/Cat\\r\\nhttps://en.wikipedia.org/wiki/Domestic_rabbit\\r\\nhttps://en.wikipedia.org/wiki/Gerbil\\r\\nhttps://en.wikipedia.org/wiki/Hedgehog\"}]"
         val detailsMap = toCourseDetailsMap(extractCourseMap(json))
-        val courseDetails = detailsMap.get("Ice Cream")
+        val courseDetails = detailsMap["Ice Cream"]
 
         var newState = reduceUpdateCourseDetailsAction(
                 UpdateAction.UpdateCourseDetailsAction(courseDetails!!),
@@ -144,7 +144,7 @@ class ReducersKtTest {
                 "Ice Cream",
                         Lce.Success(emptyList())), newState)
         newState = reduceUpdateCourseDetailsAction(
-                UpdateAction.UpdateCourseDetailsAction(courseDetails!!),
+                UpdateAction.UpdateCourseDetailsAction(courseDetails),
                 newState)
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
@@ -162,7 +162,7 @@ class ReducersKtTest {
     fun testReduceFetchCourseDetailsAction() {
         val courseContext = ConcreteCourseContext(0L, "A name", 0)
 
-        var newState = reduceFetchCourseDetailsAction(
+        val newState = reduceFetchCourseDetailsAction(
                 ReadAction.FetchCourseDetailsAction(courseContext),
                 State())
 
@@ -182,7 +182,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceUpdateSpeakerState() {
-        var newState = reduceUpdateSpeakerState(
+        val newState = reduceUpdateSpeakerState(
                 UpdateAction.UpdateSpeakerStateAction(SpeakerState.SPEAKING),
                 State())
 
@@ -199,7 +199,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceSpeakAction() {
-        var newState = reduceSpeakAction(
+        val newState = reduceSpeakAction(
                 State())
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
@@ -260,7 +260,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceUpdateArticleFreshnessState() {
-        var newState = reduceUpdateArticleFreshnessState(
+        val newState = reduceUpdateArticleFreshnessState(
                 UpdateAction.UpdateArticleFreshnessAction(
                         State().currentArticleScreen.articleState as ArticleState),
                 State())
@@ -282,7 +282,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceFetchAllPermanentAndDisplay() {
-        var newState = reduceFetchAllPermanentAndDisplay(
+        val newState = reduceFetchAllPermanentAndDisplay(
                 State())
 
         assertEquals(newState.currentArticleScreen, State().currentArticleScreen)
@@ -303,7 +303,7 @@ class ReducersKtTest {
         val readingListLce = Lce.Success(listOf(
                 BasicArticleContext(1L, "Blah", "", true)))
 
-        var newState = reduceUpdateReadingList(
+        val newState = reduceUpdateReadingList(
                 UpdateAction.UpdateReadingListAction(readingListLce = readingListLce),
                 State())
 
@@ -324,7 +324,7 @@ class ReducersKtTest {
     fun testReduceUpdateCourseBrowseList() {
         val courseListLce = Lce.Success(listOf(EmptyCourseContext()))
 
-        var newState = reduceUpdateCourseBrowseList(
+        val newState = reduceUpdateCourseBrowseList(
                 UpdateAction.UpdateCourseBrowseList(courseListLce),
                 State())
 
@@ -342,7 +342,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceSetHandsomeBritish() {
-        var newState = reduceSetHandsomeBritish(
+        val newState = reduceSetHandsomeBritish(
                 PreferenceAction.SetHandsomeBritish(true),
                 State())
 
@@ -363,7 +363,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceSetSpeechRate() {
-        var newState = reduceSetSpeechRate(
+        val newState = reduceSetSpeechRate(
                 PreferenceAction.SetSpeechRate(123.1f),
                 State())
 
@@ -384,7 +384,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceSetAutoPlay() {
-        var newState = reduceSetAutoPlay(
+        val newState = reduceSetAutoPlay(
                 PreferenceAction.SetAutoPlay(false),
                 State())
 
@@ -405,7 +405,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceSetAutoDelete() {
-        var newState = reduceSetAutoDelete(
+        val newState = reduceSetAutoDelete(
                 PreferenceAction.SetAutoDelete(false),
                 State())
 
@@ -426,7 +426,7 @@ class ReducersKtTest {
 
     @Test
     fun testReduceSetIsSlow() {
-        var newState = reduceSetIsSlow(
+        val newState = reduceSetIsSlow(
                 PreferenceAction.SetIsSlow(true),
                 State())
 

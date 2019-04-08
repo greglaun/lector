@@ -8,7 +8,7 @@ import java.io.File
 
 class SpeakUtilKtTest {
 
-    fun String.strip(): String {
+    private fun String.strip(): String {
         return this.replace("\\s+".toRegex(), " ")
     }
 

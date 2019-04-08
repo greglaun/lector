@@ -11,16 +11,16 @@ import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.util.*
 
-val NEWLINE = '\n'.toInt()
+const val NEWLINE = '\n'.toInt()
 
-val TEN_GB = 10000000000
+const val TEN_GB = 10000000000
 
 // Initial iteration of code borrows heavily from OkHttp.
 fun serializeResponse(response : Response, sink : Sink) {
-    val sink = Okio.buffer(sink)
+    val bufferSink = Okio.buffer(sink)
 
     val url = response.request().url().toString()
-    var varyHeaders: Headers? = null
+    lateinit var varyHeaders: Headers
     val requestMethod = response.request().method()
     val protocol = response.protocol()
     val code = response.code()
@@ -28,36 +28,36 @@ fun serializeResponse(response : Response, sink : Sink) {
     val responseHeaders = response.headers()
     val handshake = response.handshake()
 
-    sink.writeUtf8(url)
+    bufferSink.writeUtf8(url)
             .writeByte(NEWLINE)
-    sink.writeUtf8(requestMethod)
+    bufferSink.writeUtf8(requestMethod)
             .writeByte(NEWLINE)
     run {
         var i = 0
         var size = 0
         if (response.networkResponse() != null){
             varyHeaders = HttpHeaders.varyHeaders(response)
-            size = varyHeaders!!.size()
+            size = varyHeaders.size()
         }
-        sink.writeDecimalLong(size.toLong())
+        bufferSink.writeDecimalLong(size.toLong())
                 .writeByte(NEWLINE)
         while (i < size) {
-            sink.writeUtf8(varyHeaders!!.name(i))
+            bufferSink.writeUtf8(varyHeaders.name(i))
                     .writeUtf8(": ")
-                    .writeUtf8(varyHeaders!!.value(i))
+                    .writeUtf8(varyHeaders.value(i))
                     .writeByte(NEWLINE)
             i++
         }
     }
 
-    sink.writeUtf8(StatusLine(protocol, code, message).toString())
+    bufferSink.writeUtf8(StatusLine(protocol, code, message).toString())
             .writeByte(NEWLINE)
-    sink.writeDecimalLong((responseHeaders.size()).toLong())
+    bufferSink.writeDecimalLong((responseHeaders.size()).toLong())
             .writeByte(NEWLINE)
     var i = 0
     val size = responseHeaders.size()
     while (i < size) {
-        sink.writeUtf8(responseHeaders.name(i))
+        bufferSink.writeUtf8(responseHeaders.name(i))
                 .writeUtf8(": ")
                 .writeUtf8(responseHeaders.value(i))
                 .writeByte(NEWLINE)
@@ -65,23 +65,23 @@ fun serializeResponse(response : Response, sink : Sink) {
     }
 
     if (isHttps(url)) {
-        sink.writeByte(NEWLINE)
-        sink.writeUtf8(handshake.cipherSuite().javaName())
+        bufferSink.writeByte(NEWLINE)
+        bufferSink.writeUtf8(handshake.cipherSuite().javaName())
                 .writeByte(NEWLINE)
-        writeCertList(sink, handshake.peerCertificates())
-        writeCertList(sink, handshake.localCertificates())
-        sink.writeUtf8(handshake.tlsVersion().javaName()).writeByte(NEWLINE)
+        writeCertList(bufferSink, handshake.peerCertificates())
+        writeCertList(bufferSink, handshake.localCertificates())
+        bufferSink.writeUtf8(handshake.tlsVersion().javaName()).writeByte(NEWLINE)
     }
 
-    sink.writeAll(response.peekBody(TEN_GB)!!.source())
-    sink.close()
+    bufferSink.writeAll(response.peekBody(TEN_GB)!!.source())
+    bufferSink.close()
 }
 
 
 fun deserializeResponse(input: Source) : Response {
     // todo(beginner): Replace try-catch with try-with-resources
-    try {
-        val source = Okio.buffer(input)
+    input.use {
+        val source = Okio.buffer(it)
         val url = source.readUtf8LineStrict()
         val requestMethod = source.readUtf8LineStrict()
         val varyHeadersBuilder = Headers.Builder()
@@ -104,7 +104,7 @@ fun deserializeResponse(input: Source) : Response {
         var handshake  : Handshake? = null
         if (isHttps(url)) {
             val blank = source.readUtf8LineStrict()
-            if (blank.length > 0) {
+            if (blank.isNotEmpty()) {
                 throw IOException("expected \"\" but was \"$blank\"")
             }
             val cipherSuiteString = source.readUtf8LineStrict()
@@ -118,10 +118,10 @@ fun deserializeResponse(input: Source) : Response {
             handshake = Handshake.get(tlsVersion, cipherSuite, peerCertificates, localCertificates)
         }
         val contentType = responseHeaders.get("Content-Type")
-        var contentLength = responseHeaders.get("Content-Length")?.toInt()
-        if (null == contentLength) {
-            contentLength = -1
-        }
+//        var contentLength = responseHeaders.get("Content-Length")?.toInt()
+//        if (null == contentLength) {
+//            contentLength = -1
+//        }
         val cacheRequest = Request.Builder()
                 .url(url)
                 .method(requestMethod, null)
@@ -141,8 +141,6 @@ fun deserializeResponse(input: Source) : Response {
                 .body(ResponseBody.create(mediaType, source.readByteArray()))
                 .handshake(handshake)
                 .build()
-    } finally {
-        input.close()
     }
 }
 
@@ -154,7 +152,7 @@ private fun writeCertList(sink: BufferedSink, certificates: List<Certificate>) {
         var i = 0
         val size = certificates.size
         while (i < size) {
-            val bytes = certificates[i].getEncoded()
+            val bytes = certificates[i].encoded
             val line = ByteString.of(*bytes).base64()
             sink.writeUtf8(line)
                     .writeByte(NEWLINE)
@@ -176,7 +174,7 @@ private fun readCertificateList(source: BufferedSource): List<Certificate> {
         for (i in 0 until length) {
             val line = source.readUtf8LineStrict()
             val bytes = Buffer()
-            bytes.write(ByteString.decodeBase64(line))
+            bytes.write(ByteString.decodeBase64(line)!!)
             result.add(certificateFactory.generateCertificate(bytes.inputStream()))
         }
         return result

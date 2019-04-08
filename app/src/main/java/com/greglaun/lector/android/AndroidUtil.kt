@@ -6,7 +6,9 @@ import java.nio.charset.Charset
 
 fun okHttpToWebView(response : Response) : WebResourceResponse? {
     if (response.code() == 200) {
-        return WebResourceResponse(response.body()!!.contentType()!!.type() + "/" + response.body()!!.contentType()!!.subtype(),
+        return WebResourceResponse(
+                response.body()!!.contentType()!!.type() + "/" +
+                        response.body()!!.contentType()!!.subtype(),
                 response.body()!!.contentType()!!.charset(Charset.defaultCharset())!!.name(),
                 response.body()!!.byteStream())
     }

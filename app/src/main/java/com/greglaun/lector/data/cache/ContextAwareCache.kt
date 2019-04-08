@@ -29,8 +29,8 @@ interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
             }
 
             override suspend fun setWithContext(key: Key, value: Value, keyContext: KeyContext) {
-                return listOf(this@ContextAwareCache.setWithContext(key, value, keyContext),
-                            b.setWithContext(key, value, keyContext)).forEach {it}
+//                return listOf(this@ContextAwareCache.setWithContext(key, value, keyContext),
+//                            b.setWithContext(key, value, keyContext)).forEach {it}
             }
         }
     }
@@ -57,8 +57,8 @@ interface ContextAwareCache<Key : Any, Value : Any, KeyContext : Any> {
             }
 
             override suspend fun setWithContext(key: Key, value: Value, keyContext : KeyContext) {
-                return listOf(this@ContextAwareCache.setWithContext(key, value, keyContext),
-                        b.set(key, value)).forEach { it }
+                this@ContextAwareCache.setWithContext(key, value, keyContext)
+                b.set(key, value)
             }
         }
     }

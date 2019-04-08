@@ -5,8 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = arrayOf(RoomArticleContext::class, CachedResponse::class,
-        RoomCourseContext::class, CourseArticleJoin::class), version = 3)
+@Database(entities = [RoomArticleContext::class, CachedResponse::class, RoomCourseContext::class,
+    CourseArticleJoin::class], version = 3)
 abstract class LectorDatabase : RoomDatabase() {
 
     abstract fun articleContextDao(): ArticleContextDao
@@ -20,7 +20,7 @@ abstract class LectorDatabase : RoomDatabase() {
         fun getInstance(context: Context): LectorDatabase? {
             if (INSTANCE == null) {
                 synchronized(LectorDatabase::class) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                    INSTANCE = Room.databaseBuilder(context.applicationContext,
                             LectorDatabase::class.java, "saved_articles.db")
                             .build()
                 }
@@ -28,8 +28,5 @@ abstract class LectorDatabase : RoomDatabase() {
             return INSTANCE
         }
 
-        fun destroyInstance() {
-            INSTANCE = null
-        }
     }
 }

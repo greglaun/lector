@@ -7,27 +7,27 @@ import java.util.*
 
 // An in-memory cache to be used for testing
 class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
-    val hashCache : HashMap<Request, Pair<String, HashSet<String>>> = HashMap()
+    private val hashCache : HashMap<Request, Pair<String, HashSet<String>>> = HashMap()
 
     override suspend fun getWithContext(key: Request, keyContext : String): Response? {
         if (!hashCache.containsKey(key)) {
             return null
         }
-        if (!hashCache.get(key)!!.second.contains(keyContext)) {
+        if (!hashCache[key]!!.second.contains(keyContext)) {
             return null
         }
-        return hashCache.get(key)!!.first.toResponse()
+        return hashCache[key]!!.first.toResponse()
 
     }
 
     override suspend fun setWithContext(key: Request, value: Response, keyContext : String) {
         if (hashCache.containsKey(key)) {
-            val cacheEntry = hashCache.get(key)!!
+            val cacheEntry = hashCache[key]!!
             cacheEntry.second.add(keyContext)
         } else {
             val set = HashSet<String>()
             set.add(keyContext)
-            hashCache.put(key, Pair(value.serialize(), set))
+            hashCache[key] = Pair(value.serialize(), set)
         }
     }
 
@@ -50,8 +50,8 @@ class HashMapSavedArticleCache : SavedArticleCache<Request, Response, String> {
         return hashCache.forEach {
             val iterator = it.value.second.iterator()
             while (iterator.hasNext()) {
-                val it = iterator.next()
-                if (classifier.isTemporary(it)
+                val iter = iterator.next()
+                if (classifier.isTemporary(iter)
                 ) {
                     iterator.remove()
                 }

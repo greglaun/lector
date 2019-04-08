@@ -166,8 +166,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as BindableTtsService.LocalBinder
-            bindableTtsService = binder.getService(
-                    (application as LectorApplication).responseSource())
+            bindableTtsService = binder.getService()
             bindableTtsServiceIsBound = true
             checkTts()
         }

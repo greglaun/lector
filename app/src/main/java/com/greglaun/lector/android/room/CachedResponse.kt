@@ -3,11 +3,11 @@ package com.greglaun.lector.android.room
 import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
 
-@Entity(foreignKeys = arrayOf(ForeignKey(
+@Entity(foreignKeys = [ForeignKey(
         entity = RoomArticleContext::class,
         parentColumns = arrayOf("id"),
-        childColumns = arrayOf("articleContextId"), onDelete = CASCADE)),
-        indices = arrayOf(Index(value = ["articleContextId"])))
+        childColumns = arrayOf("articleContextId"), onDelete = CASCADE)],
+        indices = [Index(value = ["articleContextId"])])
 
 
 data class CachedResponse(@PrimaryKey(autoGenerate = true) var id: Long?,

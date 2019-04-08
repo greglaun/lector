@@ -33,7 +33,7 @@ interface CourseArticleJoinDao {
     @Query("""
            SELECT * from coursearticlejoin WHERE course_id = :courseId
            AND article_id = :articleId""")
-    fun get(courseId: Long, articleId: Long): CourseArticleJoin
+    fun get(courseId: Long, articleId: Long): CourseArticleJoin?
 
     @Query("SELECT * from coursearticlejoin")
     fun getAll(): List<CourseArticleJoin>?

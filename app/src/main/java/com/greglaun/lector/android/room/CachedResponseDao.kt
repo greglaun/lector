@@ -11,11 +11,14 @@ interface CachedResponseDao {
     @Query("SELECT * from cachedresponse")
     fun getAll(): List<CachedResponse>
 
-    @Query("SELECT * from cachedresponse WHERE articleContextId = (SELECT id from roomarticlecontext where contextString = :contextString)")
+    @Query("""
+        SELECT * from cachedresponse WHERE articleContextId = (SELECT id FROM
+        roomarticlecontext where contextString = :contextString)
+        """)
     fun getAllWithContext(contextString: String): List<CachedResponse>
 
     @Query("SELECT * from cachedresponse WHERE url_hash = :urlHash LIMIT 1")
-    fun get(urlHash : String): CachedResponse
+    fun get(urlHash : String): CachedResponse?
 
     @Insert(onConflict = REPLACE)
     fun insert(cachedResponse: CachedResponse)
@@ -26,9 +29,15 @@ interface CachedResponseDao {
     @Query("DELETE from cachedresponse")
     fun deleteAll()
 
-    @Query("DELETE from cachedresponse WHERE articleContextId = (SELECT id from roomarticlecontext WHERE contextString= :contextString)")
+    @Query("""
+        DELETE from cachedresponse WHERE articleContextId = (SELECT id FROM
+        roomarticlecontext WHERE contextString= :contextString)
+        """)
     fun deleteWithContext(contextString: String)
 
-    @Query("DELETE from cachedresponse WHERE articleContextId = (SELECT id from roomarticlecontext WHERE `temporary` = 1)")
+    @Query("""
+            DELETE from cachedresponse WHERE articleContextId = (SELECT id FROM
+            roomarticlecontext WHERE `temporary` = 1)
+            """)
     fun deleteAllTemporary()
 }

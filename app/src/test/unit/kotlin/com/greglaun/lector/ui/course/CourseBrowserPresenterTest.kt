@@ -8,16 +8,18 @@ import org.junit.Test
 import org.mockito.Mockito.*
 
 class CourseBrowserPresenterTest {
-    val mockView = mock(CourseBrowserContract.View::class.java)
-    val mockDownloader = mock(CourseDownloader::class.java)
-    val mockSource = mock(CourseSource::class.java)
-    val courseBrowserPresenter = CourseBrowserPresenter(mockView, mockDownloader, mockSource)
+    private val mockView = mock(CourseBrowserContract.View::class.java)!!
+    private val mockDownloader = mock(CourseDownloader::class.java)!!
+    private val mockSource = mock(CourseSource::class.java)!!
+    private val courseBrowserPresenter = CourseBrowserPresenter(
+            mockView, mockDownloader, mockSource)
 
     @Test
     fun beginCourseDownload() {
         runBlocking {
             courseBrowserPresenter.beginCourseDownload()
-            verify(mockDownloader, times(1)).downloadCourseMetadata()
+            verify(mockDownloader,
+                    times(1)).downloadCourseMetadata()
         }
     }
 
@@ -35,7 +37,7 @@ class CourseBrowserPresenterTest {
         val courseDetails = listOf(CourseMetadata("One"),
                 CourseMetadata("Two"), CourseMetadata("Three"))
         runBlocking {
-            val job = courseBrowserPresenter.onCoursesSaved(courseDetails)
+            courseBrowserPresenter.onCoursesSaved(courseDetails)
             verify(mockDownloader, times(1)).
                     fetchCourseDetails(CourseMetadata("One"))
         }

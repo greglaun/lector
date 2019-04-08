@@ -6,10 +6,7 @@
     <string name="action_rewind">Rewind</string>
     <string name="reading_list">Reading List</string>
     <string name="save">Save</string>
-    <string name="pref_reading_list">reading_list</string>
-    <string name="dialog_reading_list_title">Reading List</string>
     <string name="courses">My Courses</string>
-    <string name="toggle_handsome_british">Toggle British</string>
     <string name="settings">Settings</string>
     <string name="browse_courses">Browse Courses</string>
     <string name="play_all">Play All</string>

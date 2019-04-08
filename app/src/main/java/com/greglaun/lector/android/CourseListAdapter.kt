@@ -8,21 +8,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.greglaun.lector.R
 import com.greglaun.lector.data.course.CourseContext
 
-class CourseListAdapter(val courseList: MutableList<CourseContext>,
+class CourseListAdapter(private val courseList: MutableList<CourseContext>,
                         private val onItemClicked: (CourseContext) -> Unit,
                         private val onItemLongClicked: (CourseContext) -> Unit) :
-        RecyclerView.Adapter<CourseListAdapter.courseListViewHolder>() {
+        RecyclerView.Adapter<CourseListAdapter.CourseListViewHolder>() {
 
-    class courseListViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
+    class CourseListViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
 
     override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): CourseListAdapter.courseListViewHolder {
+                                    viewType: Int): CourseListAdapter.CourseListViewHolder {
         val textView = LayoutInflater.from(parent.context)
                 .inflate(R.layout.course_list_text_view, parent, false) as TextView
-        return courseListViewHolder(textView)
+        return CourseListViewHolder(textView)
     }
 
-    override fun onBindViewHolder(holder: courseListViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CourseListViewHolder, position: Int) {
         holder.textView.text = courseList[position].courseName
         holder.textView.setOnClickListener {
             onItemClicked.invoke(courseList[position])

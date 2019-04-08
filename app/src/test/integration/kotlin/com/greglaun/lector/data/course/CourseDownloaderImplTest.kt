@@ -7,15 +7,15 @@ import org.junit.Test
 import java.io.File
 
 class CourseDownloaderImplTest {
-    val testDir = File("testDir")
-    val courseDownloader = CourseDownloaderImpl(BuildConfig.BASE_URL_LOCAL, testDir)
+    private val testDir = File("testDir")
+    private val courseDownloader = CourseDownloaderImpl(BuildConfig.BASE_URL_LOCAL, testDir)
 
     @Test
     fun downloadAllCourseNames() {
         runBlocking {
             val result = courseDownloader.downloadCourseMetadata()
             assertTrue(result!!.contains(CourseMetadata("Ice Cream")))
-            assertTrue(result!!.contains(CourseMetadata("Furry Friends")))
+            assertTrue(result.contains(CourseMetadata("Furry Friends")))
         }
     }
 
@@ -24,10 +24,10 @@ class CourseDownloaderImplTest {
         runBlocking {
             val detailsMap = courseDownloader.fetchCourseDetails(
                     listOf("Ice Cream", "Furry Friends"))
-            assertTrue(detailsMap!!.keys.size > 0)
-            assertTrue(detailsMap!!.containsKey("Ice Cream"))
-            assertTrue(detailsMap!!.containsKey("Furry Friends"))
-            assertTrue(detailsMap!!.get("Ice Cream")!!.
+            assertTrue(detailsMap!!.keys.isNotEmpty())
+            assertTrue(detailsMap.containsKey("Ice Cream"))
+            assertTrue(detailsMap.containsKey("Furry Friends"))
+            assertTrue(detailsMap.getValue("Ice Cream").
                     articleNames.contains("Cold-stimulus headache"))
         }
     }

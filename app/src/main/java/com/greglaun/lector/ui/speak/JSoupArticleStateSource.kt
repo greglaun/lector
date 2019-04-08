@@ -17,10 +17,7 @@ class JSoupArticleStateSource(val responseSource: ResponseSource) : ArticleState
     }
 
     override suspend fun getArticle(articleContext: ArticleContext): ArticleState? {
-        val articleState = getArticle(contextToUrl(articleContext.contextString))
-        if (articleState == null) {
-            return null
-        }
+        val articleState = getArticle(contextToUrl(articleContext.contextString)) ?: return null
         return articleState.scrubTo(articleContext.position)
     }
 }

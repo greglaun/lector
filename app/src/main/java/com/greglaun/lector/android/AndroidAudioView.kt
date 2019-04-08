@@ -9,18 +9,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
+class AndroidAudioView(private val androidTts : TextToSpeech) : TTSContract.AudioView,
         UtteranceProgressListener() {
-    val callbacks : HashMap<String, suspend (String) -> Unit> = HashMap()
+    private val callbacks : HashMap<String, suspend (String) -> Unit> = HashMap()
     override suspend fun speak(textToSpeak: String, utteranceId: String,
                                callback : suspend (String)-> Unit) {
         if (textToSpeak == "") {
-            if (callback != null) {
-                callback(utteranceId(""))
-            }
+            callback(utteranceId(""))
             return
         }
-        callbacks.put(utteranceId, callback)
+        callbacks[utteranceId] = callback
         androidTts.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null,
                 utteranceId)
     }
@@ -29,6 +27,7 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
         androidTts.playSilentUtterance(10, TextToSpeech.QUEUE_FLUSH, null)
     }
 
+    @Deprecated("Deprecated in UtteranceProgressListener")
     override fun onError(utteranceId: String?) {
         // Do nothing
     }
@@ -39,7 +38,7 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
 
     override fun onDone(utteranceId: String?) {
         if (utteranceId != null) {
-            val callback = callbacks.get(utteranceId)
+            val callback = callbacks[utteranceId]
             if (callback != null) {
                 GlobalScope.launch {
                     callback(utteranceId)
@@ -73,7 +72,7 @@ class AndroidAudioView(val androidTts : TextToSpeech) : TTSContract.AudioView,
             androidTts.setSpeechRate(1.0f)
         } else {
             if (britishVoices.size != 0) {
-                androidTts.voice = britishVoices.get(0) // Just set any old British voiceo
+                androidTts.voice = britishVoices[0] // Just set any old British voiceo
                 androidTts.setSpeechRate(1.0f)
             }
         }

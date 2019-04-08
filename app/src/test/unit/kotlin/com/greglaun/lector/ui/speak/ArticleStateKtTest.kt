@@ -5,7 +5,7 @@ import org.junit.Before
 import org.junit.Test
 
 class ArticleStateKtTest {
-    var articleState: ArticleState? = null
+    private var articleState: ArticleState? = null
 
     @Before
     fun setUp() {
