@@ -47,6 +47,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override fun setSpeechRate(speechRate: Float) {
         GlobalScope.launch {
+            store?.dispatch(SpeakerAction.StopSpeakingAction)
             store?.dispatch(PreferenceAction.SetSpeechRate(speechRate))
         }
     }

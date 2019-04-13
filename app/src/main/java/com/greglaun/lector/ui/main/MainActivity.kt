@@ -110,6 +110,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         onCreateSetupWebview()
 
         registerReceiver(noisyAudioStreamReceiver, intentFilter)
+
+        mainPresenter.onAttach()
+        PreferenceManager.getDefaultSharedPreferences(this).
+                registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
+
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -132,13 +137,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
         bindableTtsServiceIsBound = false
         mainPresenter.onDetach()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mainPresenter.onAttach()
-        PreferenceManager.getDefaultSharedPreferences(this).
-                registerOnSharedPreferenceChangeListener(sharedPreferenceListener)
     }
 
     override fun onBackPressed() {
