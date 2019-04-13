@@ -40,6 +40,10 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
                 handleFetchArticlesForCourseAndDisplay(action, courseSource) {
                     store.dispatch(it)
                 }
+            is ReadAction.FetchSavedCoursesAndDisplay -> handleFetchSavedCourses(action,
+                    courseSource) {
+                store.dispatch(it)
+            }
             is UpdateAction.ArticleOverAction -> handleArticleOver(
                     store.state,
                     responseSource,

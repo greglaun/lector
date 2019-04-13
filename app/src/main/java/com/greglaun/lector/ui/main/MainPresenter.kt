@@ -170,7 +170,7 @@ class MainPresenter(val view : MainContract.View,
     }
 
     override suspend fun onDisplaySavedCourses() {
-        store.dispatch(ReadAction.FetchAllCoursesAndDisplay)
+        store.dispatch(ReadAction.FetchSavedCoursesAndDisplay)
     }
 
     override suspend fun onBrowseCourses() {

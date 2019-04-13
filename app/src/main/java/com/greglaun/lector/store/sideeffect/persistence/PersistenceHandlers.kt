@@ -1,6 +1,7 @@
 package com.greglaun.lector.store.sideeffect.persistence
 
 import com.greglaun.lector.data.cache.ArticleContext
+import com.greglaun.lector.data.cache.BasicArticleContext
 import com.greglaun.lector.data.cache.ResponseSource
 import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseContext
@@ -144,4 +145,13 @@ suspend fun handleMaybeGoBack(history: Stack<String>, actionDispatcher: suspend 
     history.pop()
     val previous = history.pop()
     actionDispatcher.invoke(ReadAction.LoadNewUrlAction(previous, false))
+}
+
+suspend fun handleFetchSavedCourses(action: ReadAction.FetchSavedCoursesAndDisplay,
+                                    courseSource: CourseSource,
+                                    actionDispatcher: suspend (Action) -> Unit) {
+    courseSource.getCourses()?.let {courses ->
+        actionDispatcher.invoke(UpdateAction.UpdateSavedCoursesAction(
+                Lce.Success(courses)))
+    }
 }

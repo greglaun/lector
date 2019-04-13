@@ -8,6 +8,7 @@ import com.greglaun.lector.ui.speak.EmptyArticleState
 
 const val DEFAULT_READING_LIST = "All Articles"
 const val LECTOR_UNIVERSE = ""
+const val SAVED_COURSES = "Saved Courses"
 
 enum class Navigation {
     CURRENT_ARTICLE,

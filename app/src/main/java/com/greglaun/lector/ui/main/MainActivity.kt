@@ -131,6 +131,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             unbindService(bindableTtsConnection)
         }
         bindableTtsServiceIsBound = false
+        mainPresenter.onDetach()
     }
 
     override fun onResume() {
