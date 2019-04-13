@@ -55,7 +55,7 @@ abstract class Store {
             is UpdateAction.NewArticleAction -> reduceNewArticleAction(action, state)
             is UpdateAction.UpdateArticleAction -> reduceUpdateArticleAction(action, state)
             is UpdateAction.UpdateNavigationAction -> reduceUpdateNavigationAction(action, state)
-            is UpdateAction.FastForwardOne -> reduceFastForwardOne(state)
+            is UpdateAction.ForwardOne -> reduceFastForwardOne(state)
             is UpdateAction.RewindOne -> reduceRewindOne(state)
             is UpdateAction.UpdateCourseDetailsAction ->
                 reduceUpdateCourseDetailsAction(action, state)

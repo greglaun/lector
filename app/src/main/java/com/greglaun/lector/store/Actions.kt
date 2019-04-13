@@ -27,7 +27,7 @@ sealed class UpdateAction: Action() {
             val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()
 
     object MaybeGoBack : UpdateAction()
-    object FastForwardOne : UpdateAction()
+    object ForwardOne : UpdateAction()
     object RewindOne : UpdateAction()
     object ArticleOverAction : UpdateAction()
 }

@@ -32,14 +32,17 @@ suspend fun loadNewUrl(action: ReadAction.LoadNewUrlAction,
                        articleStateSource: ArticleStateSource,
                        history: Stack<String>,
                        actionDispatcher: suspend (Action) -> Unit) {
-    articleStateSource.getArticle(action.newUrl)?.also {
-        if (!responseSource.contains(it.title)) {
-            responseSource.add(it.title)
+    val title = urlToContext(action.newUrl)
+    if (!responseSource.contains(title)) {
+        responseSource.add(title)
+    }
+    responseSource.getArticleContext(title)?.let {articleContext ->
+        articleStateSource.getArticle(articleContext)?.let {articleState ->
+            if (action.addToHistory) {
+                history.push(title)
+            }
+            actionDispatcher(UpdateAction.NewArticleAction(articleState))
         }
-        if (action.addToHistory) {
-            history.push(action.newUrl)
-        }
-        actionDispatcher(UpdateAction.NewArticleAction(it))
     }
 }
 
@@ -154,4 +157,12 @@ suspend fun handleFetchSavedCourses(action: ReadAction.FetchSavedCoursesAndDispl
         actionDispatcher.invoke(UpdateAction.UpdateSavedCoursesAction(
                 Lce.Success(courses)))
     }
+}
+
+suspend fun handleNewPosition(store: Store, responseSource: ResponseSource) {
+    // If we are here, the reduces have already updated the article state, so the updated position
+    // is the current position.
+    val articleState = store.state.currentArticleScreen.articleState
+    articleState.currentPosition
+    responseSource.updatePosition(articleState.title, articleState.currentPosition.utteranceId)
 }

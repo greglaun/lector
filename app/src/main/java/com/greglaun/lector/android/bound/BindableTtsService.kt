@@ -77,7 +77,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
                     utteranceId(text)) {
                         if (it == utteranceId(text)) {
                             if (articleState.hasNext()) {
-                                store?.dispatch(UpdateAction.FastForwardOne)
+                                store?.dispatch(UpdateAction.ForwardOne)
 
                             } else {
                                 store?.dispatch(UpdateAction.ArticleOverAction)
@@ -103,7 +103,7 @@ class BindableTtsService : Service(), DeprecatedTtsStateMachine, TTSContract.Pre
 
     override suspend fun onForwardOne() {
         store?.let {
-            store!!.dispatch(UpdateAction.FastForwardOne)
+            store!!.dispatch(UpdateAction.ForwardOne)
             if (store!!.state.currentArticleScreen.articleState.hasNext()) {
                 ttsView?.stopImmediately()
             }

@@ -20,6 +20,8 @@ class PersistenceSideEffect(val store: Store, val responseSource: ResponseSource
 
     override suspend fun handle(action: Action) {
         when (action) {
+            is UpdateAction.ForwardOne -> handleNewPosition(store, responseSource)
+            is UpdateAction.RewindOne -> handleNewPosition(store, responseSource)
             is ReadAction.FetchCourseDetailsAction ->
                 handleFetchCourseDetails(action, courseDownloader) { store.dispatch(it) }
             is ReadAction.LoadNewUrlAction -> loadNewUrl(
