@@ -7,9 +7,9 @@ import com.greglaun.lector.store.*
 import com.greglaun.lector.ui.speak.ArticleState
 import com.greglaun.lector.ui.speak.ArticleStateSource
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-
-import org.junit.Assert.*
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 import java.util.*
@@ -81,6 +81,9 @@ class PersistenceHandlersKtTest {
                     articleState)
             `when`(responseSource.contains(ArgumentMatchers.anyString())).thenReturn(
                     true)
+            `when`(responseSource.getArticleContext(ArgumentMatchers.anyString())).thenReturn(
+                    articleContext)
+
             loadNewUrl(ReadAction.LoadNewUrlAction("Some string", false),
                     responseSource,
                     articleStateSource,

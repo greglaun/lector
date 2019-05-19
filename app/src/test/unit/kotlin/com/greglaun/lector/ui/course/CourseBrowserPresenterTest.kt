@@ -3,6 +3,7 @@ package com.greglaun.lector.ui.course
 import com.greglaun.lector.data.course.CourseDownloader
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.CourseSource
+import com.greglaun.lector.store.Store
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.mockito.Mockito.*
@@ -11,8 +12,9 @@ class CourseBrowserPresenterTest {
     private val mockView = mock(CourseBrowserContract.View::class.java)!!
     private val mockDownloader = mock(CourseDownloader::class.java)!!
     private val mockSource = mock(CourseSource::class.java)!!
+    private val mockStore = mock(Store::class.java)!!
     private val courseBrowserPresenter = CourseBrowserPresenter(
-            mockView, mockDownloader, mockSource)
+            mockView, mockDownloader, mockSource, mockStore)
 
     @Test
     fun beginCourseDownload() {
