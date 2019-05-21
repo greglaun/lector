@@ -68,8 +68,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
     // Room
-    implementation "androidx.room:room-runtime:2.1.0-alpha06"
-    kapt "androidx.room:room-compiler:2.1.0-alpha06" // use kapt for Kotlin
+    implementation "androidx.room:room-runtime:2.1.0-beta01"
+    kapt "androidx.room:room-compiler:2.1.0-beta01" // use kapt for Kotlin
 
     // Jackson
     implementation "com.fasterxml.jackson.core:jackson-core:$JACKSON_VERSION"
