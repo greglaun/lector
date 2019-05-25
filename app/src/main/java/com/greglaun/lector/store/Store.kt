@@ -76,11 +76,6 @@ abstract class Store {
             is PreferenceAction.SetAutoPlay -> reduceSetAutoPlay(action, state)
             is PreferenceAction.SetAutoDelete -> reduceSetAutoDelete(action, state)
             is PreferenceAction.SetIsSlow -> reduceSetIsSlow(action, state)
-//            is CreationAction -> CreationReducer.reduce(action, currentState)
-//            is UpdateAction -> UpdateReducer.reduce(action, currentState)
-//            is ReadAction -> ReadReducer.reduce(action, currentState)
-//            is DeleteAction -> DeleteReducer.reduce(action, currentState)
-//            is NavigationAction -> NavigationReducer.reduce(action, currentState)
             else -> return currentState
         }
     }
