@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
 <!-- Ignore the IconDensities issue in the given files -->
-<issue id="IconDensities">
-    <ignore path="**/res/**"/>
-</issue>
-<issue id="TrustAllX509TrustManager" severity="ignore"/>
+    <issue id="IconDensities" severity="ignore"/>
+    <issue id="IconDipSize" severity="ignore"/>
+    <issue id="TrustAllX509TrustManager" severity="ignore"/>
 </lint>

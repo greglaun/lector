@@ -22,6 +22,9 @@ class WikiWebViewClient(val store: Store,
 
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         if (request.url.authority!!.endsWith("wikipedia.org")) {
+            if (request.url.path.endsWith("index.php")) {
+                return false
+            }
             GlobalScope.launch {
                 store.dispatch(ReadAction.LoadNewUrlAction(request.url.toString()))
             }

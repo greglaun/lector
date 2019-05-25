@@ -55,7 +55,7 @@ abstract class Store {
             is UpdateAction.NewArticleAction -> reduceNewArticleAction(action, state)
             is UpdateAction.UpdateArticleAction -> reduceUpdateArticleAction(action, state)
             is UpdateAction.UpdateNavigationAction -> reduceUpdateNavigationAction(action, state)
-            is UpdateAction.FastForwardOne -> reduceFastForwardOne(state)
+            is UpdateAction.ForwardOne -> reduceFastForwardOne(state)
             is UpdateAction.RewindOne -> reduceRewindOne(state)
             is UpdateAction.UpdateCourseDetailsAction ->
                 reduceUpdateCourseDetailsAction(action, state)
@@ -64,6 +64,8 @@ abstract class Store {
             is UpdateAction.UpdateArticleFreshnessAction ->
                 reduceUpdateArticleFreshnessState(action, state)
             is UpdateAction.UpdateReadingListAction -> reduceUpdateReadingList(action, state)
+            is UpdateAction.UpdateSavedCoursesAction -> reduceUpdateSavedCoursesAction(
+                    action, state)
             is UpdateAction.UpdateCourseBrowseList -> reduceUpdateCourseBrowseList(action, state)
             is ReadAction.FetchCourseDetailsAction -> reduceFetchCourseDetailsAction(action, state)
             is ReadAction.FetchAllPermanentAndDisplay -> reduceFetchAllPermanentAndDisplay(state)
@@ -74,11 +76,6 @@ abstract class Store {
             is PreferenceAction.SetAutoPlay -> reduceSetAutoPlay(action, state)
             is PreferenceAction.SetAutoDelete -> reduceSetAutoDelete(action, state)
             is PreferenceAction.SetIsSlow -> reduceSetIsSlow(action, state)
-//            is CreationAction -> CreationReducer.reduce(action, currentState)
-//            is UpdateAction -> UpdateReducer.reduce(action, currentState)
-//            is ReadAction -> ReadReducer.reduce(action, currentState)
-//            is DeleteAction -> DeleteReducer.reduce(action, currentState)
-//            is NavigationAction -> NavigationReducer.reduce(action, currentState)
             else -> return currentState
         }
     }

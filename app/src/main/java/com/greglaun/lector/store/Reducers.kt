@@ -116,6 +116,12 @@ fun reduceFetchAllPermanentAndDisplay(state: State): State {
     return newState.updateNavigation(Navigation.MY_READING_LIST)
 }
 
+fun reduceUpdateSavedCoursesAction(action: UpdateAction.UpdateSavedCoursesAction,
+                                   state: State): State {
+    val newState = state.updateCourseBrowserScreen(CourseBrowserScreen(action.courseListLce))
+    return newState.updateNavigation(Navigation.MY_COURSE_LIST)
+}
+
 fun reduceUpdateReadingList(action: UpdateAction.UpdateReadingListAction, state: State): State {
     return state.updateReadingListScreen(ReadingListScreen(
             articles = action.readingListLce))

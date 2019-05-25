@@ -1,6 +1,7 @@
 package com.greglaun.lector.ui.course
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
@@ -12,6 +13,7 @@ import androidx.core.app.NavUtils
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.greglaun.lector.BuildConfig
+import com.greglaun.lector.LectorApplication
 import com.greglaun.lector.R
 import com.greglaun.lector.android.room.LectorDatabase
 import com.greglaun.lector.android.room.RoomCourseSource
@@ -19,6 +21,9 @@ import com.greglaun.lector.data.cache.urlToContext
 import com.greglaun.lector.data.course.CourseDownloaderImpl
 import com.greglaun.lector.data.course.CourseMetadata
 import com.greglaun.lector.data.course.ThinCourseDetails
+import com.greglaun.lector.store.CurrentArticleScreen
+import com.greglaun.lector.store.Navigation
+import com.greglaun.lector.store.UpdateAction
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -34,7 +39,8 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
         setContentView(R.layout.activity_course_browse)
         courseBrowserPresenter = CourseBrowserPresenter(this,
                 CourseDownloaderImpl(BuildConfig.BASE_URL, cacheDir),
-                RoomCourseSource(LectorDatabase.getInstance(applicationContext)!!))
+                RoomCourseSource(LectorDatabase.getInstance(applicationContext)!!),
+                LectorApplication.AppStore)
 
         courseBrowserViewManager = GridLayoutManager(this, 2)
         courseBrowserViewAdapter = CourseBrowserAdapter(courseBrowserPresenter.courseMetadatalist)
@@ -56,12 +62,30 @@ class CourseBrowserActivity : AppCompatActivity(), CourseBrowserContract.View {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        courseBrowserPresenter.onAttach()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        courseBrowserPresenter.onDetach()
+    }
+
+
     override fun onBackPressed() {
         if (courseBrowserRecyclerView.visibility != VISIBLE) {
             unHideCourseBrowseView()
         } else {
-            NavUtils.navigateUpFromSameTask(this)
+            GlobalScope.launch {
+                LectorApplication.AppStore.dispatch(
+                        UpdateAction.UpdateNavigationAction(Navigation.CURRENT_ARTICLE))
+            }
         }
+    }
+
+    override fun navigateCurrentArticle() {
+        startActivity(Intent(this, CurrentArticleScreen::class.java))
     }
 
     private fun unHideCourseDetailsView() {

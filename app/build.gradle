@@ -39,11 +39,13 @@ android {
             buildConfigField "String", "BASE_URL_LOCAL", System.env.LECTOR_BASE_URL_LOCAL ?: "\"$lectorUrlLocal\""
         }
     }
-    android {
-        lintOptions {
-            lintConfig file("lint.xml")
-            warningsAsErrors true
-        }
+    lintOptions {
+        lintConfig file("lint.xml")
+        warningsAsErrors true
+    }
+    kotlinOptions {
+        // todo(workaround): Remove bug when https://youtrack.jetbrains.com/issue/KT-29475 is fixed
+        freeCompilerArgs += ['-Xsanitize-parentheses']
     }
 }
 
@@ -52,7 +54,7 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
-def MOCKITO_VERSION = "2.25.0"
+def MOCKITO_VERSION = "2.+"
 def JACKSON_VERSION = "2.9.7"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -60,14 +62,14 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.10.3'
 
     // Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2-eap13'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1'
 
     // OkHttp
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
     // Room
-    implementation "androidx.room:room-runtime:2.1.0-alpha06"
-    kapt "androidx.room:room-compiler:2.1.0-alpha06" // use kapt for Kotlin
+    implementation "androidx.room:room-runtime:2.1.0-beta01"
+    kapt "androidx.room:room-compiler:2.1.0-beta01" // use kapt for Kotlin
 
     // Jackson
     implementation "com.fasterxml.jackson.core:jackson-core:$JACKSON_VERSION"

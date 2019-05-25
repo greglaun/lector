@@ -19,12 +19,15 @@ sealed class UpdateAction: Action() {
     data class UpdateReadingListAction(val readingListName: String = DEFAULT_READING_LIST,
             val readingListLce: Lce<List<ArticleContext>>):
             UpdateAction()
+    data class UpdateSavedCoursesAction(val courseListLce: Lce<List<CourseContext>>):
+            UpdateAction()
+
     data class UpdateCourseBrowseList(val courseListLce: Lce<List<CourseContext>>): UpdateAction()
     data class UpdateArticlesForCourse(
             val courseArticlesLce: Lce<List<ArticleContext>>): UpdateAction()
 
     object MaybeGoBack : UpdateAction()
-    object FastForwardOne : UpdateAction()
+    object ForwardOne : UpdateAction()
     object RewindOne : UpdateAction()
     object ArticleOverAction : UpdateAction()
 }
@@ -42,6 +45,7 @@ sealed class ReadAction: Action() {
     object FetchAllPermanentAndDisplay : ReadAction()
     data class FetchArticlesForCourseAndDisplay(var courseContext: CourseContext): ReadAction()
     object FetchAllCoursesAndDisplay : ReadAction()
+    object FetchSavedCoursesAndDisplay: ReadAction()
 }
 
 sealed class WriteAction: Action() {

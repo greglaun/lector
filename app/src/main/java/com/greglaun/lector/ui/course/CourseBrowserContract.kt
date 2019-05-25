@@ -11,6 +11,7 @@ interface CourseBrowserContract {
         fun showCourseDetails(courseDetails: ThinCourseDetails)
         fun onCourseListChanged()
         fun showToast(message: String)
+        fun navigateCurrentArticle()
     }
 
     interface Presenter : LectorPresenter<View> {
