@@ -62,7 +62,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.10.3'
 
     // Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2-eap13'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1'
 
     // OkHttp
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
